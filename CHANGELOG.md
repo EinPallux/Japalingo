@@ -10,7 +10,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Continuing **Phase 2**: more game modes (Ear Training, Romaji Rush, Word Builder), daily quests, and full app-UI i18n (EN/DE).
+Continuing **Phase 2**: Romaji Rush, daily quests, and full app-UI i18n (EN/DE).
+
+---
+
+## [0.6.0] - 2026-07-14
+
+**Phase 2 — Learning platform (milestone 4).** Two more game modes.
+
+### Added
+
+- **Ear Training** — hear a kana (Web Speech TTS) and pick it from four options; feeds XP + mastery. Falls back gracefully when speech audio is unavailable.
+- **Word Builder** — read real Japanese words (from the `/database` reading pages, e.g. あお = blue, くうき = air) and pick the meaning: the "you can already read Japanese!" moment, with a hear-it button.
+- The dashboard now offers all four games (Kana Rain, Kana Match, Ear Training, Word Builder) plus the Practice hub.
 
 ---
 
@@ -103,7 +115,8 @@ Continuing **Phase 2**: more game modes (Ear Training, Romaji Rush, Word Builder
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/japalingo/japalingo/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/japalingo/japalingo/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/japalingo/japalingo/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/japalingo/japalingo/compare/v0.2.0...v0.3.0

@@ -58,24 +58,46 @@ export function LearnDashboard() {
             ))}
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          <Link
+            href="/learn/practice"
+            className="flex items-center justify-between rounded-blob-lg border border-border bg-gradient-to-r from-info/15 to-primary-tint px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
+          >
+            <span className="flex items-center gap-3">
+              <span aria-hidden className="text-2xl">
+                🧠
+              </span>
+              <span>
+                <span className="block font-display font-bold text-ink">Practice</span>
+                <span className="text-sm text-muted">Review your weakest kana</span>
+              </span>
+            </span>
+            <span aria-hidden className="font-display text-xl text-primary">
+              ▸
+            </span>
+          </Link>
+
+          <div className="grid grid-cols-2 gap-3">
             {[
-              { href: "/learn/practice", emoji: "🧠", label: "Practice", tint: "from-info/15 to-primary-tint" },
-              { href: `/learn/games/kana-rain?track=${activeTrack}`, emoji: "🌸", label: "Kana Rain", tint: "from-primary-tint to-secondary-tint" },
-              { href: `/learn/games/kana-match?track=${activeTrack}`, emoji: "🃏", label: "Kana Match", tint: "from-accent-tint to-secondary-tint" },
+              { href: `/learn/games/kana-rain?track=${activeTrack}`, emoji: "🌸", label: "Kana Rain", desc: "Type before it lands", tint: "from-primary-tint to-secondary-tint" },
+              { href: `/learn/games/kana-match?track=${activeTrack}`, emoji: "🃏", label: "Kana Match", desc: "Flip & pair", tint: "from-accent-tint to-secondary-tint" },
+              { href: `/learn/games/ear-training?track=${activeTrack}`, emoji: "🎧", label: "Ear Training", desc: "Hear it, pick it", tint: "from-info/15 to-secondary-tint" },
+              { href: `/learn/games/word-builder`, emoji: "📖", label: "Word Builder", desc: "Read real words", tint: "from-accent-tint to-primary-tint" },
             ].map((a) => (
               <Link
                 key={a.label}
                 href={a.href}
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-blob-lg border border-border bg-gradient-to-br px-2 py-4 text-center transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]",
+                  "flex items-center gap-3 rounded-blob-lg border border-border bg-gradient-to-br px-3 py-3 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]",
                   a.tint,
                 )}
               >
                 <span aria-hidden className="text-2xl">
                   {a.emoji}
                 </span>
-                <span className="font-display text-sm font-bold text-ink">{a.label}</span>
+                <span>
+                  <span className="block font-display text-sm font-bold text-ink">{a.label}</span>
+                  <span className="text-xs text-muted">{a.desc}</span>
+                </span>
               </Link>
             ))}
           </div>
