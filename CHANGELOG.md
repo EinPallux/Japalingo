@@ -10,7 +10,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Work targeted for **Phase 2 — Learning platform** (Hiragana + Katakana only): onboarding, the winding path dashboard, the lesson player, the ship-set of game modes, the SRS practice hub, gamification, local persistence, and profile. Not yet started.
+Continuing **Phase 2**: the Katakana track, more game modes (Kana Match, Ear Training, Romaji Rush, Kana Rain, Word Builder), the SRS practice hub, a profile page, daily quests, and full app-UI i18n (EN/DE).
+
+---
+
+## [0.3.0] - 2026-07-14
+
+**Phase 2 — Learning platform (milestone 1).** The first playable learning loop: Hiragana, end to end.
+
+### Added
+
+- **Hiragana content** — all 46 basic kana transcribed from the Tofugu `/database` book (pronunciation anchors, mnemonics, example words), plus a 15-node curriculum of Units → Lessons with review checkpoints (`src/data`).
+- **Path dashboard** (`/learn`) — a winding node path with locked / current / complete states, unit headers, an app top bar (streak, XP, gems, daily-goal ring), and a locked "Katakana — coming soon" section.
+- **Onboarding** — a first-visit flow (welcome + name, motivation, daily goal) shown once and saved locally.
+- **Lesson player + game modes** — a per-lesson exercise pipeline with three modes: **Mnemonic Story** (teach, with audio + memory hint), **Quick Match** (multiple choice, both directions), and **Kana Drill** (flashcard self-rating). Answer feedback, a progress bar, and a results/celebration screen.
+- **Gamification & SRS** — XP, a daily streak, gems, a daily-goal ring, and per-kana mastery (0–5) with a Leitner-lite scheduler. Progress persists locally via a Zustand store.
+- **Audio** — Japanese pronunciation via the Web Speech API and generated SFX (correct / wrong / level-up / complete) via the Web Audio API — no audio files.
+- Unit tests for the SRS math and the progress store.
+
+### Notes
+
+- Scope so far is **Hiragana only** (Katakana is intentionally locked). Three of the ten planned game modes ship; the rest, plus the SRS practice hub, profile, and quests, are next.
+- App-UI copy is currently English-only; the marketing site stays EN/DE. Full app i18n is a follow-up.
+- Progress persistence uses `localStorage` (Zustand persist); the Dexie/IndexedDB `ProgressRepository` swap remains on the plan.
 
 ---
 
@@ -56,6 +78,7 @@ Work targeted for **Phase 2 — Learning platform** (Hiragana + Katakana only): 
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/japalingo/japalingo/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/japalingo/japalingo/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/japalingo/japalingo/releases/tag/v0.1.0

@@ -11,7 +11,7 @@
 
 **Japalingo** is a playful, gamified web app to learn to *read* Japanese — Hiragana and Katakana first. Positioning: "the next big competitor to Duolingo, but focused on Japanese." Tagline: **"Learn to read Japanese — the fun way."** Mascot: **Hoshi the Shiba Inu**.
 
-**Current status:** Phase 0 (Planning) **COMPLETE**. Phase 1 (Landing page) **BUILT** — the app is scaffolded and the landing page ships (`npm run dev` works). **Phase 2 (Learning platform) is next.**
+**Current status:** Phase 0 **COMPLETE**. Phase 1 (Landing page) **BUILT**. Phase 2 (Learning platform) **IN PROGRESS** — milestone 1 is playable: onboarding, the Hiragana path dashboard, the lesson player with 3 game modes (Mnemonic Story, Quick Match, Kana Drill), XP/streak/gems/mastery with local save, and audio. **Next: Katakana, more game modes, SRS practice hub, profile, and app i18n.**
 
 **Phases at a glance:**
 

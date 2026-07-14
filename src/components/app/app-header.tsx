@@ -1,0 +1,84 @@
+"use client";
+
+import Link from "next/link";
+import { HoshiStatic } from "@/components/mascot/hoshi-static";
+import { useMounted } from "@/lib/use-mounted";
+import { cn } from "@/lib/utils";
+import { useProgress } from "@/stores/progress";
+
+function Stat({
+  icon,
+  value,
+  label,
+  className,
+}: {
+  icon: string;
+  value: number;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <span className={cn("flex items-center gap-1", className)} aria-label={`${label}: ${value}`}>
+      <span aria-hidden>{icon}</span>
+      <span>{value}</span>
+    </span>
+  );
+}
+
+function DailyGoalRing({ value, goal }: { value: number; goal: number }) {
+  const pct = goal > 0 ? Math.min(1, value / goal) : 0;
+  const r = 15;
+  const c = 2 * Math.PI * r;
+  const complete = pct >= 1;
+  return (
+    <div
+      className="relative grid size-10 place-items-center"
+      aria-label={`Daily goal: ${value} of ${goal} XP`}
+      title={`Daily goal: ${value}/${goal} XP`}
+    >
+      <svg viewBox="0 0 40 40" className="size-10 -rotate-90">
+        <circle cx="20" cy="20" r={r} fill="none" stroke="var(--jl-border)" strokeWidth="5" />
+        <circle
+          cx="20"
+          cy="20"
+          r={r}
+          fill="none"
+          stroke="var(--jl-accent)"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={c * (1 - pct)}
+        />
+      </svg>
+      <span aria-hidden className="absolute text-[11px]">
+        {complete ? "✅" : "🎯"}
+      </span>
+    </div>
+  );
+}
+
+export function AppHeader() {
+  const mounted = useMounted();
+  const xp = useProgress((s) => s.xp);
+  const gems = useProgress((s) => s.gems);
+  const streak = useProgress((s) => s.streakCount);
+  const todayXp = useProgress((s) => s.todayXp);
+  const goal = useProgress((s) => s.dailyGoalXp);
+
+  return (
+    <header className="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur-md">
+      <div className="mx-auto flex h-16 max-w-3xl items-center justify-between gap-3 px-4">
+        <Link href="/" className="flex items-center gap-2" aria-label="Japalingo home">
+          <HoshiStatic className="size-8" />
+          <span className="font-display text-lg font-bold text-ink">Japalingo</span>
+        </Link>
+        <div className="flex items-center gap-3 font-display font-bold">
+          <Stat icon="🔥" value={mounted ? streak : 0} label="Day streak" className="text-secondary-strong" />
+          <Stat icon="⚡" value={mounted ? xp : 0} label="Total XP" className="text-primary" />
+          <Stat icon="💎" value={mounted ? gems : 0} label="Gems" className="text-info" />
+          <DailyGoalRing value={mounted ? todayXp : 0} goal={goal} />
+        </div>
+      </div>
+    </header>
+  );
+}
