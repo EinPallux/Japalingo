@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "title": "Japalingo — Learn to read Japanese, the fun way",
+    "description": "Master every hiragana & katakana with playful mnemonics, mini-games, and spaced repetition. Free, no account needed, and a shiba named Hoshi cheering you on."
+  },
+  "nav": {
+    "features": "Features",
+    "games": "Games",
+    "how": "How it works",
+    "start": "Start learning",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "theme": "Toggle theme",
+    "language": "Language"
+  },
+  "hero": {
+    "badge": "Free • No account needed",
+    "titleLine1": "Master Japanese kana.",
+    "titleLine2": "Actually remember them.",
+    "subtitle": "Playful, scientifically-backed lessons for every hiragana & katakana — built on mnemonics, mini-games, and spaced repetition. With a shiba named Hoshi who believes in you.",
+    "ctaPrimary": "Start learning — it's free",
+    "ctaSecondary": "I know some kana",
+    "trust": "No sign-up · Works offline · Just fun",
+    "stats": [
+      { "value": "214", "label": "kana to master" },
+      { "value": "10", "label": "ways to play" },
+      { "value": "5 min", "label": "a day is plenty" }
+    ]
+  },
+  "how": {
+    "eyebrow": "How it works",
+    "title": "Three tiny steps to reading Japanese",
+    "subtitle": "No grammar drills, no overwhelm. Meet a character, play until it sticks, keep your streak alive.",
+    "steps": [
+      {
+        "emoji": "✨",
+        "title": "Meet a kana",
+        "body": "A quick story + memory hint links each character's shape to its sound. し looks like a shepherd's crook — “shee.”"
+      },
+      {
+        "emoji": "🎮",
+        "title": "Play until it sticks",
+        "body": "Drill it, match it, type it, hear it, race it. Ten game modes hit the same kana from every angle."
+      },
+      {
+        "emoji": "🔥",
+        "title": "Keep your streak",
+        "body": "Spaced repetition brings each kana back right before you'd forget. Earn XP, crowns, and Hoshi's applause."
+      }
+    ]
+  },
+  "features": {
+    "eyebrow": "Why it works",
+    "title": "Built to make kana actually stick",
+    "subtitle": "Every choice serves one goal: you, reading Japanese, and enjoying it enough to come back tomorrow.",
+    "items": [
+      {
+        "emoji": "🧠",
+        "title": "Mnemonics that stick",
+        "body": "Learn every character through a vivid memory hint, not brute-force repetition."
+      },
+      {
+        "emoji": "🔁",
+        "title": "Spaced repetition",
+        "body": "A smart scheduler reviews each kana right before you'd forget it — so you don't."
+      },
+      {
+        "emoji": "🎲",
+        "title": "Ten ways to play",
+        "body": "Story, drill, match, type, listen, trace, and arcade modes keep practice fresh."
+      },
+      {
+        "emoji": "🐕",
+        "title": "Hoshi's got you",
+        "body": "Your shiba companion celebrates every win and keeps the motivation high."
+      }
+    ]
+  },
+  "games": {
+    "eyebrow": "The arcade",
+    "title": "Learning that feels like playing",
+    "subtitle": "The same hiragana & katakana, met through many mini-games — so it never gets boring.",
+    "items": [
+      {
+        "emoji": "🌸",
+        "name": "Kana Rain",
+        "tag": "Signature",
+        "desc": "Type the reading before the kana petals hit the ground. Fast, juicy, addictive."
+      },
+      {
+        "emoji": "🃏",
+        "name": "Kana Match",
+        "tag": "Memory",
+        "desc": "Flip and pair each character with its sound in a cute concentration grid."
+      },
+      {
+        "emoji": "⚡",
+        "name": "Quick Match",
+        "tag": "Speed",
+        "desc": "See a kana, tap the right reading. Simple, snappy, endlessly replayable."
+      },
+      {
+        "emoji": "⌨️",
+        "name": "Romaji Rush",
+        "tag": "Recall",
+        "desc": "Type the romaji as fast as you can and grow a blazing combo."
+      },
+      {
+        "emoji": "🎧",
+        "name": "Ear Training",
+        "tag": "Listening",
+        "desc": "Hear the sound, pick the character. Wire ear to eye."
+      },
+      {
+        "emoji": "📖",
+        "name": "Word Builder",
+        "tag": "Reading",
+        "desc": "Use what you've learned to read real Japanese words. あお = blue!"
+      }
+    ],
+    "more": "…and more on the way — Kana Drill, Stroke Master, Kana Sprint."
+  },
+  "reading": {
+    "eyebrow": "The magic moment",
+    "title": "You'll be reading Japanese by lunch",
+    "subtitle": "These aren't flashcards — they're real words, spelled in kana you'll actually know. Tap to reveal.",
+    "reveal": "Tap to reveal",
+    "words": [
+      { "kana": "あお", "romaji": "ao", "meaning": "blue" },
+      { "kana": "いえ", "romaji": "ie", "meaning": "house" },
+      { "kana": "うえ", "romaji": "ue", "meaning": "up / above" },
+      { "kana": "おう", "romaji": "ou", "meaning": "king" },
+      { "kana": "こえ", "romaji": "koe", "meaning": "voice" }
+    ],
+    "footnote": "Words & mnemonics are drawn from the Tofugu Learn Hiragana & Katakana books.",
+    "cta": "Learn these for real"
+  },
+  "finalCta": {
+    "title": "Ready to read Japanese?",
+    "subtitle": "Start with あ. Hoshi will take it from there.",
+    "cta": "Start learning — it's free",
+    "trust": "Free forever · No account · Works offline"
+  },
+  "footer": {
+    "tagline": "Learn to read Japanese — the fun way.",
+    "product": "Product",
+    "learn": "Learn",
+    "about": "About",
+    "links": {
+      "features": "Features",
+      "games": "Game modes",
+      "how": "How it works",
+      "roadmap": "Roadmap",
+      "hiragana": "Hiragana",
+      "katakana": "Katakana",
+      "github": "GitHub",
+      "credits": "Credits"
+    },
+    "credits": "Learning content adapted from Tofugu's free Learn Hiragana & Learn Katakana books.",
+    "madeWith": "Made with care · Phase 1 preview",
+    "rights": "© 2026 Japalingo. A playful way to read Japanese."
+  },
+  "soon": {
+    "badge": "Phase 2 · Coming soon",
+    "title": "Hoshi is still in training!",
+    "body": "The full learning platform — lessons, mini-games, streaks, crowns, and your very first kana — lands in Phase 2. Thanks for previewing Japalingo!",
+    "back": "Back home"
+  }
+}

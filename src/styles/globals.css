@@ -1,0 +1,114 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+/*
+ * Bridge design tokens (tokens.css) into Tailwind's theme so utilities like
+ * bg-primary / text-ink / font-display / rounded-blob resolve to the CSS vars
+ * and flip automatically with light/dark. `inline` = emit var() refs, not new vars.
+ */
+@theme inline {
+  --color-primary: var(--jl-primary);
+  --color-primary-strong: var(--jl-primary-strong);
+  --color-primary-tint: var(--jl-primary-tint);
+  --color-secondary: var(--jl-secondary);
+  --color-secondary-strong: var(--jl-secondary-strong);
+  --color-secondary-tint: var(--jl-secondary-tint);
+  --color-accent: var(--jl-accent);
+  --color-accent-strong: var(--jl-accent-strong);
+  --color-accent-tint: var(--jl-accent-tint);
+
+  --color-success: var(--jl-success);
+  --color-success-strong: var(--jl-success-strong);
+  --color-error: var(--jl-error);
+  --color-error-strong: var(--jl-error-strong);
+  --color-info: var(--jl-info);
+
+  --color-ink: var(--jl-ink);
+  --color-muted: var(--jl-muted);
+  --color-border: var(--jl-border);
+  --color-surface: var(--jl-surface);
+  --color-surface-2: var(--jl-surface-2);
+  --color-bg: var(--jl-bg);
+
+  --font-display: var(--font-fredoka), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+  --font-jp:
+    var(--font-jp-rounded), "IPAGothic", "Noto Sans JP", "Hiragino Sans", "Yu Gothic", sans-serif;
+
+  --radius-blob-sm: 12px;
+  --radius-blob: 18px;
+  --radius-blob-lg: 26px;
+  --radius-blob-xl: 34px;
+
+  --shadow-soft: 0 6px 20px -6px rgb(var(--jl-shadow) / 0.18);
+  --shadow-lift: 0 16px 40px -12px rgb(var(--jl-shadow) / 0.22);
+}
+
+@layer base {
+  * {
+    border-color: var(--jl-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--jl-bg);
+    color: var(--jl-ink);
+    font-family: var(--font-nunito), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--jl-primary);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--jl-ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Respect users who prefer less motion. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .font-jp {
+    font-family: var(--font-jp);
+  }
+
+  /* The signature "chunky" toy button: a colored body over a darker shadow-lip. */
+  .btn-chunky {
+    position: relative;
+    transition:
+      transform 0.08s ease,
+      box-shadow 0.08s ease,
+      filter 0.15s ease;
+    will-change: transform;
+  }
+  /* Press the toy button down onto its shadow-lip. */
+  .btn-chunky:active {
+    transform: translateY(var(--btn-lip, 5px));
+    box-shadow: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}

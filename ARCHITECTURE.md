@@ -18,7 +18,7 @@
 
 | Concern | Choice (CANON §3) | Why (one line) |
 | --- | --- | --- |
-| Framework | **Next.js 15 (App Router)** | File-based routing, route groups, SSG/static export, RSC for a fast marketing site; scales to a backend later without a rewrite. |
+| Framework | **Next.js 16 (App Router)** | File-based routing, route groups, SSG/SSR, RSC for a fast marketing site; scales to a backend later without a rewrite. (Scaffolded on the current latest; planning said 15.) |
 | UI runtime | **React 19** | Concurrent rendering, `use`/transitions, Actions; the ecosystem all our libs target. |
 | Language | **TypeScript (strict)** | `strict: true` everywhere; the domain model (kana/SRS) is safer as types-first. |
 | Styling | **Tailwind CSS v4 + CSS custom properties** | Utility speed for a big playful UI; tokens live in CSS vars so theming (light/dark) is a variable swap, not a rebuild. |
@@ -568,7 +568,7 @@ Design tokens (CANON §2) are **CSS custom properties** in `src/styles/tokens.cs
 
 ## 14. Build, deploy & privacy
 
-- **Build:** Next.js 15 static/SSG output, **Vercel-friendly** (also deployable to any static host). No server runtime, no accounts, no API keys — nothing to configure server-side in Phase 0–2.
+- **Build:** Next.js 16 (Turbopack) output, deployed on **Vercel** (`vercel.json`). No custom server runtime, no accounts, no API keys — nothing to configure server-side in Phase 0–2.
 - **Privacy (core promise):** all user data — profile, SRS progress, XP, streak, gems, settings — lives **only in the browser** (IndexedDB + a little localStorage). No sign-up, no tracking, no analytics beacons, no third-party CDNs for fonts or audio. TTS/SFX are generated locally. Users can **export/import** their data and **reset** by clearing storage.
 - **Future (content-gated):** when accounts + cloud sync arrive, they slot behind the existing `ProgressRepository` (a `CloudRepository`/`SyncingRepository`) and TanStack Query — an additive change, opt-in, never a precondition for learning.
 

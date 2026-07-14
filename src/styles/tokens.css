@@ -1,0 +1,71 @@
+/**
+ * Japalingo design tokens.
+ * Raw values live here as CSS custom properties (prefixed --jl-) and flip between
+ * light and dark. Tailwind theme utilities are mapped onto these in globals.css,
+ * so components consume semantic tokens (bg-primary, text-ink, …) and never hardcode hex.
+ * Palette source of truth: DESIGN_DOCUMENT.md §5.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Brand */
+  --jl-primary: #5b5bf6; /* Ai indigo */
+  --jl-primary-strong: #4642d6;
+  --jl-primary-tint: #eeeeff;
+  --jl-secondary: #ff5c9d; /* Sakura pink */
+  --jl-secondary-strong: #e63f83;
+  --jl-secondary-tint: #ffe9f2;
+  --jl-accent: #ffc53d; /* Gold */
+  --jl-accent-strong: #f5a623;
+  --jl-accent-tint: #fff3d4;
+
+  /* Semantic */
+  --jl-success: #3fc77a;
+  --jl-success-strong: #2fa863;
+  --jl-error: #ff5470;
+  --jl-error-strong: #e63b58;
+  --jl-info: #38bdf8;
+
+  /* Text + surfaces */
+  --jl-ink: #2a2a4a;
+  --jl-muted: #6e6e8f;
+  --jl-border: #e9e9f3;
+  --jl-surface: #ffffff;
+  --jl-surface-2: #f2f2fb;
+  --jl-bg: #f7f7fd;
+
+  /* Effects */
+  --jl-ring: #5b5bf6;
+  --jl-shadow: 43 43 74; /* indigo-tinted shadow rgb */
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --jl-primary: #8484ff;
+  --jl-primary-strong: #6f6ff2;
+  --jl-primary-tint: #24244d;
+  --jl-secondary: #ff77b0;
+  --jl-secondary-strong: #ff5c9d;
+  --jl-secondary-tint: #3d2440;
+  --jl-accent: #ffd45f;
+  --jl-accent-strong: #ffc53d;
+  --jl-accent-tint: #3a3320;
+
+  --jl-success: #57d98d;
+  --jl-success-strong: #3fc77a;
+  --jl-error: #ff6b83;
+  --jl-error-strong: #ff5470;
+  --jl-info: #56c7fb;
+
+  --jl-ink: #ededff;
+  --jl-muted: #a2a2cc;
+  --jl-border: #2f2f57;
+  --jl-surface: #1b1b3a;
+  --jl-surface-2: #24244c;
+  --jl-bg: #111129;
+
+  --jl-ring: #8484ff;
+  --jl-shadow: 0 0 8;
+}

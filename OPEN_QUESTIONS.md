@@ -12,7 +12,7 @@ These are the load-bearing defaults from the canonical brief. All four were chos
 
 ### Q1 — Framework
 
-- [x] **Default (recommended): Next.js 15 (App Router) + React 19 + TypeScript (strict).**
+- [x] **Default (recommended): Next.js (App Router) + React 19 + TypeScript (strict).** Scaffolded in Phase 1 on the current latest, **Next.js 16** (the "15" named at planning time; App Router/Vercel behavior is equivalent).
 - [ ] Alternative: **Vite SPA** (client-only single-page app).
 - Override: `__________________________`
 
@@ -85,10 +85,10 @@ Context: **governance rule** — all learning content (kana, mnemonics, example 
 
 ### B6 — Deployment target
 
-- [x] **Default: Vercel / static export.** No backend server in Phase 0–2; everything runs client-side + static.
+- [x] **Confirmed by owner (2026-07-14): Vercel.** No backend server in Phase 0–2; everything runs client-side + SSR/static on Vercel. A `vercel.json` (framework: nextjs) ships in Phase 1.
 - [ ] Override: `__________________________`
 
-Context: a static/Vercel deploy is cheap, fast, and matches the local-only, no-backend architecture (Q2). If/when accounts + cloud sync land on the future roadmap, the deployment target can be revisited alongside the backend decision.
+Context: a Vercel deploy is cheap, fast, and matches the local-only, no-backend architecture (Q2). If/when accounts + cloud sync land on the future roadmap, the deployment target can be revisited alongside the backend decision.
 
 ---
 
@@ -98,4 +98,5 @@ When the owner overrides a default, note it here (date + decision) so downstream
 
 | Date | Question | New decision | Notes |
 |------|----------|--------------|-------|
-| _—_  | _—_      | _—_          | _—_   |
+| 2026-07-14 | B6 — Deployment | **Vercel** (explicitly confirmed) | Owner: "The whole project should be deployed on Vercel." `vercel.json` added in Phase 1. |
+| 2026-07-14 | Q1 — Framework | Next.js **16** (latest) | Scaffolded on the current latest major; equivalent App Router/Vercel behavior to the "15" named at planning. |

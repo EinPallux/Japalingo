@@ -6,12 +6,13 @@ Japalingo is a playful, gamified web app for mastering Japanese **kana** — eve
 
 ---
 
-**Status:** Phase 0 (Planning) — **COMPLETE**. Phase 1 (Landing Page) — **next.**
+**Status:** Phase 0 (Planning) — **COMPLETE**. Phase 1 (Landing Page) — **BUILT**. Phase 2 (Learning Platform) — **next.**
 
-![status: planning-complete](https://img.shields.io/badge/status-planning--complete-5B5BF6)
-![phase](https://img.shields.io/badge/next-phase%201%20landing-FF5C9D)
+![status: phase-1-built](https://img.shields.io/badge/status-phase%201%20built-3FC77A)
+![next: phase 2](https://img.shields.io/badge/next-phase%202%20learning-FF5C9D)
 ![license: TBD](https://img.shields.io/badge/license-TBD-lightgrey)
-![made with Next.js](https://img.shields.io/badge/made%20with-Next.js%2015-2A2A4A)
+![made with Next.js](https://img.shields.io/badge/made%20with-Next.js%2016-2A2A4A)
+![deploy: Vercel](https://img.shields.io/badge/deploy-Vercel-000000)
 
 > Note: badges are static, decorative placeholders — they display no live external data.
 
@@ -19,7 +20,7 @@ Japalingo is a playful, gamified web app for mastering Japanese **kana** — eve
 
 ## ✨ Features
 
-Everything below is *planned*. Phase 0 ships the blueprint; the app itself arrives in Phase 1+.
+The **landing page is live** (Phase 1) and previews all of this. The learning features themselves are built out in **Phase 2**.
 
 - 🧠 **Mnemonic-driven learning** — every kana comes with a memorable shape-to-sound story (あ has the letter "A" hiding inside it; き looks like a key) so you *remember* kana instead of grinding them.
 - 🎮 **Lots of ways to play** — because one drill gets boring:
@@ -48,42 +49,41 @@ New capabilities (vocabulary, kanji, grammar, listening, and beyond) are **conte
 
 | Area | Choice |
 | --- | --- |
-| Framework | **Next.js 15** (App Router) + **React 19** + **TypeScript** (strict) |
+| Framework | **Next.js 16** (App Router) + **React 19** + **TypeScript** (strict) |
 | Styling | **Tailwind CSS v4** + CSS custom properties (design tokens / theming) |
 | Animation | **Framer Motion** (springy, satisfying UI motion) |
 | 3D / WebGL | **Three.js** via **@react-three/fiber** + **@react-three/drei** |
 | State | **Zustand** (modular stores); TanStack Query reserved for a future backend |
 | Persistence | **IndexedDB** via **Dexie**, behind a `ProgressRepository` interface — local-only now, cloud adapter later |
 | Audio | **Web Speech API** (SpeechSynthesis) for pronunciation; **Web Audio API** for generated SFX — no external audio assets |
-| i18n | **next-intl** — English default, German-ready |
+| i18n | **next-intl** (EN default, DE ready) · theming via **next-themes** (`data-theme`) |
 | Testing | **Vitest** + **Testing Library** (unit); **Playwright** (e2e) |
 | Tooling | **ESLint + Prettier**, **npm** |
+| Deploy | **Vercel** (zero-config Next.js; `vercel.json`) |
 
-No backend server in Phases 0–2 — everything runs client-side and static.
+No backend server in Phases 0–2 — everything runs client-side and static/SSR on Vercel.
 
 ## 🚀 Getting Started
 
-> ⚠️ **The repo is currently planning docs only.** Application code lands in **Phase 1**. The commands below are the intended workflow for when source arrives — they won't do anything yet.
-
-**Prerequisites**
-
-- **Node.js 20+**
-- **npm** (bundled with Node)
-
-**Once Phase 1 code exists:**
+**Prerequisites:** **Node.js 20+** (dev uses Node 22) and **npm**.
 
 ```bash
-# Install dependencies
-npm install
+npm install          # install dependencies
+npm run dev          # dev server → http://localhost:3000
+npm run build        # production build (Turbopack)
+npm run start        # serve the production build
+npm run lint         # eslint
+npm run typecheck    # tsc --noEmit
+npm test             # vitest unit tests
+npm run test:e2e     # playwright e2e (run `npx playwright install` once)
+```
 
-# Start the dev server (http://localhost:3000)
-npm run dev
+### Deploy (Vercel)
 
-# Production build
-npm run build
+Japalingo is Vercel-ready (`vercel.json`, zero-config Next.js). Import the repo into Vercel — no build settings required — or from the CLI:
 
-# Run the test suites
-npm test
+```bash
+npm i -g vercel && vercel
 ```
 
 ## 📁 Project Structure
