@@ -10,7 +10,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Continuing **Phase 2**: the Katakana track, more game modes (Kana Match, Ear Training, Romaji Rush, Kana Rain, Word Builder), the SRS practice hub, a profile page, daily quests, and full app-UI i18n (EN/DE).
+Continuing **Phase 2**: more game modes (Kana Match, Ear Training, Romaji Rush, Word Builder), the SRS practice hub, a profile page, daily quests, and full app-UI i18n (EN/DE).
+
+---
+
+## [0.4.0] - 2026-07-14
+
+**Phase 2 — Learning platform (milestone 2).** Katakana + the signature arcade.
+
+### Added
+
+- **Katakana track** — all 46 basic katakana transcribed from the Tofugu `/database` book (mnemonics; pronunciations mirror the hiragana counterparts). The curriculum is now generated from a shared spec so both tracks stay in parity, and the dashboard gains a **Hiragana / Katakana track switcher** (saved locally).
+- **Kana Rain** — the signature arcade game: kana fall, type the romaji to pop them before they hit the line; lives, a combo multiplier, and a live score. Correct clears feed XP + mastery into the SRS, so playing is real practice. Launchable from the dashboard for either track.
+- Data-integrity tests for the curriculum (18 unit tests total).
 
 ---
 
@@ -78,7 +90,8 @@ Continuing **Phase 2**: the Katakana track, more game modes (Kana Match, Ear Tra
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/japalingo/japalingo/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/japalingo/japalingo/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/japalingo/japalingo/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/japalingo/japalingo/releases/tag/v0.1.0

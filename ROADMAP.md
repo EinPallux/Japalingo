@@ -13,7 +13,7 @@ This is the single delivery plan. It is **content-gated**: every learning fact s
 |-------|------|--------|---------------|
 | **0** | Planning | ✅ **DONE** | Lock every decision (brand, tech, content model, game modes) into planning docs — no app code. |
 | **1** | Landing Page | ✅ **BUILT** | Ship the full playful marketing site with a 3D Hoshi hero, plus the design system it stands on. |
-| **2** | Learning Platform (Hiragana + Katakana ONLY) | 🚧 In progress | Deliver the whole client-side learning app: onboarding, path, lessons, ship-set of games, SRS, gamification — no accounts, no backend. **Milestone 1 (Hiragana loop) is playable;** Katakana + more modes next. |
+| **2** | Learning Platform (Hiragana + Katakana ONLY) | 🚧 In progress | Deliver the whole client-side learning app: onboarding, path, lessons, ship-set of games, SRS, gamification — no accounts, no backend. **Milestones 1–2 playable: both kana tracks + the Kana Rain arcade;** more game modes, the SRS practice hub, and profile next. |
 | **F1** | Vocabulary | 🔒 Content-gated | Real words as first-class content, once `/database` has a vocab pack. |
 | **F2** | Kanji | 🔒 Content-gated | Kanji learning tracks, once `/database` has a kanji pack. |
 | **F3** | Grammar | 🔒 Content-gated | Grammar points & drills, once `/database` has a grammar pack. |

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { KanaProgress } from "@/types";
+import type { KanaProgress, Track } from "@/types";
 import {
   applyAnswer,
   applyRating,
@@ -30,8 +30,10 @@ export interface ProgressState {
   todayDate: string | null;
   kana: Record<string, KanaProgress>;
   completedLessons: string[];
+  activeTrack: Track;
 
   completeOnboarding(data: { name: string; reason: string | null; dailyGoalXp: number }): void;
+  setActiveTrack(track: Track): void;
   addXp(n: number): void;
   answer(kanaId: string, correct: boolean): void;
   rate(kanaId: string, grade: Grade): void;
@@ -54,6 +56,7 @@ const initial = {
   todayDate: null as string | null,
   kana: {} as Record<string, KanaProgress>,
   completedLessons: [] as string[],
+  activeTrack: "hiragana" as Track,
 };
 
 export const useProgress = create<ProgressState>()(
@@ -63,6 +66,8 @@ export const useProgress = create<ProgressState>()(
 
       completeOnboarding: ({ name, reason, dailyGoalXp }) =>
         set({ onboardingComplete: true, name, reason, dailyGoalXp }),
+
+      setActiveTrack: (activeTrack) => set({ activeTrack }),
 
       addXp: (n) =>
         set((s) => {
