@@ -14,7 +14,7 @@ import {
 } from "@/lib/achievements";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
-import { useProgress } from "@/stores/progress";
+import { selectStreak, useProgress } from "@/stores/progress";
 import type { KanaProgress, Track } from "@/types";
 
 function masteryClass(m: number): string {
@@ -32,13 +32,17 @@ function MasteryGrid({ track, kana }: { track: Track; kana: Record<string, KanaP
         return (
           <div
             key={k.id}
+            role="img"
             title={`${k.char} = ${k.romaji} · mastery ${m}/5`}
+            aria-label={`${k.romaji} — mastery ${m} of 5`}
             className={cn(
               "grid aspect-square place-items-center rounded-blob-sm border font-jp text-lg font-bold",
               masteryClass(m),
             )}
           >
-            <span lang="ja">{k.char}</span>
+            <span lang="ja" aria-hidden>
+              {k.char}
+            </span>
           </div>
         );
       })}
@@ -95,7 +99,7 @@ export function ProfileView() {
 
         <div className="grid grid-cols-3 gap-3">
           <Stat value={`⚡ ${state.xp}`} label="Total XP" />
-          <Stat value={`🔥 ${state.streakCount}`} label="Day streak" />
+          <Stat value={`🔥 ${selectStreak(state)}`} label="Day streak" />
           <Stat value={`💎 ${state.gems}`} label="Gems" />
           <Stat value={`${seen}/92`} label="Kana met" />
           <Stat value={mastered} label="Mastered" />

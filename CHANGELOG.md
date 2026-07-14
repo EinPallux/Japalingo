@@ -14,6 +14,29 @@ Continuing **Phase 2**: Romaji Rush, daily quests, and full app-UI i18n (EN/DE).
 
 ---
 
+## [0.6.1] - 2026-07-14
+
+**Phase 2 — polish pass.** An adversarial review of the whole learning app, then the real fixes: correctness, hydration, mobile, and accessibility.
+
+### Fixed
+
+- **Daily rollover math** — the streak and daily-goal ring now turn over at the player's **local** midnight (was UTC, so they reset mid-afternoon for many timezones) and are derived at read time: a broken streak no longer keeps showing the old flame, and yesterday's XP no longer counts toward today's goal before you've practised.
+- **Hydration** — the screens that render randomized content (Ear Training, Word Builder, and review lessons) no longer mismatch between server and client on first load; the randomized round is gated behind mount, matching the rest of the app.
+- **Ear Training replay** — "Play again" no longer reports cumulative XP from earlier games.
+
+### Added / Changed
+
+- **Kana Rain on touch** — phones now get a **tap keypad** (the readings of the falling kana) instead of being forced to type into a timed game behind the soft keyboard; keyboard players keep the text input.
+- **Reduced motion** — Kana Rain (a JS animation that bypassed the global reduced-motion handling) now honors `prefers-reduced-motion` with a gentle, constant pace.
+
+### Accessibility
+
+- Right/wrong feedback in **Ear Training** and **Word Builder** now includes text ("Correct!" / "It was あ = a"), not colour alone.
+- Onboarding reason/goal choices expose `aria-pressed`; profile mastery cells announce their level to assistive tech; game/lesson exit buttons meet the 44px touch-target size.
+- The Japanese TTS voice is cached and refreshed on `voiceschanged`, so it's picked reliably after the first utterance.
+
+---
+
 ## [0.6.0] - 2026-07-14
 
 **Phase 2 — Learning platform (milestone 4).** Two more game modes.
@@ -115,7 +138,8 @@ Continuing **Phase 2**: Romaji Rush, daily quests, and full app-UI i18n (EN/DE).
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/japalingo/japalingo/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/japalingo/japalingo/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/japalingo/japalingo/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/japalingo/japalingo/compare/v0.3.0...v0.4.0

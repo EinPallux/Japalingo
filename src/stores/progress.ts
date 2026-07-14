@@ -10,11 +10,17 @@ import {
   XP_PER_CORRECT,
 } from "@/lib/srs";
 
+/** Local-time day key (YYYY-MM-DD). Using local components — not toISOString's
+ *  UTC — so streaks and the daily goal roll over at the user's own midnight. */
+function dateKey(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  return dateKey(new Date());
 }
 function yesterday(): string {
-  return new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  return dateKey(new Date(Date.now() - 86_400_000));
 }
 
 export interface ProgressState {
@@ -129,3 +135,18 @@ export const useProgress = create<ProgressState>()(
     },
   ),
 );
+
+/**
+ * `todayXp`/`streakCount` are only rolled over when XP is written. These
+ * selectors derive the *current* values at read time so the UI never shows a
+ * stale daily ring (yesterday's XP counting toward today) or a lingering streak
+ * flame after a missed day — the flame stays lit while the last active day is
+ * today or yesterday, and reads as broken (0) once a day is skipped.
+ */
+export function selectTodayXp(s: ProgressState): number {
+  return s.todayDate === today() ? s.todayXp : 0;
+}
+export function selectStreak(s: ProgressState): number {
+  if (!s.streakDate) return 0;
+  return s.streakDate === today() || s.streakDate === yesterday() ? s.streakCount : 0;
+}

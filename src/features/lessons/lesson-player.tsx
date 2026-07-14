@@ -2,8 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { CloseIcon } from "@/components/ui/icons";
 import { sfx } from "@/lib/audio";
+import { useMounted } from "@/lib/use-mounted";
 import { useProgress } from "@/stores/progress";
 import type { Lesson } from "@/types";
 import { buildQueue } from "./build-queue";
@@ -14,6 +16,7 @@ import { LessonResults } from "./results";
 
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const router = useRouter();
+  const mounted = useMounted();
   const queue = useMemo(() => buildQueue(lesson), [lesson]);
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
@@ -38,6 +41,16 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }
   };
 
+  // Gate randomized exercises (review lessons shuffle their first item) behind
+  // mount so the server render never mismatches the client's first render.
+  if (!mounted) {
+    return (
+      <main id="main" className="grid min-h-dvh place-items-center">
+        <HoshiStatic className="size-24 opacity-70" />
+      </main>
+    );
+  }
+
   if (done) {
     return <LessonResults lesson={lesson} xpEarned={earnedXp} onContinue={exit} />;
   }
@@ -52,7 +65,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           type="button"
           aria-label="Exit lesson"
           onClick={exit}
-          className="grid size-10 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-2"
+          className="grid size-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-2"
         >
           <CloseIcon className="size-6" />
         </button>

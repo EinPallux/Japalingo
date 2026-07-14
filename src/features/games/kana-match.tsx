@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
@@ -49,6 +49,14 @@ export function KanaMatch({ track }: { track: Track }) {
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [moves, setMoves] = useState(0);
   const [busy, setBusy] = useState(false);
+  const flipBackTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (flipBackTimer.current) window.clearTimeout(flipBackTimer.current);
+    },
+    [],
+  );
 
   const done = matched.size === PAIRS;
 
@@ -82,7 +90,7 @@ export function KanaMatch({ track }: { track: Track }) {
     } else {
       setBusy(true);
       sfx.wrong();
-      window.setTimeout(() => {
+      flipBackTimer.current = window.setTimeout(() => {
         setFlipped([]);
         setBusy(false);
       }, 850);
@@ -116,7 +124,7 @@ export function KanaMatch({ track }: { track: Track }) {
           type="button"
           aria-label="Exit game"
           onClick={() => router.push("/learn")}
-          className="grid size-10 place-items-center rounded-full text-muted transition hover:bg-surface-2"
+          className="grid size-11 place-items-center rounded-full text-muted transition hover:bg-surface-2"
         >
           <CloseIcon className="size-6" />
         </button>

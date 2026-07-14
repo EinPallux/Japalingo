@@ -36,13 +36,23 @@ export function EarTraining({ track }: { track: Track }) {
   const [correctCount, setCorrectCount] = useState(0);
   const [done, setDone] = useState(false);
   const [earned, setEarned] = useState(0);
-  const [xpBefore] = useState(() => useProgress.getState().xp);
+  const [xpBefore, setXpBefore] = useState(() => useProgress.getState().xp);
 
   useEffect(() => {
     if (mounted && !done && ttsAvailable()) speakJa(rd.target.char);
   }, [rd, mounted, done]);
 
-  if (mounted && !ttsAvailable()) {
+  // Gate the randomized round behind mount so the server HTML (which would pick
+  // a different random kana) never mismatches the client's first render.
+  if (!mounted) {
+    return (
+      <main id="main" className="grid min-h-dvh place-items-center">
+        <HoshiStatic className="size-24 opacity-70" />
+      </main>
+    );
+  }
+
+  if (!ttsAvailable()) {
     return (
       <main id="main" className="grid min-h-dvh place-items-center px-5 text-center">
         <div className="flex max-w-sm flex-col items-center gap-4">
@@ -98,6 +108,7 @@ export function EarTraining({ track }: { track: Track }) {
                 setPicked(null);
                 setCorrectCount(0);
                 setEarned(0);
+                setXpBefore(useProgress.getState().xp);
                 setDone(false);
               }}
               size="lg"
@@ -121,7 +132,7 @@ export function EarTraining({ track }: { track: Track }) {
           type="button"
           aria-label="Exit game"
           onClick={() => router.push("/learn")}
-          className="grid size-10 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-2"
+          className="grid size-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-2"
         >
           <CloseIcon className="size-6" />
         </button>
@@ -167,9 +178,24 @@ export function EarTraining({ track }: { track: Track }) {
         </div>
 
         {picked ? (
-          <Button onClick={next} size="lg" className="w-full max-w-md">
-            Continue
-          </Button>
+          <div className="flex w-full max-w-md flex-col items-center gap-3">
+            <p
+              aria-live="polite"
+              className={cn(
+                "font-bold",
+                picked === rd.target.id ? "text-success-strong" : "text-error-strong",
+              )}
+            >
+              {picked === rd.target.id ? "Correct! " : "It was "}
+              <span lang="ja" className="font-jp text-xl">
+                {rd.target.char}
+              </span>{" "}
+              = {rd.target.romaji}
+            </p>
+            <Button onClick={next} size="lg" className="w-full">
+              Continue
+            </Button>
+          </div>
         ) : null}
       </div>
     </main>

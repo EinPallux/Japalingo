@@ -4,7 +4,7 @@ import Link from "next/link";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
-import { useProgress } from "@/stores/progress";
+import { selectStreak, selectTodayXp, useProgress } from "@/stores/progress";
 
 function Stat({
   icon,
@@ -61,8 +61,8 @@ export function AppHeader() {
   const mounted = useMounted();
   const xp = useProgress((s) => s.xp);
   const gems = useProgress((s) => s.gems);
-  const streak = useProgress((s) => s.streakCount);
-  const todayXp = useProgress((s) => s.todayXp);
+  const streak = useProgress(selectStreak);
+  const todayXp = useProgress(selectTodayXp);
   const goal = useProgress((s) => s.dailyGoalXp);
   const name = useProgress((s) => s.name);
 
@@ -79,7 +79,7 @@ export function AppHeader() {
           <Stat icon="🔥" value={mounted ? streak : 0} label="Day streak" className="text-secondary-strong" />
           <Stat icon="⚡" value={mounted ? xp : 0} label="Total XP" className="text-primary" />
           <Stat icon="💎" value={mounted ? gems : 0} label="Gems" className="text-info" />
-          <DailyGoalRing value={mounted ? todayXp : 0} goal={goal} />
+          <DailyGoalRing value={mounted ? todayXp : 0} goal={mounted ? goal : 30} />
           <Link
             href="/profile"
             aria-label="Your profile"

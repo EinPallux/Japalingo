@@ -48,6 +48,26 @@ export function ttsAvailable(): boolean {
   return typeof window !== "undefined" && "speechSynthesis" in window;
 }
 
+let jaVoice: SpeechSynthesisVoice | null = null;
+let voicesBound = false;
+
+/** Resolve the best ja-JP voice, caching it and refreshing when the voice list
+ *  loads (getVoices() is frequently empty on the first call in Chrome). */
+function resolveJaVoice(): SpeechSynthesisVoice | null {
+  if (!ttsAvailable()) return null;
+  const synth = window.speechSynthesis;
+  const pick = () =>
+    synth.getVoices().find((v) => v.lang?.toLowerCase().startsWith("ja")) ?? null;
+  jaVoice = pick();
+  if (!voicesBound && typeof synth.addEventListener === "function") {
+    voicesBound = true;
+    synth.addEventListener("voiceschanged", () => {
+      jaVoice = pick();
+    });
+  }
+  return jaVoice;
+}
+
 /** Speak Japanese text with the best available ja-JP voice. */
 export function speakJa(text: string, rate = 0.9): void {
   if (!ttsAvailable()) return;
@@ -55,7 +75,7 @@ export function speakJa(text: string, rate = 0.9): void {
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang = "ja-JP";
   utter.rate = rate;
-  const ja = synth.getVoices().find((v) => v.lang?.toLowerCase().startsWith("ja"));
+  const ja = jaVoice ?? resolveJaVoice();
   if (ja) utter.voice = ja;
   synth.cancel();
   synth.speak(utter);

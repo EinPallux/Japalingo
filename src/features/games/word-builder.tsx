@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
 import { WORDS } from "@/data/words";
 import { sfx } from "@/lib/audio";
+import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
 import type { ExampleWord } from "@/types";
@@ -37,6 +38,7 @@ function buildRounds(): { word: ExampleWord; options: string[] }[] {
 
 export function WordBuilder() {
   const router = useRouter();
+  const mounted = useMounted();
   const rounds = useMemo(() => buildRounds(), []);
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
@@ -47,6 +49,16 @@ export function WordBuilder() {
 
   const cur = rounds[index]!;
   const correct = picked === cur.word.meaning;
+
+  // Gate the randomized rounds behind mount so the server-rendered word never
+  // mismatches the client's first render (Math.random differs across them).
+  if (!mounted) {
+    return (
+      <main id="main" className="grid min-h-dvh place-items-center">
+        <HoshiStatic className="size-24 opacity-70" />
+      </main>
+    );
+  }
 
   const pick = (opt: string) => {
     if (picked) return;
@@ -97,7 +109,7 @@ export function WordBuilder() {
           type="button"
           aria-label="Exit game"
           onClick={() => router.push("/learn")}
-          className="grid size-10 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-2"
+          className="grid size-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-2"
         >
           <CloseIcon className="size-6" />
         </button>
@@ -145,7 +157,11 @@ export function WordBuilder() {
             animate={{ opacity: 1, y: 0 }}
             className="flex w-full flex-col items-center gap-3"
           >
-            <p className={cn("font-bold", correct ? "text-success-strong" : "text-error-strong")}>
+            <p
+              aria-live="polite"
+              className={cn("font-bold", correct ? "text-success-strong" : "text-error-strong")}
+            >
+              {correct ? "Correct! " : "Not quite — "}
               <span lang="ja" className="font-jp">
                 {cur.word.kana}
               </span>{" "}

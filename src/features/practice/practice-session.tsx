@@ -58,7 +58,7 @@ export function PracticeSession({ kana, onExit }: { kana: Kana[]; onExit: () => 
           type="button"
           aria-label="Exit review"
           onClick={onExit}
-          className="grid size-10 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-2"
+          className="grid size-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-2"
         >
           <CloseIcon className="size-6" />
         </button>
