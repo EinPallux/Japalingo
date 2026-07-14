@@ -12,8 +12,8 @@ This is the single delivery plan. It is **content-gated**: every learning fact s
 | Phase | Name | Status | One-line goal |
 |-------|------|--------|---------------|
 | **0** | Planning | ✅ **DONE** | Lock every decision (brand, tech, content model, game modes) into planning docs — no app code. |
-| **1** | Landing Page | ⬜ Next | Ship the full playful marketing site with a 3D Hoshi hero, plus the design system it stands on. |
-| **2** | Learning Platform (Hiragana + Katakana ONLY) | ⬜ Planned | Deliver the whole client-side learning app: onboarding, path, lessons, ship-set of games, SRS, gamification — no accounts, no backend. |
+| **1** | Landing Page | ✅ **BUILT** | Ship the full playful marketing site with a 3D Hoshi hero, plus the design system it stands on. |
+| **2** | Learning Platform (Hiragana + Katakana ONLY) | ⬜ Next | Deliver the whole client-side learning app: onboarding, path, lessons, ship-set of games, SRS, gamification — no accounts, no backend. |
 | **F1** | Vocabulary | 🔒 Content-gated | Real words as first-class content, once `/database` has a vocab pack. |
 | **F2** | Kanji | 🔒 Content-gated | Kanji learning tracks, once `/database` has a kanji pack. |
 | **F3** | Grammar | 🔒 Content-gated | Grammar points & drills, once `/database` has a grammar pack. |
@@ -54,13 +54,16 @@ Legend: ✅ done · ⬜ scheduled · 🔒 not scheduled (see [Future phases](#fu
 
 ---
 
-## Phase 1 — Landing Page ⬜
+## Phase 1 — Landing Page ✅ BUILT
 
 **Goal:** a full playful marketing site that sells the product and proves the brand — plus the design system and tokens everything else is built on. No learning app yet.
 
+> **✅ Delivered (2026-07-14).** Scaffolding, design system + tokens (light/dark), self-hosted fonts (incl. a kana-subset M PLUS Rounded 1c), the 3D Hoshi hero + static fallback, all landing sections, a `/learn` placeholder, i18n with **full EN + DE** translations, `vercel.json`, passing build/lint/unit tests, and a Playwright e2e spec — all shipped. See [`CHANGELOG.md`](./CHANGELOG.md) `[0.2.0]`.
+> **Deviations from the plan below:** built on **Next.js 16** (latest, not 15); i18n shipped with a **complete** German translation (not just a stub); route groups and the `(app)` group are deferred to Phase 2 (the single landing route didn't need them); locale is cookie-based (no i18n routing) so pages render on demand.
+
 ### 1.1 Project scaffolding
 
-- [ ] Initialize **Next.js 15 (App Router)** + **React 19** + **TypeScript (strict)** with **npm**.
+- [x] Initialize **Next.js 16 (App Router)** + **React 19** + **TypeScript (strict)** with **npm**.
 - [ ] Add **Tailwind CSS v4**; wire `src/styles/tokens.css` exposing every CANON color/space/radius/shadow as CSS custom properties (enables theming).
 - [ ] Self-host fonts (no external CDN): **Fredoka** (500/600/700), **Nunito** (400/600/700/800), **M PLUS Rounded 1c** (400/500/700/800) with Noto Sans JP fallback, under `public/`.
 - [ ] Configure route groups: `src/app/(marketing)` and a reserved `(app)` group.

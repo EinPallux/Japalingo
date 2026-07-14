@@ -10,14 +10,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Work targeted for **Phase 1 — Landing page**. This is planning intent, not shipped code.
+Work targeted for **Phase 2 — Learning platform** (Hiragana + Katakana only): onboarding, the winding path dashboard, the lesson player, the ship-set of game modes, the SRS practice hub, gamification, local persistence, and profile. Not yet started.
 
-### Added (planned)
+---
 
-- **Landing page (`/`)** — playful marketing site with the 3D **Hoshi the Shiba Inu** hero (react-three-fiber + drei; floating kana / tori / sakura particles), plus features, game showcase, how-it-works, and CTA sections. Light-mode-first with optional dark mode; fully responsive.
-- **App scaffolding** — Next.js 15 (App Router) + React 19 + TypeScript (strict); Tailwind CSS v4 with CSS-custom-property design tokens; folder structure per [`ARCHITECTURE.md`](./ARCHITECTURE.md); ESLint + Prettier; Vitest + Testing Library + Playwright; npm.
-- **Design system** — self-hosted sans-serif type (Fredoka / Nunito / M PLUS Rounded 1c), brand color tokens (Indigo "Ai" `#5B5BF6`, Sakura Pink `#FF5C9D`, Gold `#FFC53D`, and the semantic set), chunky "shadow-lip" buttons, Framer Motion springs, and core reusable UI components.
-- **i18n scaffold** — next-intl dictionary layer; English default, German (`de`) as the first planned locale.
+## [0.2.0] - 2026-07-14
+
+**Phase 1 — Landing page.** The first application code: a playful, Vercel-ready marketing site.
+
+### Added
+
+- **Landing page (`/`)** — responsive, light/dark, reduced-motion-aware marketing site: sticky nav, 3D **Hoshi** hero, "how it works", features, game showcase, an interactive "you can already read Japanese" moment (real words from `/database`), a gradient final CTA, and a footer. Plus a friendly `/learn` "coming in Phase 2" placeholder so no CTA dead-ends.
+- **App scaffolding (Vercel-ready)** — Next.js 16 (App Router, Turbopack) + React 19 + TypeScript (strict); `vercel.json`; ESLint (flat config) + Prettier; Vitest + Testing Library (passing) and a Playwright e2e spec.
+- **Design system** — Tailwind CSS v4 with CSS-custom-property design tokens (light + dark) in `src/styles/`, the chunky "shadow-lip" button, cards, pills, section headings, reveal-on-scroll, and theme/language toggles.
+- **Hoshi mascot** — a procedural 3D Shiba Inu (react-three-fiber + drei; floating kana, orbs, sparkles, pointer parallax) that lazy-loads and degrades to a hand-built static SVG under reduced-motion / no-WebGL.
+- **Self-hosted type** — Fredoka + Nunito via `next/font`, and a kana-subset **M PLUS Rounded 1c** (self-hosted woff2 built from the OFL font, ~40 KB/weight) so Japanese renders on-brand with no runtime CDN.
+- **i18n** — next-intl (no-routing, cookie-based locale) with full **English + German** message catalogs and a language toggle. Light/dark via next-themes (`data-theme`).
+
+### Notes
+
+- Scaffolded on **Next.js 16** (the current latest) rather than the 15 named at planning time; App Router + Vercel behavior is equivalent, and the docs were updated to match.
+- Routes render on demand (SSR) because the UI locale is read from a cookie — fine for a marketing site; locale-routed static generation is a possible later optimization.
 
 ---
 
@@ -43,5 +56,6 @@ Work targeted for **Phase 1 — Landing page**. This is planning intent, not shi
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/japalingo/japalingo/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/japalingo/japalingo/releases/tag/v0.1.0

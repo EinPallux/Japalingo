@@ -11,15 +11,15 @@
 
 **Japalingo** is a playful, gamified web app to learn to *read* Japanese — Hiragana and Katakana first. Positioning: "the next big competitor to Duolingo, but focused on Japanese." Tagline: **"Learn to read Japanese — the fun way."** Mascot: **Hoshi the Shiba Inu**.
 
-**Current status:** Phase 0 (Planning) is **COMPLETE**. The repo is **docs-only** right now — no app code, no `package.json`, no build. **Phase 1 (Landing page) is next.**
+**Current status:** Phase 0 (Planning) **COMPLETE**. Phase 1 (Landing page) **BUILT** — the app is scaffolded and the landing page ships (`npm run dev` works). **Phase 2 (Learning platform) is next.**
 
 **Phases at a glance:**
 
 | Phase | Name | Scope |
 |-------|------|-------|
 | 0 | Planning | All planning docs. No app code. **(complete)** |
-| 1 | Landing page | Playful marketing site, 3D Hoshi hero, features, game showcase, responsive, light/dark, i18n scaffold, design system + tokens + core UI components. **(next)** |
-| 2 | Learning platform | Hiragana + Katakana ONLY: onboarding, path dashboard, lesson player, ship-set of game modes, SRS practice hub, gamification, local persistence, profile. No accounts/backend. |
+| 1 | Landing page | Playful marketing site, 3D Hoshi hero, features, game showcase, responsive, light/dark, i18n (EN/DE), design system + tokens + core UI components, Vercel-ready. **(built)** |
+| 2 | Learning platform | Hiragana + Katakana ONLY: onboarding, path dashboard, lesson player, ship-set of game modes, SRS practice hub, gamification, local persistence, profile. No accounts/backend. **(next)** |
 | Future | Content-gated | Vocabulary, kanji, grammar, sentences/listening, recorded audio, accounts + cloud sync + leagues/friends, PWA polish. Build ONLY when `/database` grows. |
 
 ---
@@ -43,7 +43,7 @@
 
 Recommended defaults (overridable only by the owner in writing):
 
-- **Framework:** Next.js 15 (App Router) + React 19 + **TypeScript (strict)**
+- **Framework:** Next.js (App Router) + React 19 + **TypeScript (strict)** — scaffolded on **Next.js 16** (current latest; planning said 15, behavior is equivalent). Deploys to **Vercel** (`vercel.json`).
 - **Styling:** Tailwind CSS v4 + CSS custom properties for design tokens (enables theming)
 - **UI animation:** Framer Motion
 - **3D / WebGL:** Three.js via `@react-three/fiber` + `@react-three/drei`
@@ -96,15 +96,15 @@ One-line purpose per folder:
 
 ## 5. Commands
 
-> These become available **after Phase 1 scaffolding**. Today the repo is **docs-only** — there is
-> no `package.json` yet, so these will not run. Do not assume a toolchain exists until it does.
+> Live as of Phase 1 (`package.json` exists). Run `npm install` first. Node 20+ (dev uses Node 22).
 
 | Command | Purpose |
 |---------|---------|
 | `npm run dev` | Start the Next.js dev server. |
-| `npm run build` | Production build. |
+| `npm run build` | Production build (Turbopack). |
 | `npm run start` | Serve the production build. |
-| `npm run lint` | ESLint. |
+| `npm run lint` | ESLint (flat config; `eslint .`). |
+| `npm run typecheck` | `tsc --noEmit`. |
 | `npm run test` | Vitest unit tests (Testing Library). |
 | `npm run test:e2e` | Playwright end-to-end tests. |
 
