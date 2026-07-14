@@ -21,6 +21,7 @@ export function Features() {
             <Reveal key={item.title} delay={i * 0.08}>
               <div className="h-full rounded-blob-lg border border-border bg-surface p-6 shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]">
                 <span
+                  aria-hidden
                   className={`mb-4 grid size-14 place-items-center rounded-blob text-3xl ${ACCENTS[i % ACCENTS.length]}`}
                 >
                   {item.emoji}

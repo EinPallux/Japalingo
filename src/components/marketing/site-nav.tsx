@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -13,12 +13,18 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 export function SiteNav() {
   const t = useTranslations("nav");
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
 
   const links = [
     { href: "#how", label: t("how") },
     { href: "#features", label: t("features") },
     { href: "#games", label: t("games") },
   ];
+
+  const closeAndRestoreFocus = () => {
+    setOpen(false);
+    toggleRef.current?.focus();
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-bg/80 backdrop-blur-md">
@@ -28,12 +34,12 @@ export function SiteNav() {
           <span className="font-display text-xl font-bold text-ink">Japalingo</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav aria-label={t("menu")} className="hidden items-center gap-1 lg:flex">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="rounded-full px-4 py-2 font-semibold text-muted transition hover:bg-surface-2 hover:text-ink"
+              className="rounded-full px-4 py-2 font-semibold whitespace-nowrap text-muted transition hover:bg-surface-2 hover:text-ink"
             >
               {l.label}
             </a>
@@ -49,11 +55,13 @@ export function SiteNav() {
             </Button>
           </div>
           <button
+            ref={toggleRef}
             type="button"
             aria-label={open ? t("closeMenu") : t("openMenu")}
             aria-expanded={open}
+            aria-controls="mobile-nav"
             onClick={() => setOpen((o) => !o)}
-            className="grid size-10 place-items-center rounded-full border-2 border-border bg-surface text-ink md:hidden"
+            className="grid size-11 place-items-center rounded-full border-2 border-border bg-surface text-ink lg:hidden"
           >
             {open ? <CloseIcon className="size-5" /> : <MenuIcon className="size-5" />}
           </button>
@@ -61,7 +69,14 @@ export function SiteNav() {
       </Container>
 
       {open ? (
-        <div className="border-t border-border bg-surface md:hidden">
+        <nav
+          id="mobile-nav"
+          aria-label={t("menu")}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") closeAndRestoreFocus();
+          }}
+          className="border-t border-border bg-surface lg:hidden"
+        >
           <Container className="flex flex-col gap-1 py-4">
             {links.map((l) => (
               <a
@@ -77,7 +92,7 @@ export function SiteNav() {
               {t("start")}
             </Button>
           </Container>
-        </div>
+        </nav>
       ) : null}
     </header>
   );

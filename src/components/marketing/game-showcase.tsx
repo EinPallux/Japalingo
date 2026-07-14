@@ -28,7 +28,10 @@ export function GameShowcase() {
                   }`}
                 >
                   <div className="mb-4 flex items-center justify-between">
-                    <span className="text-4xl transition-transform duration-200 group-hover:scale-110">
+                    <span
+                      aria-hidden
+                      className="text-4xl transition-transform duration-200 group-hover:scale-110"
+                    >
                       {game.emoji}
                     </span>
                     <Pill tone={signature ? "primary" : "neutral"}>{game.tag}</Pill>

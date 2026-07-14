@@ -45,11 +45,20 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t("description"),
       type: "website",
       siteName: "Japalingo",
+      images: [
+        {
+          url: "/og.png",
+          width: 1200,
+          height: 630,
+          alt: "Japalingo — learn to read Japanese, the fun way",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
+      images: ["/og.png"],
     },
     icons: {
       icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
@@ -67,6 +76,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const t = await getTranslations("nav");
 
   return (
     <html
@@ -75,6 +85,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${fredoka.variable} ${nunito.variable} ${jpRounded.variable}`}
     >
       <body className="min-h-dvh antialiased">
+        <a
+          href="#main"
+          className="sr-only rounded-blob bg-primary px-4 py-2 font-display font-semibold text-white focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100]"
+        >
+          {t("skip")}
+        </a>
         <ThemeProvider attribute="data-theme" defaultTheme="light" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider locale={locale} messages={messages}>
             {children}

@@ -43,7 +43,9 @@ export function ReadingMoment() {
                     aria-pressed={isOpen}
                     className="flex h-40 w-36 flex-col items-center justify-center gap-2 rounded-blob-lg border-2 border-border bg-surface p-4 text-center shadow-[var(--shadow-soft)] transition duration-200 hover:-translate-y-1 hover:border-primary/40 hover:shadow-[var(--shadow-lift)]"
                   >
-                    <span className="font-jp text-5xl font-bold text-ink">{word.kana}</span>
+                    <span lang="ja" className="font-jp text-5xl font-bold text-ink">
+                      {word.kana}
+                    </span>
                     <AnimatePresence mode="wait" initial={false}>
                       {isOpen ? (
                         <motion.span

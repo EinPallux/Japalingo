@@ -16,8 +16,9 @@ export function ThemeToggle() {
     <button
       type="button"
       aria-label={t("theme")}
+      aria-pressed={mounted ? isDark : undefined}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-border bg-surface text-ink transition hover:bg-surface-2"
+      className="grid size-11 shrink-0 place-items-center rounded-full border-2 border-border bg-surface text-ink transition hover:bg-surface-2"
     >
       {mounted ? (
         isDark ? (
