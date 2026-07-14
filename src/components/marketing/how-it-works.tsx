@@ -19,10 +19,15 @@ export function HowItWorks() {
             <Reveal key={step.title} delay={i * 0.1}>
               <div className="relative h-full rounded-blob-lg border border-border bg-surface p-7 shadow-[var(--shadow-soft)]">
                 <div className="mb-5 flex items-center justify-between">
-                  <span className="grid size-14 place-items-center rounded-blob bg-primary-tint text-3xl">
+                  <span
+                    aria-hidden
+                    className="grid size-14 place-items-center rounded-blob bg-primary-tint text-3xl"
+                  >
                     {step.emoji}
                   </span>
-                  <span className="font-display text-5xl font-bold text-border">{i + 1}</span>
+                  <span aria-hidden className="font-display text-5xl font-bold text-border">
+                    {i + 1}
+                  </span>
                 </div>
                 <h3 className="mb-2 font-display text-xl font-bold text-ink">{step.title}</h3>
                 <p className="text-muted">{step.body}</p>

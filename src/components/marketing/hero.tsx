@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { HoshiHero } from "@/components/mascot/hoshi-hero";
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,6 @@ const FLOATING_KANA = [
 ];
 
 function FloatingKana() {
-  const reduce = useReducedMotion();
-
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
       {FLOATING_KANA.map((k) => (
@@ -29,7 +27,7 @@ function FloatingKana() {
           key={k.c}
           className={`font-jp absolute font-bold ${k.size} ${k.tone}`}
           style={{ top: k.top, left: k.left }}
-          animate={reduce ? undefined : { y: [0, -16, 0], rotate: [-5, 5, -5] }}
+          animate={{ y: [0, -16, 0], rotate: [-5, 5, -5] }}
           transition={{ duration: 6 + k.delay, repeat: Infinity, ease: "easeInOut", delay: k.delay }}
         >
           {k.c}
@@ -59,7 +57,9 @@ export function Hero() {
       <Container className="relative grid items-center gap-10 lg:grid-cols-2 lg:gap-6">
         <div className="flex flex-col items-start gap-6">
           <Reveal>
-            <Pill tone="accent">🎌 {t("badge")}</Pill>
+            <Pill tone="accent">
+              <span aria-hidden>🎌</span> {t("badge")}
+            </Pill>
           </Reveal>
 
           <Reveal delay={0.05}>
@@ -77,12 +77,16 @@ export function Hero() {
           </Reveal>
 
           <Reveal delay={0.15}>
-            <div className="flex flex-wrap items-center gap-3">
-              <Button href="/learn" size="lg">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+              <Button
+                href="/learn"
+                size="lg"
+                className="w-full whitespace-normal sm:w-auto sm:whitespace-nowrap"
+              >
                 {t("ctaPrimary")}
-                <ArrowRightIcon className="size-5" />
+                <ArrowRightIcon className="size-5 shrink-0" />
               </Button>
-              <Button href="/learn" size="lg" variant="outline">
+              <Button href="/learn" size="lg" variant="outline" className="w-full sm:w-auto">
                 {t("ctaSecondary")}
               </Button>
             </div>

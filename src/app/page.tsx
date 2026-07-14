@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <>
       <SiteNav />
-      <main>
+      <main id="main">
         <Hero />
         <HowItWorks />
         <Features />

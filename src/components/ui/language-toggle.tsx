@@ -25,7 +25,7 @@ export function LanguageToggle() {
           router.refresh();
         })
       }
-      className="grid h-10 min-w-10 shrink-0 place-items-center rounded-full border-2 border-border bg-surface px-3 font-display text-sm font-bold uppercase text-ink transition hover:bg-surface-2 disabled:opacity-60"
+      className="grid h-11 min-w-11 shrink-0 place-items-center rounded-full border-2 border-border bg-surface px-3 font-display text-sm font-bold uppercase text-ink transition hover:bg-surface-2 disabled:opacity-60"
     >
       {locale}
     </button>

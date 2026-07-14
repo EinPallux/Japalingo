@@ -10,6 +10,8 @@
     "start": "Loslegen",
     "openMenu": "Menü öffnen",
     "closeMenu": "Menü schließen",
+    "menu": "Menü",
+    "skip": "Zum Inhalt springen",
     "theme": "Design wechseln",
     "language": "Sprache"
   },
@@ -161,6 +163,7 @@
     "rights": "© 2026 Japalingo. Japanisch lesen, spielerisch."
   },
   "soon": {
+    "metaTitle": "Bald verfügbar — Japalingo",
     "badge": "Phase 2 · Bald verfügbar",
     "title": "Hoshi trainiert noch!",
     "body": "Die komplette Lernplattform — Lektionen, Minispiele, Streaks, Kronen und dein allererstes Kana — kommt in Phase 2. Danke, dass du Japalingo schon vorab ansiehst!",

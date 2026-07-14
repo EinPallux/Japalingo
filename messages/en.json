@@ -10,6 +10,8 @@
     "start": "Start learning",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
+    "menu": "Menu",
+    "skip": "Skip to content",
     "theme": "Toggle theme",
     "language": "Language"
   },
@@ -161,6 +163,7 @@
     "rights": "© 2026 Japalingo. A playful way to read Japanese."
   },
   "soon": {
+    "metaTitle": "Coming soon — Japalingo",
     "badge": "Phase 2 · Coming soon",
     "title": "Hoshi is still in training!",
     "body": "The full learning platform — lessons, mini-games, streaks, crowns, and your very first kana — lands in Phase 2. Thanks for previewing Japalingo!",

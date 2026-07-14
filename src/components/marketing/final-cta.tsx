@@ -19,10 +19,12 @@ export function FinalCta() {
             aria-hidden
             className="absolute -bottom-12 -left-8 size-56 rounded-full bg-white/10 blur-2xl"
           />
+          {/* contrast scrim so white copy clears WCAG AA over the vivid gradient */}
+          <div aria-hidden className="absolute inset-0 bg-ink/35" />
 
           <div className="relative">
             <Reveal>
-              <HoshiStatic className="mx-auto mb-6 size-28 drop-shadow-[0_16px_30px_rgba(0,0,0,0.25)]" />
+              <HoshiStatic className="mx-auto mb-6 size-28 drop-shadow-[0_16px_30px_rgb(var(--jl-shadow)/0.35)]" />
             </Reveal>
             <Reveal delay={0.05}>
               <h2 className="text-balance font-display text-3xl font-bold text-white sm:text-4xl">
@@ -30,7 +32,7 @@ export function FinalCta() {
               </h2>
             </Reveal>
             <Reveal delay={0.1}>
-              <p className="mx-auto mt-3 max-w-xl text-balance text-lg text-white/90">
+              <p className="mx-auto mt-3 max-w-xl text-balance text-lg text-white">
                 {t("subtitle")}
               </p>
             </Reveal>
@@ -42,7 +44,7 @@ export function FinalCta() {
               </div>
             </Reveal>
             <Reveal delay={0.2}>
-              <p className="mt-4 text-sm font-semibold text-white/80">{t("trust")}</p>
+              <p className="mt-4 text-sm font-semibold text-white">{t("trust")}</p>
             </Reveal>
           </div>
         </div>

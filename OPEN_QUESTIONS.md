@@ -100,3 +100,4 @@ When the owner overrides a default, note it here (date + decision) so downstream
 |------|----------|--------------|-------|
 | 2026-07-14 | B6 — Deployment | **Vercel** (explicitly confirmed) | Owner: "The whole project should be deployed on Vercel." `vercel.json` added in Phase 1. |
 | 2026-07-14 | Q1 — Framework | Next.js **16** (latest) | Scaffolded on the current latest major; equivalent App Router/Vercel behavior to the "15" named at planning. |
+| 2026-07-14 | Q4 — Mascot rendering | Landing hero uses an **animated SVG** Hoshi (not 3D) | Owner found the procedural 3D/WebGL model unappealing; replaced with the cuter, lighter animated SVG. Hoshi identity unchanged. Three.js reserved for Phase 2 celebration effects. |
