@@ -58,3 +58,16 @@ export function buildQueue(lesson: Lesson): Exercise[] {
 
   return [...intro, ...shuffle(practice)];
 }
+
+/** Build a pure-review queue (no teaching step) over a set of already-seen kana. */
+export function buildReviewQueue(kana: Kana[]): Exercise[] {
+  const queue: Exercise[] = [];
+  for (const k of kana) {
+    queue.push(makeChoice(k, "k2r", kana));
+    queue.push(makeChoice(k, "r2k", kana));
+  }
+  for (const k of kana.slice(0, Math.min(4, kana.length))) {
+    queue.push({ kind: "drill", kana: k });
+  }
+  return shuffle(queue);
+}

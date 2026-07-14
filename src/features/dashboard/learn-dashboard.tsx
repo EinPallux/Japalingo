@@ -58,23 +58,27 @@ export function LearnDashboard() {
             ))}
           </div>
 
-          <Link
-            href={`/learn/games/kana-rain?track=${activeTrack}`}
-            className="flex items-center justify-between rounded-blob-lg border border-border bg-gradient-to-r from-primary-tint to-secondary-tint px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
-          >
-            <span className="flex items-center gap-3">
-              <span aria-hidden className="text-2xl">
-                🌸
-              </span>
-              <span>
-                <span className="block font-display font-bold text-ink">Kana Rain</span>
-                <span className="text-sm text-muted">Type the reading before it lands!</span>
-              </span>
-            </span>
-            <span aria-hidden className="font-display text-xl text-primary">
-              ▸
-            </span>
-          </Link>
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { href: "/learn/practice", emoji: "🧠", label: "Practice", tint: "from-info/15 to-primary-tint" },
+              { href: `/learn/games/kana-rain?track=${activeTrack}`, emoji: "🌸", label: "Kana Rain", tint: "from-primary-tint to-secondary-tint" },
+              { href: `/learn/games/kana-match?track=${activeTrack}`, emoji: "🃏", label: "Kana Match", tint: "from-accent-tint to-secondary-tint" },
+            ].map((a) => (
+              <Link
+                key={a.label}
+                href={a.href}
+                className={cn(
+                  "flex flex-col items-center gap-1 rounded-blob-lg border border-border bg-gradient-to-br px-2 py-4 text-center transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]",
+                  a.tint,
+                )}
+              >
+                <span aria-hidden className="text-2xl">
+                  {a.emoji}
+                </span>
+                <span className="font-display text-sm font-bold text-ink">{a.label}</span>
+              </Link>
+            ))}
+          </div>
         </div>
 
         <PathView track={activeTrack} />
