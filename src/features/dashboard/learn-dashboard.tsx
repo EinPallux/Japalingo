@@ -1,15 +1,25 @@
 "use client";
 
+import Link from "next/link";
 import { AppHeader } from "@/components/app/app-header";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Onboarding } from "@/features/onboarding/onboarding";
 import { PathView } from "@/features/path/path-view";
 import { useMounted } from "@/lib/use-mounted";
+import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
+import type { Track } from "@/types";
+
+const TRACKS: { id: Track; label: string; sample: string }[] = [
+  { id: "hiragana", label: "Hiragana", sample: "あ" },
+  { id: "katakana", label: "Katakana", sample: "ア" },
+];
 
 export function LearnDashboard() {
   const mounted = useMounted();
   const onboarded = useProgress((s) => s.onboardingComplete);
+  const activeTrack = useProgress((s) => s.activeTrack);
+  const setActiveTrack = useProgress((s) => s.setActiveTrack);
 
   if (!mounted) {
     return (
@@ -25,7 +35,49 @@ export function LearnDashboard() {
     <>
       <AppHeader />
       <main id="main">
-        <PathView />
+        <div className="mx-auto flex max-w-md flex-col gap-4 px-4 pt-5">
+          <div className="flex gap-1 rounded-full bg-surface-2 p-1">
+            {TRACKS.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => setActiveTrack(t.id)}
+                aria-pressed={activeTrack === t.id}
+                className={cn(
+                  "flex flex-1 items-center justify-center gap-2 rounded-full py-2 font-display font-bold transition",
+                  activeTrack === t.id
+                    ? "bg-surface text-primary shadow-[var(--shadow-soft)]"
+                    : "text-muted hover:text-ink",
+                )}
+              >
+                <span lang="ja" className="font-jp">
+                  {t.sample}
+                </span>
+                {t.label}
+              </button>
+            ))}
+          </div>
+
+          <Link
+            href={`/learn/games/kana-rain?track=${activeTrack}`}
+            className="flex items-center justify-between rounded-blob-lg border border-border bg-gradient-to-r from-primary-tint to-secondary-tint px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
+          >
+            <span className="flex items-center gap-3">
+              <span aria-hidden className="text-2xl">
+                🌸
+              </span>
+              <span>
+                <span className="block font-display font-bold text-ink">Kana Rain</span>
+                <span className="text-sm text-muted">Type the reading before it lands!</span>
+              </span>
+            </span>
+            <span aria-hidden className="font-display text-xl text-primary">
+              ▸
+            </span>
+          </Link>
+        </div>
+
+        <PathView track={activeTrack} />
       </main>
     </>
   );

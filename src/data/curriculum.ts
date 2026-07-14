@@ -1,8 +1,9 @@
-import type { Kana, Lesson, Unit } from "@/types";
+import type { Kana, Lesson, Track, Unit } from "@/types";
 import { HIRAGANA } from "./hiragana";
+import { KATAKANA } from "./katakana";
 
-/** Every kana we currently teach, indexed by id. (Hiragana only for now.) */
-export const ALL_KANA: Kana[] = [...HIRAGANA];
+/** Every kana we teach, indexed by id (both tracks). */
+export const ALL_KANA: Kana[] = [...HIRAGANA, ...KATAKANA];
 const KANA_BY_ID = new Map(ALL_KANA.map((k) => [k.id, k]));
 
 export function getKana(id: string): Kana | undefined {
@@ -12,63 +13,110 @@ export function getKanaList(ids: string[]): Kana[] {
   return ids.map((id) => KANA_BY_ID.get(id)).filter((k): k is Kana => Boolean(k));
 }
 
-const ids = (chars: string[]) => chars.map((c) => `hira-${c}`);
+/** The 10 gojūon groups, shared by both tracks (kana referenced by suffix). */
+const GROUPS = [
+  { id: "vowels", title: "Vowels", learnTitle: "Meet the vowels", suffixes: ["a", "i", "u", "e", "o"] },
+  { id: "k", title: "K row", learnTitle: "The K row", suffixes: ["ka", "ki", "ku", "ke", "ko"] },
+  { id: "s", title: "S row", learnTitle: "The S row", suffixes: ["sa", "shi", "su", "se", "so"] },
+  { id: "t", title: "T row", learnTitle: "The T row", suffixes: ["ta", "chi", "tsu", "te", "to"] },
+  { id: "n", title: "N row", learnTitle: "The N row", suffixes: ["na", "ni", "nu", "ne", "no"] },
+  { id: "h", title: "H row", learnTitle: "The H row", suffixes: ["ha", "hi", "fu", "he", "ho"] },
+  { id: "m", title: "M row", learnTitle: "The M row", suffixes: ["ma", "mi", "mu", "me", "mo"] },
+  { id: "y", title: "Y row", learnTitle: "The Y row", suffixes: ["ya", "yu", "yo"] },
+  { id: "r", title: "R row", learnTitle: "The R row", suffixes: ["ra", "ri", "ru", "re", "ro"] },
+  { id: "w", title: "W row", learnTitle: "The W row", suffixes: ["wa", "wo", "n"] },
+] as const;
 
-export const HIRAGANA_UNITS: Unit[] = [
-  { id: "hira-vowels", track: "hiragana", title: "Vowels", subtitle: "あ い う え お",
-    kanaIds: ids(["a", "i", "u", "e", "o"]), order: 1 },
-  { id: "hira-k", track: "hiragana", title: "K row", subtitle: "か き く け こ",
-    kanaIds: ids(["ka", "ki", "ku", "ke", "ko"]), order: 2 },
-  { id: "hira-s", track: "hiragana", title: "S row", subtitle: "さ し す せ そ",
-    kanaIds: ids(["sa", "shi", "su", "se", "so"]), order: 3 },
-  { id: "hira-t", track: "hiragana", title: "T row", subtitle: "た ち つ て と",
-    kanaIds: ids(["ta", "chi", "tsu", "te", "to"]), order: 4 },
-  { id: "hira-n", track: "hiragana", title: "N row", subtitle: "な に ぬ ね の",
-    kanaIds: ids(["na", "ni", "nu", "ne", "no"]), order: 5 },
-  { id: "hira-h", track: "hiragana", title: "H row", subtitle: "は ひ ふ へ ほ",
-    kanaIds: ids(["ha", "hi", "fu", "he", "ho"]), order: 6 },
-  { id: "hira-m", track: "hiragana", title: "M row", subtitle: "ま み む め も",
-    kanaIds: ids(["ma", "mi", "mu", "me", "mo"]), order: 7 },
-  { id: "hira-y", track: "hiragana", title: "Y row", subtitle: "や ゆ よ",
-    kanaIds: ids(["ya", "yu", "yo"]), order: 8 },
-  { id: "hira-r", track: "hiragana", title: "R row", subtitle: "ら り る れ ろ",
-    kanaIds: ids(["ra", "ri", "ru", "re", "ro"]), order: 9 },
-  { id: "hira-w", track: "hiragana", title: "W + ん", subtitle: "わ を ん",
-    kanaIds: ids(["wa", "wo", "n"]), order: 10 },
-];
+const REVIEW_AFTER: Record<string, { title: string; groups: string[] | "sample" }> = {
+  k: { title: "Review: A–K", groups: ["vowels", "k"] },
+  t: { title: "Review: S–T", groups: ["s", "t"] },
+  h: { title: "Review: N–H", groups: ["n", "h"] },
+  r: { title: "Review: M–R", groups: ["m", "y", "r"] },
+  w: { title: "Final review", groups: "sample" },
+};
 
-const learn = (unitId: string, order: number, title: string, newIds: string[], reviewIds: string[] = []): Lesson => ({
-  id: `${unitId}-learn`, unitId, title, newKanaIds: newIds, reviewKanaIds: reviewIds, order, kind: "lesson",
-});
-const review = (unitId: string, order: number, title: string, reviewIds: string[]): Lesson => ({
-  id: `${unitId}-review`, unitId, title, newKanaIds: [], reviewKanaIds: reviewIds, order, kind: "review",
-});
+function suffixesForGroups(groupIds: string[]): string[] {
+  return groupIds.flatMap((gid) => GROUPS.find((g) => g.id === gid)?.suffixes ?? []);
+}
 
-/** Ordered path of lessons (winding node path). Reviews checkpoint prior kana. */
-export const LESSONS: Lesson[] = [
-  learn("hira-vowels", 1, "Meet the vowels", ids(["a", "i", "u", "e", "o"])),
-  learn("hira-k", 2, "The K row", ids(["ka", "ki", "ku", "ke", "ko"]), ids(["a", "o"])),
-  review("hira-k", 3, "Review: A–K", ids(["a", "i", "u", "e", "o", "ka", "ki", "ku", "ke", "ko"])),
-  learn("hira-s", 4, "The S row", ids(["sa", "shi", "su", "se", "so"]), ids(["ka", "ki"])),
-  learn("hira-t", 5, "The T row", ids(["ta", "chi", "tsu", "te", "to"]), ids(["sa", "shi"])),
-  review("hira-t", 6, "Review: S–T", ids(["sa", "shi", "su", "se", "so", "ta", "chi", "tsu", "te", "to"])),
-  learn("hira-n", 7, "The N row", ids(["na", "ni", "nu", "ne", "no"]), ids(["ta", "to"])),
-  learn("hira-h", 8, "The H row", ids(["ha", "hi", "fu", "he", "ho"]), ids(["na", "no"])),
-  review("hira-h", 9, "Review: N–H", ids(["na", "ni", "nu", "ne", "no", "ha", "hi", "fu", "he", "ho"])),
-  learn("hira-m", 10, "The M row", ids(["ma", "mi", "mu", "me", "mo"]), ids(["ha", "he"])),
-  learn("hira-y", 11, "The Y row", ids(["ya", "yu", "yo"]), ids(["ma", "mo"])),
-  learn("hira-r", 12, "The R row", ids(["ra", "ri", "ru", "re", "ro"]), ids(["ya", "yo"])),
-  review("hira-r", 13, "Review: M–R", ids(["ma", "mi", "mu", "ya", "yu", "yo", "ra", "ri", "ru", "re", "ro"])),
-  learn("hira-w", 14, "W + ん", ids(["wa", "wo", "n"]), ids(["ra", "ro"])),
-  review("hira-w", 15, "Final review", ids(["a", "ka", "sa", "ta", "na", "ha", "ma", "ya", "ra", "wa", "shi", "tsu", "fu", "wo", "n"])),
-];
+function buildTrack(track: Track, prefix: string): { units: Unit[]; lessons: Lesson[] } {
+  const units: Unit[] = [];
+  const lessons: Lesson[] = [];
+  let order = 0;
 
-const LESSON_BY_ID = new Map(LESSONS.map((l) => [l.id, l]));
+  GROUPS.forEach((g, gi) => {
+    const kanaIds = g.suffixes.map((s) => `${prefix}-${s}`);
+    const unitId = `${prefix}-${g.id}`;
+    units.push({
+      id: unitId,
+      track,
+      title: g.title,
+      subtitle: kanaIds.map((id) => getKana(id)?.char ?? "").join(" "),
+      kanaIds,
+      order: gi + 1,
+    });
+
+    const prevGroup = GROUPS[gi - 1];
+    const reviewIds = (prevGroup?.suffixes.slice(0, 2) ?? []).map((s) => `${prefix}-${s}`);
+    lessons.push({
+      id: `${unitId}-learn`,
+      unitId,
+      title: g.learnTitle,
+      newKanaIds: kanaIds,
+      reviewKanaIds: reviewIds,
+      order: (order += 1),
+      kind: "lesson",
+    });
+
+    const rev = REVIEW_AFTER[g.id];
+    if (rev) {
+      const suffixes =
+        rev.groups === "sample"
+          ? [...GROUPS.map((gg) => gg.suffixes[0]!), "shi", "tsu", "fu", "wo", "n"]
+          : suffixesForGroups(rev.groups);
+      lessons.push({
+        id: `${unitId}-review`,
+        unitId,
+        title: rev.title,
+        newKanaIds: [],
+        reviewKanaIds: suffixes.map((s) => `${prefix}-${s}`),
+        order: (order += 1),
+        kind: "review",
+      });
+    }
+  });
+
+  return { units, lessons };
+}
+
+const hira = buildTrack("hiragana", "hira");
+const kata = buildTrack("katakana", "kata");
+
+export const UNITS_BY_TRACK: Record<Track, Unit[]> = {
+  hiragana: hira.units,
+  katakana: kata.units,
+};
+export const LESSONS_BY_TRACK: Record<Track, Lesson[]> = {
+  hiragana: hira.lessons,
+  katakana: kata.lessons,
+};
+export const ALL_LESSONS: Lesson[] = [...hira.lessons, ...kata.lessons];
+const ALL_UNITS: Unit[] = [...hira.units, ...kata.units];
+
+const LESSON_BY_ID = new Map(ALL_LESSONS.map((l) => [l.id, l]));
+const UNIT_BY_ID = new Map(ALL_UNITS.map((u) => [u.id, u]));
+
 export function getLesson(id: string): Lesson | undefined {
   return LESSON_BY_ID.get(id);
 }
 export function getUnit(id: string): Unit | undefined {
-  return HIRAGANA_UNITS.find((u) => u.id === id);
+  return UNIT_BY_ID.get(id);
+}
+export function getTrackLessons(track: Track): Lesson[] {
+  return LESSONS_BY_TRACK[track];
+}
+export function trackKana(track: Track): Kana[] {
+  return track === "hiragana" ? HIRAGANA : KATAKANA;
 }
 
 /** All kana a lesson touches (new + review), as full Kana objects. */

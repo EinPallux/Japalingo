@@ -4,20 +4,22 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { CheckIcon, LockIcon, StarIcon } from "@/components/ui/icons";
-import { getUnit, LESSONS } from "@/data/curriculum";
+import { getTrackLessons, getUnit } from "@/data/curriculum";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
+import type { Track } from "@/types";
 
 type NodeState = "complete" | "current" | "locked";
 
-export function PathView() {
+export function PathView({ track }: { track: Track }) {
   const router = useRouter();
   const completed = useProgress((s) => s.completedLessons);
+  const lessons = getTrackLessons(track);
 
   const stateFor = (i: number): NodeState => {
-    const lesson = LESSONS[i]!;
+    const lesson = lessons[i]!;
     if (completed.includes(lesson.id)) return "complete";
-    const prev = LESSONS[i - 1];
+    const prev = lessons[i - 1];
     const prevDone = i === 0 || (prev ? completed.includes(prev.id) : false);
     return prevDone ? "current" : "locked";
   };
@@ -26,14 +28,16 @@ export function PathView() {
     <div className="mx-auto flex max-w-md flex-col items-center px-4 pb-24 pt-6">
       <div className="mb-2 flex flex-col items-center gap-2 text-center">
         <HoshiStatic className="size-20" />
-        <p className="font-display text-xl font-bold text-ink">Hiragana</p>
+        <p className="font-display text-xl font-bold text-ink">
+          {track === "hiragana" ? "Hiragana" : "Katakana"}
+        </p>
         <p className="text-sm text-muted">Learn to read all 46 basic characters.</p>
       </div>
 
-      {LESSONS.map((lesson, i) => {
+      {lessons.map((lesson, i) => {
         const state = stateFor(i);
         const unit = getUnit(lesson.unitId)!;
-        const showHeader = i === 0 || LESSONS[i - 1]?.unitId !== lesson.unitId;
+        const showHeader = i === 0 || lessons[i - 1]?.unitId !== lesson.unitId;
         const offset = Math.sin(i * 0.8) * 70;
         const isReview = lesson.kind === "review";
 
@@ -101,14 +105,6 @@ export function PathView() {
           </div>
         );
       })}
-
-      <div className="mt-12 w-full rounded-blob-lg border-2 border-dashed border-border px-6 py-6 text-center">
-        <p lang="ja" className="font-jp text-3xl text-muted">
-          カタカナ
-        </p>
-        <p className="mt-1 font-display font-bold text-ink">Katakana</p>
-        <p className="text-sm text-muted">Unlocks after Hiragana — coming soon!</p>
-      </div>
     </div>
   );
 }
