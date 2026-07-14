@@ -2,7 +2,7 @@
 
 > You are an AI coding agent working in this repo. Read this file first. It encodes decisions
 > that are already made so you can act correctly without re-deriving them. When in doubt, this
-> file plus the docs in the [Documentation index](#12-documentation-index) are your source of
+> file plus the docs in the [Documentation index](#11-documentation-index) are your source of
 > truth — not general knowledge, not model memory.
 
 ---

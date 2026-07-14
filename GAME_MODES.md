@@ -145,7 +145,7 @@ Ship status.
 - **Mechanics & round flow.**
   1. Prompt appears (kana or romaji) with **4 answer tiles**.
   2. **Smart distractors** from the same row/column or visually confusable kana (シ/ツ, ソ/ン,
-     は/ほ, ね/れ/わ) via `row`, `column`, and shape-neighbor tables.
+     は/ほ, ね/れ/わ) via `row`, `vowel`, and shape-neighbor tables.
   3. Tap a tile: correct → green pop + chime; wrong → gentle red shake, correct tile highlights,
      TTS speaks the right answer.
   4. Optional **timed mode**: a per-question ring; fast answers earn bonus XP.
@@ -157,7 +157,7 @@ Ship status.
   mastery** (and calibrates Kana Drill self-ratings).
 - **Feedback & celebration.** Per-answer micro-feedback; end-of-round accuracy bar + Hoshi
   reaction scaled to score. Wrong answers never end the round.
-- **Data requirements.** `char`, `romaji`, `altRomaji`, `type`, `row`, `column`, `category` (for
+- **Data requirements.** `char`, `romaji`, `altRomaji`, `type`, `row`, `vowel`, `category` (for
   distractors); `pronunciationHint` for reveal.
 - **Accessibility.** Large tiles, keyboard-selectable (1–4 / arrows + Enter). Feedback is never
   color-only — ✓/✗ icons + text accompany green/red. Timer optional (disable for anxiety-free
@@ -242,7 +242,7 @@ Ship status.
 - **Feedback & celebration.** Encouraging; the reveal always pairs sound + shape so a miss still
   teaches. Hoshi "listening" pose while audio plays.
 - **Data requirements.** `char`, `romaji`, `altRomaji`, `pronunciationHint`, `type`; **depends on
-  `AudioService` TTS** for every prompt. Distractors use `row`/`column` for near-sound confusers.
+  `AudioService` TTS** for every prompt. Distractors use `row`/`vowel` for near-sound confusers.
 - **Accessibility.** **Audio is essential**, so provide a caption toggle and always reveal the
   written kana on answer for deaf/HoH users; the mode is skippable and non-blocking in a lesson if
   audio is unavailable. Play button keyboard-focusable with clear aria-label + replay key.
@@ -304,7 +304,7 @@ Ship status.
 - **Feedback & celebration.** Juicy — petal pops, screen-shake-lite on big combos, Hoshi cheering.
   Misses fade softly; the round never feels like failure. Springy and `prefers-reduced-motion`-aware.
 - **Data requirements.** `char`, `romaji`, **`altRomaji`**, `type`, `category` (to scope waves),
-  `row`/`column` for confusable clusters. Optional TTS on clear.
+  `row`/`vowel` for confusable clusters. Optional TTS on clear.
 - **Accessibility.** Keyboard-first (typing is the game); on-screen keyboard for touch. Reduced-motion
   slows/steadies the fall and cuts particles; low-power fallback drops the 3D/particle layer. Speed
   and density are user-adjustable; never color-only feedback.
@@ -381,7 +381,7 @@ Ship status.
   **update mastery** across the set.
 - **Feedback & celebration.** Arcade energy — combo flares, Hoshi hype at new personal bests.
   Timer pressure is opt-in scope; misses never end the run early.
-- **Data requirements.** `char`, `romaji`, `altRomaji`, `type`, `row`, `column`, `category`;
+- **Data requirements.** `char`, `romaji`, `altRomaji`, `type`, `row`, `vowel`, `category`;
   `AudioService` for the audio-prompt format. Reuses the same fields as Quick Match / Romaji Rush /
   Ear Training (it composes their prompt types).
 - **Accessibility.** Mixed input honors keyboard + touch; audio prompts skippable if TTS is off.
