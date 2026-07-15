@@ -119,6 +119,19 @@ export function LearnDashboard() {
             </span>
           </Link>
 
+          <Link
+            href="/learn/chart"
+            className="flex items-center justify-between rounded-blob-lg border border-border bg-surface px-5 py-3 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
+          >
+            <span className="flex items-center gap-3">
+              <span aria-hidden className="text-2xl">
+                📖
+              </span>
+              <span className="font-display font-bold text-ink">Kana Chart</span>
+            </span>
+            <span className="text-xs text-muted">tap any kana to hear &amp; review ▸</span>
+          </Link>
+
           <div className="grid grid-cols-2 gap-3">
             {[
               { href: `/learn/games/romaji-rush?track=${activeTrack}`, emoji: "⏱️", label: "Romaji Rush", desc: "Beat the 60s clock", tint: "from-secondary-tint to-accent-tint", wide: true },
