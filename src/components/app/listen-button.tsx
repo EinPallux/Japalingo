@@ -1,12 +1,28 @@
 "use client";
 
-import { speakJa, ttsAvailable } from "@/lib/audio";
+import { speakJa } from "@/lib/audio";
 import { useMounted } from "@/lib/use-mounted";
+import { useSpeechStatus } from "@/lib/use-speech";
 import { SpeakerIcon } from "@/components/ui/icons";
 
 export function ListenButton({ text, label = "Listen" }: { text: string; label?: string }) {
   const mounted = useMounted();
-  if (!mounted || !ttsAvailable()) return null;
+  const speech = useSpeechStatus();
+  if (!mounted) return null;
+
+  // The browser has no installed voice — show an honest, non-interactive hint
+  // rather than a button that produces silence.
+  if (speech === "unavailable") {
+    return (
+      <span
+        title="No speech voice is available in this browser."
+        className="inline-flex items-center gap-2 rounded-full bg-surface-2 px-4 py-2 font-display font-bold text-muted"
+      >
+        <SpeakerIcon className="size-5" />
+        No audio
+      </span>
+    );
+  }
 
   return (
     <button
