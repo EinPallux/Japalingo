@@ -173,7 +173,7 @@ export function DrillView() {
           })}
         </div>
 
-        <div className="sticky bottom-0 -mx-4 mt-1 flex flex-col gap-2 border-t border-border bg-bg/90 px-4 pb-3 pt-3 backdrop-blur">
+        <div className="sticky bottom-0 -mx-4 mt-1 flex flex-col gap-2 border-t border-border bg-bg/90 px-4 pt-3 pb-safe-bar backdrop-blur">
           {picked.length > DRILL_SESSION_SIZE ? (
             <p className="text-center text-xs text-muted">
               Focusing on your weakest {DRILL_SESSION_SIZE} of {picked.length} selected kana.

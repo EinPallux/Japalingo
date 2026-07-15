@@ -14,6 +14,19 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.12.0] - 2026-07-15
+
+**Phase 2 — Installable PWA.** Japalingo can now be added to the iPhone/iPad home screen and run full-screen like a native app, with offline support.
+
+### Added
+
+- **Web App Manifest** (`/manifest.webmanifest`) — installable as a standalone app: name, brand theme color, `portrait` orientation, `start_url: /learn` (opens straight into the path), and a full icon set (192 / 512 / maskable) generated from the brand star.
+- **iOS home-screen support** — `apple-touch-icon` (180×180), `apple-mobile-web-app-capable` + `mobile-web-app-capable`, app title, and status-bar style, plus `viewport-fit=cover` and `env(safe-area-inset-*)` padding so content clears the notch and home indicator in standalone mode.
+- **Offline support** via a service worker (`/sw.js`, registered in production) — cache-first for immutable assets (JS/CSS/fonts/images) and network-first for pages, so the app shell loads instantly and pages you've opened keep working with no connection. The learning path (`/learn`) is precached, and an unreachable new page falls back to a friendly **`/offline`** screen. All learning state already lives on-device, so lessons, games, and SRS run offline once cached.
+- **"Add to Home Screen" hint** — a small, dismissible card on the dashboard (iOS Safari only, hidden once installed) explaining the Share → Add to Home Screen flow, since iOS has no install-prompt API.
+
+---
+
 ## [0.11.1] - 2026-07-15
 
 **Phase 2 — Quality & correctness pass.** A full logical audit of the learning platform, with every finding fixed: games now only ever quiz kana you've actually met, distractors can't cheat, accuracy/streak/quest bookkeeping is honest, and new learners are walked in gently.

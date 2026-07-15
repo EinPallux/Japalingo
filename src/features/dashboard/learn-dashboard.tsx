@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { AppHeader } from "@/components/app/app-header";
+import { IosInstallHint } from "@/components/app/ios-install-hint";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Onboarding } from "@/features/onboarding/onboarding";
 import { PathView } from "@/features/path/path-view";
@@ -47,8 +48,9 @@ export function LearnDashboard() {
   return (
     <>
       <AppHeader />
-      <main id="main">
+      <main id="main" className="pb-safe">
         <div className="mx-auto flex max-w-md flex-col gap-4 px-4 pt-5">
+          <IosInstallHint />
           <div className="flex gap-1 rounded-full bg-surface-2 p-1">
             {TRACKS.map((t) => (
               <button

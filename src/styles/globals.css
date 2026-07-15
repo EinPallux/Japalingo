@@ -93,6 +93,20 @@
     font-family: var(--font-jp);
   }
 
+  /* iOS PWA safe areas. env() resolves to 0 on devices without a notch/home
+   * indicator, so these are inert everywhere except an installed standalone app
+   * on an iPhone/iPad — where they keep content clear of the status bar and the
+   * home indicator. */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .pb-safe-bar {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  }
+
   /* The signature "chunky" toy button: a colored body over a darker shadow-lip. */
   .btn-chunky {
     position: relative;
