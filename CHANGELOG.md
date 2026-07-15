@@ -10,7 +10,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Continuing **Phase 2**: Romaji Rush, and full app-UI i18n (EN/DE).
+Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persistence swap.
+
+---
+
+## [0.8.0] - 2026-07-15
+
+**Phase 2 — Romaji Rush.** The fifth game mode: a tap-based speed round.
+
+### Added
+
+- **Romaji Rush** — a 60-second rush that mixes both directions (see a kana, tap its reading; or see a reading, tap the kana) with a live score, a combo multiplier, and a depleting timer that flushes red in the final seconds. It's fully tap-driven (no typing), so it plays great on phones, and every answer feeds XP + mastery into the SRS and counts toward your daily quests. Launchable per track from the dashboard, where it now headlines the games grid.
 
 ---
 
@@ -153,7 +163,8 @@ Continuing **Phase 2**: Romaji Rush, and full app-UI i18n (EN/DE).
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.7.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/japalingo/japalingo/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/japalingo/japalingo/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/japalingo/japalingo/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/japalingo/japalingo/compare/v0.5.0...v0.6.0

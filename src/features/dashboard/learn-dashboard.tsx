@@ -81,6 +81,7 @@ export function LearnDashboard() {
 
           <div className="grid grid-cols-2 gap-3">
             {[
+              { href: `/learn/games/romaji-rush?track=${activeTrack}`, emoji: "⏱️", label: "Romaji Rush", desc: "Beat the 60s clock", tint: "from-secondary-tint to-accent-tint", wide: true },
               { href: `/learn/games/kana-rain?track=${activeTrack}`, emoji: "🌸", label: "Kana Rain", desc: "Type before it lands", tint: "from-primary-tint to-secondary-tint" },
               { href: `/learn/games/kana-match?track=${activeTrack}`, emoji: "🃏", label: "Kana Match", desc: "Flip & pair", tint: "from-accent-tint to-secondary-tint" },
               { href: `/learn/games/ear-training?track=${activeTrack}`, emoji: "🎧", label: "Ear Training", desc: "Hear it, pick it", tint: "from-info/15 to-secondary-tint" },
@@ -92,6 +93,7 @@ export function LearnDashboard() {
                 className={cn(
                   "flex items-center gap-3 rounded-blob-lg border border-border bg-gradient-to-br px-3 py-3 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]",
                   a.tint,
+                  a.wide && "col-span-2",
                 )}
               >
                 <span aria-hidden className="text-2xl">
