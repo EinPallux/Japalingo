@@ -60,11 +60,13 @@ export function EarTraining({ track }: { track: Track }) {
         <div className="flex max-w-sm flex-col items-center gap-4">
           <HoshiStatic className="size-28" />
           <p className="text-ink">
-            Ear Training needs a speech voice, and this browser doesn&apos;t have one installed.
+            Ear Training needs a <strong>Japanese</strong> voice, and this browser doesn&apos;t have
+            one installed.
           </p>
           <p className="text-sm text-muted">
-            Tip: Chrome or Edge usually work out of the box; on some systems you may need to add a
-            Japanese text-to-speech voice. The other games and lessons don&apos;t need audio.
+            (Your general audio still works — that&apos;s separate.) Chrome and Edge usually include a
+            Japanese voice; on Windows/macOS you may need to add a Japanese text-to-speech voice in
+            system settings. Everything else in the app works without it.
           </p>
           <Button href="/learn" size="lg">
             Back to path

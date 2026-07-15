@@ -24,7 +24,7 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
   - **Waits for the voice list to load** before the first utterance (`getVoices()` is empty on the first call in Chrome/Edge, so early calls — like Ear Training speaking on mount — were being dropped),
   - **resumes a spontaneously-paused synth** and only cancels when something is actually queued (a known Chrome quirk that swallowed utterances), and
   - **prefers a Japanese voice**, falling back to the `ja-JP` language hint.
-- **Honest fallback when no voice exists.** Ear Training now shows a clear "this browser has no speech voice" message (with a tip) instead of a silent game, and the Listen buttons show a muted "No audio" chip instead of doing nothing. Detection waits for voices to load so it doesn't false-trigger.
+- **Honest fallback when no _Japanese_ voice exists.** The check now requires an installed **Japanese** voice — a browser with only English voices (which still plays general audio + SFX) was slipping through as "ready" and then staying silent on Japanese text. Ear Training now shows a clear "no Japanese voice" message (with a tip and a note that general audio is separate), and the Listen buttons show a muted "No audio" chip instead of doing nothing. Detection waits for voices to load so it doesn't false-trigger.
 
 
 

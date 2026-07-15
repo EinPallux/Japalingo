@@ -15,7 +15,7 @@ export function ListenButton({ text, label = "Listen" }: { text: string; label?:
   if (speech === "unavailable") {
     return (
       <span
-        title="No speech voice is available in this browser."
+        title="No Japanese speech voice is installed in this browser."
         className="inline-flex items-center gap-2 rounded-full bg-surface-2 px-4 py-2 font-display font-bold text-muted"
       >
         <SpeakerIcon className="size-5" />
