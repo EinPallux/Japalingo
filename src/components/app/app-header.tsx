@@ -4,7 +4,7 @@ import Link from "next/link";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
-import { useProgress } from "@/stores/progress";
+import { selectStreak, selectTodayXp, useProgress } from "@/stores/progress";
 
 function Stat({
   icon,
@@ -61,22 +61,32 @@ export function AppHeader() {
   const mounted = useMounted();
   const xp = useProgress((s) => s.xp);
   const gems = useProgress((s) => s.gems);
-  const streak = useProgress((s) => s.streakCount);
-  const todayXp = useProgress((s) => s.todayXp);
+  const streak = useProgress(selectStreak);
+  const todayXp = useProgress(selectTodayXp);
   const goal = useProgress((s) => s.dailyGoalXp);
+  const name = useProgress((s) => s.name);
+
+  const initial = mounted && name.trim() ? name.trim()[0]!.toUpperCase() : "・";
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-3xl items-center justify-between gap-3 px-4">
-        <Link href="/" className="flex items-center gap-2" aria-label="Japalingo home">
+        <Link href="/learn" className="flex items-center gap-2" aria-label="Japalingo — learn">
           <HoshiStatic className="size-8" />
-          <span className="font-display text-lg font-bold text-ink">Japalingo</span>
+          <span className="hidden font-display text-lg font-bold text-ink sm:inline">Japalingo</span>
         </Link>
-        <div className="flex items-center gap-3 font-display font-bold">
+        <div className="flex items-center gap-2.5 font-display font-bold sm:gap-3">
           <Stat icon="🔥" value={mounted ? streak : 0} label="Day streak" className="text-secondary-strong" />
           <Stat icon="⚡" value={mounted ? xp : 0} label="Total XP" className="text-primary" />
           <Stat icon="💎" value={mounted ? gems : 0} label="Gems" className="text-info" />
-          <DailyGoalRing value={mounted ? todayXp : 0} goal={goal} />
+          <DailyGoalRing value={mounted ? todayXp : 0} goal={mounted ? goal : 30} />
+          <Link
+            href="/profile"
+            aria-label="Your profile"
+            className="grid size-10 place-items-center rounded-full border-2 border-border bg-surface text-ink transition hover:bg-surface-2"
+          >
+            <span className="font-display text-sm font-bold">{initial}</span>
+          </Link>
         </div>
       </div>
     </header>

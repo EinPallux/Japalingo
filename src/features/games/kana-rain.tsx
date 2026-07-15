@@ -5,6 +5,7 @@ import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
 import { sfx } from "@/lib/audio";
+import { useMediaQuery } from "@/lib/use-media-query";
 import { cn } from "@/lib/utils";
 import { trackKana } from "@/data/curriculum";
 import { useProgress } from "@/stores/progress";
@@ -19,6 +20,11 @@ const MAX_ON_SCREEN = 6;
 export function KanaRain({ track }: { track: Track }) {
   const router = useRouter();
   const pool = useMemo(() => trackKana(track), [track]);
+  // Touch devices can't comfortably type into a timed game — offer a tap keypad.
+  const coarse = useMediaQuery("(pointer: coarse)");
+  // The fall is a JS RAF loop, so it bypasses the global CSS/Framer reduced-
+  // motion handling; gentle it manually for users who ask for less motion.
+  const reduceMotion = useMediaQuery("(prefers-reduced-motion: reduce)");
 
   const [status, setStatus] = useState<"playing" | "over">("playing");
   const [drops, setDrops] = useState<Drop[]>([]);
@@ -38,13 +44,18 @@ export function KanaRain({ track }: { track: Track }) {
   const lastRef = useRef<number | null>(null);
   const idRef = useRef(0);
 
-  const spawn = () => {
+  const newDrop = (): Drop => {
     const kana = pool[Math.floor(Math.random() * pool.length)]!;
     idRef.current += 1;
-    dropsRef.current = [
-      ...dropsRef.current,
-      { key: idRef.current, kana, x: 8 + Math.random() * 78, y: -6, speed: 9 + Math.random() * 4 },
-    ];
+    const base = reduceMotion ? 5.5 : 9;
+    const variance = reduceMotion ? 1.5 : 4;
+    return {
+      key: idRef.current,
+      kana,
+      x: 8 + Math.random() * 78,
+      y: -6,
+      speed: base + Math.random() * variance,
+    };
   };
 
   const start = () => {
@@ -73,7 +84,8 @@ export function KanaRain({ track }: { track: Track }) {
       lastRef.current = t;
       const dt = Math.min(0.05, (t - last) / 1000);
       elapsedRef.current += dt;
-      const boost = 1 + elapsedRef.current / 70;
+      // Reduced motion: keep a gentle, constant pace (no speed-up ramp).
+      const boost = reduceMotion ? 1 : 1 + elapsedRef.current / 70;
 
       let cur = dropsRef.current.map((d) => ({ ...d, y: d.y + d.speed * boost * dt }));
       const landed = cur.filter((d) => d.y >= 100).length;
@@ -87,12 +99,10 @@ export function KanaRain({ track }: { track: Track }) {
       }
 
       spawnRef.current += dt;
-      const interval = Math.max(0.75, 1.7 - elapsedRef.current / 45);
+      const interval = reduceMotion ? 1.8 : Math.max(0.75, 1.7 - elapsedRef.current / 45);
       if (spawnRef.current >= interval && cur.length < MAX_ON_SCREEN) {
         spawnRef.current = 0;
-        const kana = pool[Math.floor(Math.random() * pool.length)]!;
-        idRef.current += 1;
-        cur.push({ key: idRef.current, kana, x: 8 + Math.random() * 78, y: -6, speed: 9 + Math.random() * 4 });
+        cur.push(newDrop());
       }
 
       dropsRef.current = cur;
@@ -105,22 +115,23 @@ export function KanaRain({ track }: { track: Track }) {
       raf = requestAnimationFrame(loop);
     };
 
-    // seed two drops then run
-    spawn();
+    // seed one drop then run
+    dropsRef.current = [newDrop()];
     setDrops(dropsRef.current);
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
-  const handleInput = (value: string) => {
-    setInput(value);
-    const v = value.toLowerCase().trim();
-    if (!v) return;
+  // Pop the lowest (most urgent) drop whose reading matches. Shared by the
+  // typed input and the touch keypad.
+  const clearReading = (raw: string): boolean => {
+    const v = raw.toLowerCase().trim();
+    if (!v) return false;
     const match = dropsRef.current
       .filter((d) => d.kana.romaji === v || d.kana.altRomaji?.includes(v))
       .sort((a, b) => b.y - a.y)[0];
-    if (!match) return;
+    if (!match) return false;
 
     dropsRef.current = dropsRef.current.filter((d) => d.key !== match.key);
     setDrops(dropsRef.current);
@@ -130,10 +141,18 @@ export function KanaRain({ track }: { track: Track }) {
     setBestCombo((b) => Math.max(b, nextCombo));
     setScore((s) => s + 10 * nextCombo);
     setCleared((c) => c + 1);
-    setInput("");
     sfx.correct();
     useProgress.getState().answer(match.kana.id, true);
+    return true;
   };
+
+  const handleInput = (value: string) => {
+    setInput(value);
+    if (clearReading(value)) setInput("");
+  };
+
+  // Distinct readings currently falling, for the touch keypad (stable order).
+  const keypad = Array.from(new Set(drops.map((d) => d.kana.romaji))).sort();
 
   if (status === "over") {
     return (
@@ -166,7 +185,7 @@ export function KanaRain({ track }: { track: Track }) {
           type="button"
           aria-label="Exit game"
           onClick={() => router.push("/learn")}
-          className="grid size-10 place-items-center rounded-full text-muted transition hover:bg-surface-2"
+          className="grid size-11 place-items-center rounded-full text-muted transition hover:bg-surface-2"
         >
           <CloseIcon className="size-6" />
         </button>
@@ -197,21 +216,44 @@ export function KanaRain({ track }: { track: Track }) {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-error/40" />
       </div>
 
-      <input
-        autoFocus
-        value={input}
-        onChange={(e) => handleInput(e.target.value)}
-        placeholder="type the reading…"
-        aria-label="Type the reading of a falling kana"
-        autoCapitalize="none"
-        autoComplete="off"
-        spellCheck={false}
-        className={cn(
-          "mt-3 w-full rounded-blob border-2 border-border bg-surface px-4 py-4 text-center font-display text-xl text-ink outline-none focus:border-primary",
-        )}
-      />
+      {coarse ? (
+        <div
+          className="mt-3 grid grid-cols-4 gap-2"
+          role="group"
+          aria-label="Tap the reading of a falling kana"
+        >
+          {keypad.length === 0 ? (
+            <p className="col-span-4 py-4 text-center text-sm text-muted">Kana incoming…</p>
+          ) : (
+            keypad.map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => clearReading(r)}
+                className="rounded-blob border-2 border-border bg-surface px-2 py-3 font-display text-lg font-bold text-ink transition active:translate-y-0.5 active:bg-primary-tint"
+              >
+                {r}
+              </button>
+            ))
+          )}
+        </div>
+      ) : (
+        <input
+          autoFocus
+          value={input}
+          onChange={(e) => handleInput(e.target.value)}
+          placeholder="type the reading…"
+          aria-label="Type the reading of a falling kana"
+          autoCapitalize="none"
+          autoComplete="off"
+          spellCheck={false}
+          className="mt-3 w-full rounded-blob border-2 border-border bg-surface px-4 py-4 text-center font-display text-xl text-ink outline-none focus:border-primary"
+        />
+      )}
       <p className="mt-2 text-center text-xs text-muted">
-        Type the romaji and the kana pops before it hits the line.
+        {coarse
+          ? "Tap the reading of a kana to pop it before it hits the line."
+          : "Type the romaji and the kana pops before it hits the line."}
       </p>
     </main>
   );

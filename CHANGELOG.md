@@ -10,7 +10,80 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Continuing **Phase 2**: more game modes (Kana Match, Ear Training, Romaji Rush, Word Builder), the SRS practice hub, a profile page, daily quests, and full app-UI i18n (EN/DE).
+Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persistence swap.
+
+---
+
+## [0.8.0] - 2026-07-15
+
+**Phase 2 — Romaji Rush.** The fifth game mode: a tap-based speed round.
+
+### Added
+
+- **Romaji Rush** — a 60-second rush that mixes both directions (see a kana, tap its reading; or see a reading, tap the kana) with a live score, a combo multiplier, and a depleting timer that flushes red in the final seconds. It's fully tap-driven (no typing), so it plays great on phones, and every answer feeds XP + mastery into the SRS and counts toward your daily quests. Launchable per track from the dashboard, where it now headlines the games grid.
+
+---
+
+## [0.7.0] - 2026-07-15
+
+**Phase 2 — Daily Quests.** A motivation loop over the games and lessons you already have.
+
+### Added
+
+- **Daily Quests** — a three-quest board on the dashboard (reach your daily goal, nail N correct answers, earn N XP) that refreshes each day. The set rotates deterministically by the day, tracks your real activity from every game and lesson, and each completed quest is **claimable for gems** with a satisfying reward. Quests reset at your local midnight and read correctly across day boundaries.
+- Store support: day-scoped `dailyCorrect` counter and `claimedQuests`, a consolidated daily-rollover helper, a `claimQuest` action, and read-time selectors — with unit tests for quest rotation, completion, and claim idempotency (30 tests total).
+
+### Notes
+
+- Quests are pure gamification over **existing** activity (today's XP + correct answers); no new learning content, so this stays within the `/database` content-gating rule.
+
+---
+
+## [0.6.1] - 2026-07-14
+
+**Phase 2 — polish pass.** An adversarial review of the whole learning app, then the real fixes: correctness, hydration, mobile, and accessibility.
+
+### Fixed
+
+- **Daily rollover math** — the streak and daily-goal ring now turn over at the player's **local** midnight (was UTC, so they reset mid-afternoon for many timezones) and are derived at read time: a broken streak no longer keeps showing the old flame, and yesterday's XP no longer counts toward today's goal before you've practised.
+- **Hydration** — the screens that render randomized content (Ear Training, Word Builder, and review lessons) no longer mismatch between server and client on first load; the randomized round is gated behind mount, matching the rest of the app.
+- **Ear Training replay** — "Play again" no longer reports cumulative XP from earlier games.
+
+### Added / Changed
+
+- **Kana Rain on touch** — phones now get a **tap keypad** (the readings of the falling kana) instead of being forced to type into a timed game behind the soft keyboard; keyboard players keep the text input.
+- **Reduced motion** — Kana Rain (a JS animation that bypassed the global reduced-motion handling) now honors `prefers-reduced-motion` with a gentle, constant pace.
+
+### Accessibility
+
+- Right/wrong feedback in **Ear Training** and **Word Builder** now includes text ("Correct!" / "It was あ = a"), not colour alone.
+- Onboarding reason/goal choices expose `aria-pressed`; profile mastery cells announce their level to assistive tech; game/lesson exit buttons meet the 44px touch-target size.
+- The Japanese TTS voice is cached and refreshed on `voiceschanged`, so it's picked reliably after the first utterance.
+
+---
+
+## [0.6.0] - 2026-07-14
+
+**Phase 2 — Learning platform (milestone 4).** Two more game modes.
+
+### Added
+
+- **Ear Training** — hear a kana (Web Speech TTS) and pick it from four options; feeds XP + mastery. Falls back gracefully when speech audio is unavailable.
+- **Word Builder** — read real Japanese words (from the `/database` reading pages, e.g. あお = blue, くうき = air) and pick the meaning: the "you can already read Japanese!" moment, with a hear-it button.
+- The dashboard now offers all four games (Kana Rain, Kana Match, Ear Training, Word Builder) plus the Practice hub.
+
+---
+
+## [0.5.0] - 2026-07-14
+
+**Phase 2 — Learning platform (milestone 3).** Practice, profile, and a memory game.
+
+### Added
+
+- **Practice hub** (`/learn/practice`) — a spaced-review screen that gathers your weakest seen kana across both tracks and runs a mixed review session (feeds XP + mastery).
+- **Profile** (`/profile`) — rank + stats (XP, streak, gems, kana met/mastered, lessons), a per-track **mastery grid** that colours all 46 kana by how well you know them, an achievement/badge shelf, and a reset. Reachable from the app-header avatar.
+- **Kana Match** — a memory/concentration game: flip cards to pair each kana with its reading; correct pairs feed XP + mastery. Launchable per-track from the dashboard.
+- The dashboard now surfaces **Practice**, **Kana Rain**, and **Kana Match** as quick actions. Rank + achievement helpers with unit tests (21 total).
 
 ---
 
@@ -90,7 +163,12 @@ Continuing **Phase 2**: more game modes (Kana Match, Ear Training, Romaji Rush, 
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/japalingo/japalingo/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/japalingo/japalingo/compare/v0.6.1...v0.7.0
+[0.6.1]: https://github.com/japalingo/japalingo/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/japalingo/japalingo/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/japalingo/japalingo/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/japalingo/japalingo/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/japalingo/japalingo/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/japalingo/japalingo/compare/v0.1.0...v0.2.0

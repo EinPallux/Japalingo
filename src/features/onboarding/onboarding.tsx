@@ -79,6 +79,7 @@ export function Onboarding() {
                     key={r.id}
                     type="button"
                     onClick={() => setReason(r.id)}
+                    aria-pressed={reason === r.id}
                     className={cn(
                       "flex items-center gap-3 rounded-blob-lg border-2 px-4 py-3 text-left font-semibold transition",
                       reason === r.id
@@ -111,6 +112,7 @@ export function Onboarding() {
                     key={g.xp}
                     type="button"
                     onClick={() => setGoal(g.xp)}
+                    aria-pressed={goal === g.xp}
                     className={cn(
                       "flex items-center justify-between rounded-blob-lg border-2 px-4 py-3 font-semibold transition",
                       goal === g.xp
