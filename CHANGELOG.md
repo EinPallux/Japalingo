@@ -14,6 +14,24 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.11.1] - 2026-07-15
+
+**Phase 2 — Quality & correctness pass.** A full logical audit of the learning platform, with every finding fixed: games now only ever quiz kana you've actually met, distractors can't cheat, accuracy/streak/quest bookkeeping is honest, and new learners are walked in gently.
+
+### Fixed
+
+- **Games only use kana you've met.** Romaji Rush, Kana Rain, Kana Match, Ear Training, and Word Builder now draw every round from your **learned** kana (met at least once) instead of all 46 — so a beginner who's done one lesson is never ambushed by characters they've never seen, and answering a game can no longer create or corrupt mastery for un-taught kana. Each game shows a friendly **"learn a bit more first"** gate until enough kana are met (Kana Rain 3, Romaji Rush / Ear Training 4, Kana Match 6, Word Builder 4 readable words).
+- **Clean multiple-choice distractors.** Lesson choices, Romaji Rush, and Ear Training now pick wrong answers **only from the same script** and never one that reads the same as the correct answer — no more a katakana option appearing among hiragana, and no "two right answers." (`build-queue.ts` + game round builders; pinned by new tests.)
+- **Word Builder only shows words you can read** — every character already met (hiragana words for now; katakana words remain content-gated) — and now awards **coins + daily-quest credit** on a correct read, like every other correct answer.
+- **Honest accuracy.** Your Journey's accuracy is now over **graded answers only** (a new per-kana `attempts` counter), so passively viewing a kana on the chart no longer skews the number.
+- **Streak badges stay earned.** "On Fire" / "Week Warrior" now track your **best-ever streak**, so breaking a streak no longer revokes a badge you already earned. The streak flame also stays lit through a single missed day when a Streak Freeze is banked.
+- **Kana Rain records misses.** A kana that reaches the line now counts as a miss against its mastery + review schedule, instead of silently vanishing.
+- **Quests can't be over-claimed.** Claiming a daily quest re-verifies it's actually complete against freshly-rolled metrics.
+- **Gentler onboarding.** Finishing onboarding now flows into the **"Meet the Sounds" primer**, which then hands straight off to your **first lesson** — no more landing cold on the dashboard.
+- **Smarter Free Drill.** "Weakest rows" and each drill session now prefer kana you've **started** (seen but shaky) over rows you've never been taught. Review lessons gained reverse-recall + self-drill steps (not just one-way matching), and the final review now covers the **whole script**.
+
+---
+
 ## [0.11.0] - 2026-07-15
 
 **Phase 2 — Beginner toolkit.** Five additions that help an absolute beginner: real spaced-repetition scheduling, a reference chart, a sounds primer, a settings screen, and a progress view.

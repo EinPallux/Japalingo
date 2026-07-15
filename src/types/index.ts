@@ -48,6 +48,8 @@ export interface KanaProgress {
   mastery: number; // 0..5 crowns
   seen: number;
   correct: number;
+  /** Graded answers only (excludes passive "met it" views) — the accuracy base. */
+  attempts?: number;
   streak: number; // consecutive correct
   lastResult: "correct" | "wrong" | null;
   /** Epoch ms when this kana is next due for review (set once seen). */

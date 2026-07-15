@@ -2,12 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
+import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
 import { sfx } from "@/lib/audio";
+import { learnedKana } from "@/lib/learned";
 import { useMediaQuery } from "@/lib/use-media-query";
+import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
-import { trackKana } from "@/data/curriculum";
 import { useProgress } from "@/stores/progress";
 import type { Kana, Track } from "@/types";
 import { useRouter } from "next/navigation";
@@ -16,10 +18,33 @@ type Drop = { key: number; kana: Kana; x: number; y: number; speed: number };
 
 const START_LIVES = 3;
 const MAX_ON_SCREEN = 6;
+/** Fewest met kana needed before the rain is fair to play. */
+const MIN_KANA = 3;
 
+/** Gate on mount + a big-enough learned pool, then run the game on a ready pool
+ *  (so the falling kana are only ones the learner has actually met). */
 export function KanaRain({ track }: { track: Track }) {
+  const mounted = useMounted();
+  const kanaProgress = useProgress((s) => s.kana);
+  const pool = useMemo(() => learnedKana(track, kanaProgress), [track, kanaProgress]);
+
+  if (!mounted) {
+    return (
+      <main id="main" className="grid min-h-dvh place-items-center">
+        <HoshiStatic className="size-24 opacity-70" />
+      </main>
+    );
+  }
+
+  if (pool.length < MIN_KANA) {
+    return <NotEnoughKana need={MIN_KANA} have={pool.length} />;
+  }
+
+  return <KanaRainGame pool={pool} />;
+}
+
+function KanaRainGame({ pool }: { pool: Kana[] }) {
   const router = useRouter();
-  const pool = useMemo(() => trackKana(track), [track]);
   // Touch devices can't comfortably type into a timed game — offer a tap keypad.
   const coarse = useMediaQuery("(pointer: coarse)");
   // The fall is a JS RAF loop, so it bypasses the global CSS/Framer reduced-
@@ -88,14 +113,18 @@ export function KanaRain({ track }: { track: Track }) {
       const boost = reduceMotion ? 1 : 1 + elapsedRef.current / 70;
 
       let cur = dropsRef.current.map((d) => ({ ...d, y: d.y + d.speed * boost * dt }));
-      const landed = cur.filter((d) => d.y >= 100).length;
+      const landedDrops = cur.filter((d) => d.y >= 100);
       cur = cur.filter((d) => d.y < 100);
-      if (landed > 0) {
-        livesRef.current = Math.max(0, livesRef.current - landed);
+      if (landedDrops.length > 0) {
+        livesRef.current = Math.max(0, livesRef.current - landedDrops.length);
         comboRef.current = 0;
         sfx.wrong();
         setLives(livesRef.current);
         setCombo(0);
+        // A kana hitting the line is a genuine miss — record it so mastery and
+        // the SRS schedule reflect the ones the learner couldn't read in time.
+        const { answer } = useProgress.getState();
+        for (const d of landedDrops) answer(d.kana.id, false);
       }
 
       spawnRef.current += dt;

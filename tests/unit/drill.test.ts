@@ -21,7 +21,7 @@ describe("free drill", () => {
     expect(two.every((k) => k.track === "katakana")).toBe(true);
   });
 
-  it("summarises row mastery and surfaces the weakest rows", () => {
+  it("summarises row mastery", () => {
     const progress: Record<string, KanaProgress> = {
       "hira-a": { ...emptyProgress(), mastery: 5, seen: 3 },
       "hira-i": { ...emptyProgress(), mastery: 5, seen: 3 },
@@ -30,9 +30,24 @@ describe("free drill", () => {
     const vowels = rows.find((r) => r.row === "a")!;
     expect(vowels.seen).toBe(2);
     expect(vowels.avgMastery).toBeCloseTo(2); // two of five kana at mastery 5
+  });
 
-    // the vowels row now has some mastery, so it shouldn't be among the weakest
-    expect(weakestRows(rows, 3)).not.toContain("a");
+  it("recommends the weakest STARTED rows, never untouched ones", () => {
+    const progress: Record<string, KanaProgress> = {
+      // vowels: seen and strong
+      "hira-a": { ...emptyProgress(), mastery: 5, seen: 3 },
+      "hira-i": { ...emptyProgress(), mastery: 5, seen: 3 },
+      // k row: seen but shaky — this is the real "weakest"
+      "hira-ka": { ...emptyProgress(), mastery: 1, seen: 2 },
+      "hira-ki": { ...emptyProgress(), mastery: 0, seen: 2 },
+    };
+    const weakest = weakestRows(trackRows("hiragana", progress), 3);
+    expect(weakest[0]).toBe("k"); // started-but-shaky leads
+    expect(weakest).not.toContain("s"); // never-seen rows aren't "weak", just untaught
+  });
+
+  it("falls back to all rows before anything has been started", () => {
+    expect(weakestRows(trackRows("hiragana", {}), 3)).toHaveLength(3);
   });
 
   it("prioritizes weakest kana and caps the session size", () => {

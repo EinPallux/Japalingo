@@ -93,11 +93,11 @@ describe("progress store", () => {
     s().addXp(30);
     const before = s().gems;
 
-    s().claimQuest("goal", 15);
+    s().claimQuest("goal", 15, "goal", 30);
     expect(s().gems).toBe(before + 15);
     expect(selectDaily(s()).claimed).toContain("goal");
 
-    s().claimQuest("goal", 15); // already claimed today — no double reward
+    s().claimQuest("goal", 15, "goal", 30); // already claimed today — no double reward
     expect(s().gems).toBe(before + 15);
 
     // Next day: claims (and the daily correct/XP counters) reset.
@@ -105,6 +105,46 @@ describe("progress store", () => {
     expect(selectDaily(s()).claimed).toEqual([]);
     expect(selectDaily(s()).correct).toBe(0);
     expect(selectDaily(s()).xp).toBe(0);
+  });
+
+  it("refuses to claim a quest that isn't actually complete", () => {
+    s().addXp(10); // only 10 XP toward a 30-XP goal quest
+    const before = s().gems;
+    s().claimQuest("goal", 15, "goal", 30);
+    expect(s().gems).toBe(before); // not done — no reward, not marked claimed
+    expect(selectDaily(s()).claimed).not.toContain("goal");
+  });
+
+  it("counts only graded answers toward accuracy, not passive views", () => {
+    s().answer("hira-a", true);
+    s().answer("hira-a", false);
+    s().markSeen("hira-a"); // a passive 'met it' view — must not count as an attempt
+    const p = s().kana["hira-a"]!;
+    expect(p.attempts).toBe(2);
+    expect(p.correct).toBe(1);
+    expect(p.seen).toBe(3);
+  });
+
+  it("rewards Word Builder solves with XP, coins, and daily-correct", () => {
+    s().rewardCorrect();
+    expect(s().xp).toBe(10);
+    expect(s().coins).toBe(COIN_PER_CORRECT);
+    expect(selectDaily(s()).correct).toBe(1);
+  });
+
+  it("ratchets bestStreak up and never lets it fall after a break", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 1, 12, 0, 0));
+    s().addXp(10);
+    vi.setSystemTime(new Date(2026, 0, 2, 12, 0, 0));
+    s().addXp(10); // streak 2
+    expect(s().bestStreak).toBe(2);
+
+    // Skip days, then practice again — streak restarts at 1 but best holds at 2.
+    vi.setSystemTime(new Date(2026, 0, 10, 12, 0, 0));
+    s().addXp(10);
+    expect(s().streakCount).toBe(1);
+    expect(s().bestStreak).toBe(2);
   });
 });
 

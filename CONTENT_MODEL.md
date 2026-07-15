@@ -202,6 +202,15 @@ export interface StrokePath { order: number; d: string; }
 export interface ExampleWord { kana: string; romaji: string; meaning: string; }
 ```
 
+> **As shipped (Phase 2).** The schema above is the full **planned** target (it carries
+> fields for stroke order, derived/combo kana, and categories that content-gated future
+> phases will fill). The Hiragana + Katakana that ship today use a trimmed subset — see
+> [`src/types/index.ts`](./src/types/index.ts). Notable naming differences to be aware of:
+> the shipped `Kana` uses **`track`** (not `type`), **`pronunciation`** (not `pronunciationHint`),
+> a single **`mnemonic`** string, and an optional **`altRomaji?`**; `examples` (optional) is the
+> shipped name for `exampleWords`. Fields for stroke order, `category`, `baseKanaId`, and
+> `comboParts` are not yet present — they arrive with the content that needs them.
+
 ### 3.1 Field-by-field provenance
 
 Each field's inline comment above names its source; in book terms: `char` = page headline; `romaji`/`altRomaji`/`pronunciationHint` = **"HOW TO PRONOUNCE"** (exceptions し=shi, を=o recorded explicitly); `mnemonic`/`mnemonicImageIdea` = **"HOW TO REMEMBER"**; `strokeCount`/`strokeOrder` = **"PRACTICE WRITING"** (transcribed in Phase 2); `exampleWords` = **"LET'S PRACTICE READING!"**. `type` comes from which book the page is in; `category`/`row`/`vowel` from the character's position in the book's grid; and `baseKanaId`/`comboParts` are implied by the derivation shown (K→G, H→P; base + small kana).
@@ -259,6 +268,16 @@ Notes:
 - A `Lesson.gameModeIds` pipeline typically opens with `mnemonic-story` for any `newKanaIds`, mixes recognition/recall modes, and closes with results + crown progress.
 - `mastery` (0–5 crowns) is the user-facing signal; `box`/`interval`/`dueAt` are scheduler internals — both in `KanaProgress` so the Practice hub can surface "due today."
 - `reviewKanaIds` interleaves prior kana into every lesson so the SRS never lets old kana rot.
+
+> **As shipped (Phase 2).** The `Lesson` shipping today carries a **`kind: "lesson" | "review"`**
+> instead of an explicit `gameModeIds` pipeline — the exercise pipeline is built on demand by
+> [`build-queue.ts`](./src/features/lessons/build-queue.ts) from `newKanaIds`/`reviewKanaIds`.
+> The shipped **`KanaProgress`** is a lighter SRS-lite record — `{ mastery, seen, correct,
+> attempts?, streak, lastResult, due? }` (see [`src/types/index.ts`](./src/types/index.ts)):
+> a single mastery box drives the review interval (no separate `box`/`ease`/`interval`), `due`
+> is the epoch-ms next-review time, and **`attempts`** counts graded answers only (excluding
+> passive "met it" views) so accuracy stays honest. The richer `box`/`ease`/`interval` model
+> above is the planned target for when vocab/kanji reuse the scheduler.
 
 ---
 

@@ -18,7 +18,7 @@ const ROW_TITLE: Record<KanaRow, string> = {
   m: "M row",
   y: "Y row",
   r: "R row",
-  w: "W row",
+  w: "W row + ん",
 };
 
 /** Cap a single drill session so a big selection stays focused. */
@@ -63,24 +63,33 @@ export function kanaForRows(track: Track, rows: KanaRow[]): Kana[] {
   return trackKana(track).filter((k) => wanted.has(k.row));
 }
 
-/** The `n` rows most in need of practice (lowest average mastery). */
+/**
+ * The `n` rows most in need of practice (lowest average mastery). Rows the
+ * learner has actually started (some kana seen) are preferred — an untouched
+ * row scores mastery 0 but "weak" should mean *practised yet shaky*, not
+ * *never taught*. Falls back to all rows if nothing has been started yet.
+ */
 export function weakestRows(rows: RowInfo[], n = 3): KanaRow[] {
-  return [...rows]
+  const started = rows.filter((r) => r.seen > 0);
+  const pool = started.length ? started : rows;
+  return [...pool]
     .sort((a, b) => a.avgMastery - b.avgMastery || ROW_ORDER.indexOf(a.row) - ROW_ORDER.indexOf(b.row))
     .slice(0, n)
     .map((r) => r.row);
 }
 
 /**
- * Pick the session's kana from a selection: weakest first, capped, so a large
- * pick becomes a focused drill on what the learner needs most.
+ * Pick the session's kana from a selection: already-seen kana first (weakest of
+ * those leading), then any unseen, capped — so a large pick becomes a focused
+ * drill on what the learner has met and is shaky on, not brand-new characters.
  */
 export function drillSession(
   kana: Kana[],
   progress: Record<string, KanaProgress>,
   size = DRILL_SESSION_SIZE,
 ): Kana[] {
+  const seenRank = (k: Kana) => ((progress[k.id]?.seen ?? 0) > 0 ? 0 : 1);
   return [...kana]
-    .sort((a, b) => mastery(progress, a.id) - mastery(progress, b.id))
+    .sort((a, b) => seenRank(a) - seenRank(b) || mastery(progress, a.id) - mastery(progress, b.id))
     .slice(0, size);
 }

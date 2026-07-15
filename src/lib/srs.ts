@@ -31,7 +31,7 @@ export function isDue(p: KanaProgress | undefined, now: number): boolean {
 }
 
 export function emptyProgress(): KanaProgress {
-  return { mastery: 0, seen: 0, correct: 0, streak: 0, lastResult: null, due: 0 };
+  return { mastery: 0, seen: 0, correct: 0, attempts: 0, streak: 0, lastResult: null, due: 0 };
 }
 
 /** Objective answer (choice / listen): correct bumps mastery, wrong demotes one box. */
@@ -39,6 +39,9 @@ export function applyAnswer(p: KanaProgress, correct: boolean): KanaProgress {
   return {
     mastery: correct ? Math.min(MAX_MASTERY, p.mastery + 1) : Math.max(0, p.mastery - 1),
     seen: p.seen + 1,
+    // `attempts` counts only real graded answers (not passive "met it" views), so
+    // accuracy stays honest — reviewing a kana on the chart can't inflate it.
+    attempts: (p.attempts ?? 0) + 1,
     correct: p.correct + (correct ? 1 : 0),
     streak: correct ? p.streak + 1 : 0,
     lastResult: correct ? "correct" : "wrong",
@@ -52,6 +55,7 @@ export function applyRating(p: KanaProgress, grade: Grade): KanaProgress {
   return {
     mastery: Math.max(0, Math.min(MAX_MASTERY, p.mastery + delta)),
     seen: p.seen + 1,
+    attempts: (p.attempts ?? 0) + 1,
     correct: p.correct + (correct ? 1 : 0),
     streak: correct ? p.streak + 1 : 0,
     lastResult: correct ? "correct" : "wrong",

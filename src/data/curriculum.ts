@@ -70,9 +70,11 @@ function buildTrack(track: Track, prefix: string): { units: Unit[]; lessons: Les
 
     const rev = REVIEW_AFTER[g.id];
     if (rev) {
+      // The final checkpoint reviews the whole script; sectional reviews cover
+      // just the groups since the previous checkpoint.
       const suffixes =
         rev.groups === "sample"
-          ? [...GROUPS.map((gg) => gg.suffixes[0]!), "shi", "tsu", "fu", "wo", "n"]
+          ? GROUPS.flatMap((gg) => gg.suffixes)
           : suffixesForGroups(rev.groups);
       lessons.push({
         id: `${unitId}-review`,

@@ -5,13 +5,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
-import { getKana } from "@/data/curriculum";
+import { getKana, getTrackLessons } from "@/data/curriculum";
 import { speakJa } from "@/lib/audio";
 import { useSpeechStatus } from "@/lib/use-speech";
 import type { Kana } from "@/types";
 
 const VOWEL_IDS = ["hira-a", "hira-i", "hira-u", "hira-e", "hira-o"];
 const K_ROW_IDS = ["hira-ka", "hira-ki", "hira-ku", "hira-ke", "hira-ko"];
+
+/** The very first lesson on the hiragana path — where the primer hands off. */
+const FIRST_LESSON = getTrackLessons("hiragana")[0];
 
 function kanaList(ids: string[]): Kana[] {
   return ids.map((id) => getKana(id)).filter((k): k is Kana => Boolean(k));
@@ -31,7 +34,9 @@ export function SoundsPrimer() {
   const kRow = kanaList(K_ROW_IDS);
 
   const canHear = speech === "ready";
-  const finish = () => router.push("/learn");
+  // Hand straight off to the first lesson so the primer flows into learning,
+  // rather than bouncing the learner back to the dashboard to find it.
+  const finish = () => router.push(FIRST_LESSON ? `/learn/lesson/${FIRST_LESSON.id}` : "/learn");
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-bg">

@@ -11,6 +11,7 @@ import {
   XP_PER_CORRECT,
 } from "@/lib/srs";
 import { COIN_PER_CORRECT, getShopItem, MAX_STREAK_FREEZES, XP_BOOST_MS } from "@/lib/shop";
+import type { QuestMetric } from "@/lib/quests";
 
 /** Local-time day key (YYYY-MM-DD). Using local components — not toISOString's
  *  UTC — so streaks and the daily goal roll over at the user's own midnight. */
@@ -39,6 +40,8 @@ export interface ProgressState {
   /** Plentiful currency, earned per correct answer. */
   coins: number;
   streakCount: number;
+  /** Highest streak ever reached — badges read this so they never un-earn. */
+  bestStreak: number;
   streakDate: string | null;
   todayXp: number;
   todayDate: string | null;
@@ -70,8 +73,10 @@ export interface ProgressState {
   answer(kanaId: string, correct: boolean): void;
   rate(kanaId: string, grade: Grade): void;
   markSeen(kanaId: string): void;
+  /** Word Builder solve: XP + coins + daily-correct, no per-kana SRS change. */
+  rewardCorrect(): void;
   completeLesson(lessonId: string): { alreadyDone: boolean };
-  claimQuest(id: string, reward: number): void;
+  claimQuest(id: string, reward: number, metric: QuestMetric, target: number): void;
   /** Attempt a purchase; returns why it failed so the UI can explain. */
   buyItem(id: string): { ok: boolean; reason?: "unknown" | "owned" | "max" | "active" | "funds" };
   /** Toggle a cosmetic on/off in its slot (must be owned). */
@@ -89,6 +94,7 @@ const initial = {
   gems: 0,
   coins: 0,
   streakCount: 0,
+  bestStreak: 0,
   streakDate: null as string | null,
   todayXp: 0,
   todayDate: null as string | null,
@@ -148,6 +154,9 @@ function applyDaily(s: ProgressState, opts: DailyOpts): Partial<ProgressState> {
     dailyCorrect: (sameDay ? s.dailyCorrect : 0) + (opts.correct ?? 0),
     claimedQuests: sameDay ? s.claimedQuests : [],
     streakCount,
+    // Ratchet the all-time best up (seeding from the current streak for saves
+    // that predate the field), so streak badges stay earned after a break.
+    bestStreak: Math.max(s.bestStreak ?? s.streakCount, streakCount),
     streakDate,
     streakFreezes,
   };
@@ -201,6 +210,9 @@ export const useProgress = create<ProgressState>()(
           };
         }),
 
+      rewardCorrect: () =>
+        set((s) => applyDaily(s, { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT })),
+
       completeLesson: (lessonId) => {
         const alreadyDone = get().completedLessons.includes(lessonId);
         if (!alreadyDone) {
@@ -213,11 +225,15 @@ export const useProgress = create<ProgressState>()(
         return { alreadyDone };
       },
 
-      claimQuest: (id, reward) =>
+      claimQuest: (id, reward, metric, target) =>
         set((s) => {
           const base = applyDaily(s, {});
           const claimed = base.claimedQuests ?? [];
           if (claimed.includes(id)) return {};
+          // Re-verify completion against freshly-rolled metrics — never grant a
+          // reward for a quest that isn't actually done (or is a new day's zero).
+          const value = metric === "correct" ? (base.dailyCorrect ?? 0) : (base.todayXp ?? 0);
+          if (value < target) return {};
           return { ...base, gems: s.gems + reward, claimedQuests: [...claimed, id] };
         }),
 
@@ -279,7 +295,11 @@ export function selectTodayXp(s: ProgressState): number {
 }
 export function selectStreak(s: ProgressState): number {
   if (!s.streakDate) return 0;
-  return s.streakDate === today() || s.streakDate === yesterday() ? s.streakCount : 0;
+  if (s.streakDate === today() || s.streakDate === yesterday()) return s.streakCount;
+  // One missed day is survivable while a Streak Freeze is banked — show the
+  // flame as still alive (it'll be spent the moment the learner returns).
+  if (s.streakDate === dayBefore() && s.streakFreezes > 0) return s.streakCount;
+  return 0;
 }
 
 /** The current local day key — for comparing against the stored `todayDate`. */

@@ -1,6 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
@@ -29,14 +30,19 @@ const anim = {
 };
 
 export function Onboarding() {
+  const router = useRouter();
   const completeOnboarding = useProgress((s) => s.completeOnboarding);
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [reason, setReason] = useState<string | null>(null);
   const [goal, setGoal] = useState(30);
 
-  const finish = () =>
+  // Send new learners straight into the sounds primer — the gentlest on-ramp —
+  // rather than dropping them cold onto the dashboard.
+  const finish = () => {
     completeOnboarding({ name: name.trim() || "friend", reason, dailyGoalXp: goal });
+    router.push("/learn/sounds");
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-bg">

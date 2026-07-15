@@ -1,4 +1,4 @@
-import { ALL_KANA, getKanaList, lessonKana } from "@/data/curriculum";
+import { getKanaList, lessonKana, trackKana } from "@/data/curriculum";
 import type { Kana, Lesson } from "@/types";
 
 export type Exercise =
@@ -15,10 +15,28 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/** Pick `n` distinct distractor strings (romaji or char) unlike the answer. */
-function distractors(answer: string, dir: "k2r" | "r2k", pool: Kana[], n = 3): string[] {
+/** True if two kana read the same (homophones must never both be options). */
+function sameReading(a: Kana, b: Kana): boolean {
+  return (
+    a.romaji === b.romaji ||
+    Boolean(a.altRomaji?.includes(b.romaji)) ||
+    Boolean(b.altRomaji?.includes(a.romaji))
+  );
+}
+
+/**
+ * Pick `n` distinct distractor strings (romaji or char) unlike the answer.
+ * Distractors are drawn only from the answer's OWN track — never the other
+ * script — and never share a reading with the answer, so a katakana card never
+ * appears among hiragana options and two options can't both be "correct". The
+ * lesson's own pool is preferred, falling back to the rest of the track.
+ */
+function distractors(kana: Kana, dir: "k2r" | "r2k", pool: Kana[], n = 3): string[] {
   const value = (k: Kana) => (dir === "k2r" ? k.romaji : k.char);
-  const candidates = shuffle([...pool, ...ALL_KANA]);
+  const answer = value(kana);
+  const candidates = [...shuffle(pool), ...shuffle(trackKana(kana.track))].filter(
+    (k) => k.track === kana.track && !sameReading(k, kana),
+  );
   const seen = new Set<string>([answer]);
   const out: string[] = [];
   for (const k of candidates) {
@@ -34,7 +52,7 @@ function distractors(answer: string, dir: "k2r" | "r2k", pool: Kana[], n = 3): s
 
 function makeChoice(kana: Kana, direction: "k2r" | "r2k", pool: Kana[]): Exercise {
   const answer = direction === "k2r" ? kana.romaji : kana.char;
-  const options = shuffle([answer, ...distractors(answer, direction, pool)]);
+  const options = shuffle([answer, ...distractors(kana, direction, pool)]);
   return { kind: "choice", kana, direction, options };
 }
 
@@ -51,9 +69,21 @@ export function buildQueue(lesson: Lesson): Exercise[] {
 
   const practice: Exercise[] = [];
   for (const kana of pool) practice.push(makeChoice(kana, "k2r", pool));
-  for (const kana of newKana) {
-    practice.push(makeChoice(kana, "r2k", pool));
-    practice.push({ kind: "drill", kana });
+  if (newKana.length > 0) {
+    // A teaching lesson deepens its new kana with reverse recall + a self-drill.
+    for (const kana of newKana) {
+      practice.push(makeChoice(kana, "r2k", pool));
+      practice.push({ kind: "drill", kana });
+    }
+  } else {
+    // A pure-review lesson has no new kana, so add reverse recall + a few drills
+    // over its pool — otherwise it degrades to one-way matching. Cap the extra
+    // steps so a big final review (whole script) stays a digestible length: the
+    // k2r pass already covers every kana for recognition.
+    for (const kana of pool.slice(0, 12)) practice.push(makeChoice(kana, "r2k", pool));
+    for (const kana of pool.slice(0, Math.min(4, pool.length))) {
+      practice.push({ kind: "drill", kana });
+    }
   }
 
   return [...intro, ...shuffle(practice)];
