@@ -4,17 +4,21 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ListenButton } from "@/components/app/listen-button";
+import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
 import { WORDS } from "@/data/words";
 import { sfx } from "@/lib/audio";
+import { learnedKana } from "@/lib/learned";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
 import type { ExampleWord } from "@/types";
 
 const ROUNDS = 8;
+/** Need at least four readable words so every round can show four options. */
+const MIN_WORDS = 4;
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -25,11 +29,16 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function buildRounds(): { word: ExampleWord; options: string[] }[] {
-  return shuffle(WORDS)
-    .slice(0, Math.min(ROUNDS, WORDS.length))
+/** Words the learner can actually decode — every character already met. */
+function decodableWords(learnedChars: Set<string>): ExampleWord[] {
+  return WORDS.filter((w) => [...w.kana].every((ch) => learnedChars.has(ch)));
+}
+
+function buildRounds(words: ExampleWord[]): { word: ExampleWord; options: string[] }[] {
+  return shuffle(words)
+    .slice(0, Math.min(ROUNDS, words.length))
     .map((word) => {
-      const distractors = shuffle(WORDS.filter((w) => w.meaning !== word.meaning))
+      const distractors = shuffle(words.filter((w) => w.meaning !== word.meaning))
         .slice(0, 3)
         .map((w) => w.meaning);
       return { word, options: shuffle([word.meaning, ...distractors]) };
@@ -37,9 +46,34 @@ function buildRounds(): { word: ExampleWord; options: string[] }[] {
 }
 
 export function WordBuilder() {
-  const router = useRouter();
   const mounted = useMounted();
-  const rounds = useMemo(() => buildRounds(), []);
+  const kanaProgress = useProgress((s) => s.kana);
+  // Word Builder is hiragana-only for now (the /database words are all hiragana);
+  // katakana words are content-gated until the owner adds them.
+  const words = useMemo(() => {
+    const learnedChars = new Set(learnedKana("hiragana", kanaProgress).map((k) => k.char));
+    return decodableWords(learnedChars);
+  }, [kanaProgress]);
+
+  if (!mounted) {
+    return (
+      <main id="main" className="grid min-h-dvh place-items-center">
+        <HoshiStatic className="size-24 opacity-70" />
+      </main>
+    );
+  }
+
+  if (words.length < MIN_WORDS) {
+    return <NotEnoughKana need={MIN_WORDS} have={words.length} unit="readable words" />;
+  }
+
+  return <WordBuilderGame words={words} />;
+}
+
+/** The quiz itself — mounted only once enough decodable words exist. */
+function WordBuilderGame({ words }: { words: ExampleWord[] }) {
+  const router = useRouter();
+  const rounds = useMemo(() => buildRounds(words), [words]);
   const [index, setIndex] = useState(0);
   const [picked, setPicked] = useState<string | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
@@ -50,23 +84,14 @@ export function WordBuilder() {
   const cur = rounds[index]!;
   const correct = picked === cur.word.meaning;
 
-  // Gate the randomized rounds behind mount so the server-rendered word never
-  // mismatches the client's first render (Math.random differs across them).
-  if (!mounted) {
-    return (
-      <main id="main" className="grid min-h-dvh place-items-center">
-        <HoshiStatic className="size-24 opacity-70" />
-      </main>
-    );
-  }
-
   const pick = (opt: string) => {
     if (picked) return;
     setPicked(opt);
     if (opt === cur.word.meaning) {
       sfx.correct();
       setCorrectCount((c) => c + 1);
-      useProgress.getState().addXp(10);
+      // Reading a real word counts like any correct answer: XP + coins + daily.
+      useProgress.getState().rewardCorrect();
     } else {
       sfx.wrong();
     }

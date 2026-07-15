@@ -2,20 +2,32 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
-import { trackKana } from "@/data/curriculum";
 import { sfx } from "@/lib/audio";
+import { learnedKana } from "@/lib/learned";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
 import type { Kana, Track } from "@/types";
 
 const DURATION_MS = 60_000;
+/** Fewest met kana needed to offer four distinct answer choices. */
+const MIN_KANA = 4;
 
 type Direction = "k2r" | "r2k";
 type Round = { kana: Kana; direction: Direction; prompt: string; answer: string; options: string[] };
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j]!, a[i]!];
+  }
+  return a;
+}
 
 function makeRound(pool: Kana[]): Round {
   const kana = pool[Math.floor(Math.random() * pool.length)]!;
@@ -25,7 +37,10 @@ function makeRound(pool: Kana[]): Round {
 
   const seen = new Set([answer]);
   const options = [answer];
-  for (const k of [...pool].sort(() => Math.random() - 0.5)) {
+  // Distractors share the answer's track and never its reading, so no option is
+  // secretly also correct and no cross-script character sneaks in.
+  for (const k of shuffle(pool)) {
+    if (k.romaji === kana.romaji) continue;
     const v = value(k);
     if (!seen.has(v)) {
       seen.add(v);
@@ -38,17 +53,37 @@ function makeRound(pool: Kana[]): Round {
     direction,
     prompt: direction === "k2r" ? kana.char : kana.romaji,
     answer,
-    options: options.sort(() => Math.random() - 0.5),
+    options: shuffle(options),
   };
 }
 
+/** Gate on mount + a big-enough learned pool, then hand a ready pool to the game
+ *  (so its first round is dealt from real, rehydrated data — never an empty set). */
 export function RomajiRush({ track }: { track: Track }) {
-  const router = useRouter();
   const mounted = useMounted();
-  const pool = useMemo(() => trackKana(track), [track]);
+  const kanaProgress = useProgress((s) => s.kana);
+  const pool = useMemo(() => learnedKana(track, kanaProgress), [track, kanaProgress]);
+
+  if (!mounted) {
+    return (
+      <main id="main" className="grid min-h-dvh place-items-center">
+        <HoshiStatic className="size-24 opacity-70" />
+      </main>
+    );
+  }
+
+  if (pool.length < MIN_KANA) {
+    return <NotEnoughKana need={MIN_KANA} have={pool.length} />;
+  }
+
+  return <RomajiRushGame pool={pool} />;
+}
+
+function RomajiRushGame({ pool }: { pool: Kana[] }) {
+  const router = useRouter();
 
   const [status, setStatus] = useState<"playing" | "over">("playing");
-  const [round, setRound] = useState(() => makeRound(pool));
+  const [round, setRound] = useState<Round>(() => makeRound(pool));
   const [picked, setPicked] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [correct, setCorrect] = useState(0);
@@ -61,7 +96,7 @@ export function RomajiRush({ track }: { track: Track }) {
 
   // Countdown clock. Restarts whenever a game (re)starts.
   useEffect(() => {
-    if (!mounted || status !== "playing") return;
+    if (status !== "playing") return;
     deadlineRef.current = Date.now() + DURATION_MS;
     const id = window.setInterval(() => {
       const remaining = deadlineRef.current - Date.now();
@@ -74,7 +109,7 @@ export function RomajiRush({ track }: { track: Track }) {
       }
     }, 100);
     return () => window.clearInterval(id);
-  }, [mounted, status]);
+  }, [status]);
 
   useEffect(
     () => () => {
@@ -120,14 +155,6 @@ export function RomajiRush({ track }: { track: Track }) {
     setRound(makeRound(pool));
     setStatus("playing");
   };
-
-  if (!mounted) {
-    return (
-      <main id="main" className="grid min-h-dvh place-items-center">
-        <HoshiStatic className="size-24 opacity-70" />
-      </main>
-    );
-  }
 
   if (status === "over") {
     return (

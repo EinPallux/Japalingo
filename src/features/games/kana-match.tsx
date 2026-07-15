@@ -2,14 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
-import { trackKana } from "@/data/curriculum";
 import { sfx } from "@/lib/audio";
+import { learnedKana } from "@/lib/learned";
+import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
-import type { Track } from "@/types";
+import type { Kana, Track } from "@/types";
 
 const PAIRS = 6;
 
@@ -24,11 +26,8 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function buildCards(track: Track, learnedIds: Set<string>): Card[] {
-  const pool = trackKana(track);
-  const learned = pool.filter((k) => learnedIds.has(k.id));
-  const source = learned.length >= PAIRS ? learned : pool;
-  const chosen = shuffle(source).slice(0, PAIRS);
+function buildCards(learned: Kana[]): Card[] {
+  const chosen = shuffle(learned).slice(0, PAIRS);
   const cards = chosen.flatMap((k): Card[] => [
     { uid: `${k.id}-k`, kanaId: k.id, kind: "kana", label: k.char },
     { uid: `${k.id}-r`, kanaId: k.id, kind: "romaji", label: k.romaji },
@@ -37,14 +36,31 @@ function buildCards(track: Track, learnedIds: Set<string>): Card[] {
 }
 
 export function KanaMatch({ track }: { track: Track }) {
-  const router = useRouter();
+  const mounted = useMounted();
   const kanaProgress = useProgress((s) => s.kana);
-  const learnedIds = useMemo(
-    () => new Set(Object.entries(kanaProgress).filter(([, p]) => p.seen > 0).map(([id]) => id)),
-    [kanaProgress],
-  );
+  const learned = useMemo(() => learnedKana(track, kanaProgress), [track, kanaProgress]);
 
-  const [cards, setCards] = useState<Card[]>(() => buildCards(track, learnedIds));
+  // Gate on mount so the localStorage-derived learned set doesn't mismatch SSR.
+  if (!mounted) {
+    return (
+      <main id="main" className="grid min-h-dvh place-items-center">
+        <HoshiStatic className="size-24 opacity-70" />
+      </main>
+    );
+  }
+
+  if (learned.length < PAIRS) {
+    return <NotEnoughKana need={PAIRS} have={learned.length} />;
+  }
+
+  return <KanaMatchGame learned={learned} />;
+}
+
+/** The playable board — only mounted once enough kana have been met, so its
+ *  initial card deal is always drawn from real, learned characters. */
+function KanaMatchGame({ learned }: { learned: Kana[] }) {
+  const router = useRouter();
+  const [cards, setCards] = useState<Card[]>(() => buildCards(learned));
   const [flipped, setFlipped] = useState<string[]>([]);
   const [matched, setMatched] = useState<Set<string>>(new Set());
   const [moves, setMoves] = useState(0);
@@ -61,7 +77,7 @@ export function KanaMatch({ track }: { track: Track }) {
   const done = matched.size === PAIRS;
 
   const restart = () => {
-    setCards(buildCards(track, learnedIds));
+    setCards(buildCards(learned));
     setFlipped([]);
     setMatched(new Set());
     setMoves(0);

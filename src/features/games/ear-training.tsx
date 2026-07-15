@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
+import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { Button } from "@/components/ui/button";
 import { CloseIcon, SpeakerIcon } from "@/components/ui/icons";
-import { trackKana } from "@/data/curriculum";
 import { sfx, speakJa } from "@/lib/audio";
+import { learnedKana } from "@/lib/learned";
 import { useMounted } from "@/lib/use-mounted";
 import { useSpeechStatus } from "@/lib/use-speech";
 import { cn } from "@/lib/utils";
@@ -14,35 +15,40 @@ import { useProgress } from "@/stores/progress";
 import type { Kana, Track } from "@/types";
 
 const ROUNDS = 10;
+/** Fewest met kana needed to offer four distinct options. */
+const MIN_KANA = 4;
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j]!, a[i]!];
+  }
+  return a;
+}
 
 function pickRound(pool: Kana[]): { target: Kana; options: Kana[] } {
   const target = pool[Math.floor(Math.random() * pool.length)]!;
   const options: Kana[] = [target];
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  for (const k of shuffled) {
-    if (!options.some((o) => o.id === k.id)) options.push(k);
+  // Only offer options that read differently from the target (and each other),
+  // so a wrong pick is never actually a correct reading of the sound played.
+  for (const k of shuffle(pool)) {
+    if (options.some((o) => o.romaji === k.romaji)) continue;
+    options.push(k);
     if (options.length === 4) break;
   }
-  return { target, options: options.sort(() => Math.random() - 0.5) };
+  return { target, options: shuffle(options) };
 }
 
+/**
+ * Gate on mount, a working Japanese voice, and a big-enough learned pool, then
+ * hand a ready pool to the game so its first round is real (never an empty set).
+ */
 export function EarTraining({ track }: { track: Track }) {
-  const router = useRouter();
   const mounted = useMounted();
   const speech = useSpeechStatus();
-  const pool = useMemo(() => trackKana(track), [track]);
-
-  const [round, setRound] = useState(0);
-  const [rd, setRd] = useState(() => pickRound(pool));
-  const [picked, setPicked] = useState<string | null>(null);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [done, setDone] = useState(false);
-  const [earned, setEarned] = useState(0);
-  const [xpBefore, setXpBefore] = useState(() => useProgress.getState().xp);
-
-  useEffect(() => {
-    if (speech === "ready" && !done) speakJa(rd.target.char);
-  }, [rd, speech, done]);
+  const kanaProgress = useProgress((s) => s.kana);
+  const pool = useMemo(() => learnedKana(track, kanaProgress), [track, kanaProgress]);
 
   // Gate on mount (so the randomized round doesn't mismatch the SSR HTML) and on
   // resolving whether speech works, so we never show a silent game.
@@ -75,6 +81,30 @@ export function EarTraining({ track }: { track: Track }) {
       </main>
     );
   }
+
+  if (pool.length < MIN_KANA) {
+    return <NotEnoughKana need={MIN_KANA} have={pool.length} />;
+  }
+
+  return <EarTrainingGame pool={pool} />;
+}
+
+function EarTrainingGame({ pool }: { pool: Kana[] }) {
+  const router = useRouter();
+
+  const [round, setRound] = useState(0);
+  const [rd, setRd] = useState(() => pickRound(pool));
+  const [picked, setPicked] = useState<string | null>(null);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [done, setDone] = useState(false);
+  const [earned, setEarned] = useState(0);
+  const [xpBefore, setXpBefore] = useState(() => useProgress.getState().xp);
+
+  // Reaching this component means a Japanese voice is ready, so auto-play each
+  // round's sound (until the game is done).
+  useEffect(() => {
+    if (!done) speakJa(rd.target.char);
+  }, [rd, done]);
 
   const pick = (k: Kana) => {
     if (picked) return;
