@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { selectDaily, selectStreak, selectTodayXp, useProgress } from "@/stores/progress";
+import { COIN_PER_CORRECT, getShopItem } from "@/lib/shop";
 
 const s = () => useProgress.getState();
 
@@ -104,5 +105,68 @@ describe("progress store", () => {
     expect(selectDaily(s()).claimed).toEqual([]);
     expect(selectDaily(s()).correct).toBe(0);
     expect(selectDaily(s()).xp).toBe(0);
+  });
+});
+
+describe("shop economy", () => {
+  it("earns coins on correct answers only", () => {
+    s().answer("hira-a", true);
+    s().answer("hira-i", false);
+    expect(s().coins).toBe(COIN_PER_CORRECT);
+  });
+
+  it("buys a cosmetic (spending the currency), then denies re-buy and unaffordable buys", () => {
+    useProgress.setState({ coins: 200 });
+    const price = getShopItem("hat-leaf")!.price;
+    expect(s().buyItem("hat-leaf").ok).toBe(true);
+    expect(s().coins).toBe(200 - price);
+    expect(s().ownedCosmetics).toContain("hat-leaf");
+
+    expect(s().buyItem("hat-leaf")).toEqual({ ok: false, reason: "owned" });
+
+    useProgress.setState({ coins: 0 });
+    expect(s().buyItem("hat-party").reason).toBe("funds");
+  });
+
+  it("equips and unequips a cosmetic, and refuses unowned ones", () => {
+    useProgress.setState({ coins: 500 });
+    s().buyItem("hat-leaf");
+    s().equip("hat-leaf");
+    expect(s().equipped.hat).toBe("hat-leaf");
+    s().equip("hat-leaf"); // toggle off
+    expect(s().equipped.hat).toBeNull();
+
+    s().equip("hat-crown"); // never bought
+    expect(s().equipped.hat).toBeNull();
+  });
+
+  it("caps streak freezes and auto-consumes one to bridge a single missed day", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 10, 12, 0, 0));
+    useProgress.setState({ gems: 100 });
+    expect(s().buyItem("streak-freeze").ok).toBe(true);
+    expect(s().streakFreezes).toBe(1);
+
+    s().addXp(10); // streak starts on day 10
+    expect(s().streakCount).toBe(1);
+
+    // Skip day 11 entirely; practice on day 12 — the freeze bridges the gap.
+    vi.setSystemTime(new Date(2026, 0, 12, 12, 0, 0));
+    s().addXp(10);
+    expect(s().streakCount).toBe(2);
+    expect(s().streakFreezes).toBe(0);
+  });
+
+  it("doubles XP while an XP boost is active, then reverts when it expires", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 1, 12, 0, 0));
+    useProgress.setState({ gems: 100 });
+    s().buyItem("xp-boost"); // 15 minutes of 2×
+    s().addXp(10);
+    expect(s().xp).toBe(20);
+
+    vi.setSystemTime(new Date(2026, 0, 1, 12, 20, 0)); // boost expired
+    s().addXp(10);
+    expect(s().xp).toBe(30);
   });
 });

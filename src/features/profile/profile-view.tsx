@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AppHeader } from "@/components/app/app-header";
+import { HoshiAvatar } from "@/components/mascot/hoshi-avatar";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { trackKana } from "@/data/curriculum";
@@ -12,6 +13,7 @@ import {
   totalMastered,
   totalSeen,
 } from "@/lib/achievements";
+import { equippedEmojis } from "@/lib/shop";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { selectStreak, useProgress } from "@/stores/progress";
@@ -90,7 +92,7 @@ export function ProfileView() {
       <AppHeader />
       <main id="main" className="mx-auto flex max-w-md flex-col gap-6 px-4 py-8">
         <div className="flex flex-col items-center gap-2 text-center">
-          <HoshiStatic className="size-24" />
+          <HoshiAvatar size={104} equipped={equippedEmojis(state.equipped)} />
           <h1 className="font-display text-2xl font-bold text-ink">{state.name || "friend"}</h1>
           <span className="rounded-full bg-primary-tint px-3 py-1 text-sm font-bold text-primary">
             {rank.name}
@@ -100,7 +102,9 @@ export function ProfileView() {
         <div className="grid grid-cols-3 gap-3">
           <Stat value={`⚡ ${state.xp}`} label="Total XP" />
           <Stat value={`🔥 ${selectStreak(state)}`} label="Day streak" />
+          <Stat value={`🪙 ${state.coins}`} label="Coins" />
           <Stat value={`💎 ${state.gems}`} label="Gems" />
+          <Stat value={`❄️ ${state.streakFreezes}`} label="Freezes" />
           <Stat value={`${seen}/92`} label="Kana met" />
           <Stat value={mastered} label="Mastered" />
           <Stat value={state.completedLessons.length} label="Lessons" />
