@@ -22,6 +22,7 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 - **Real SRS "due today" scheduling.** Each kana now carries a review **due-date** whose interval grows with mastery (4h → 1d → … → 16d) and shrinks on a miss. The Practice hub shows how many kana are **due now** (and "all caught up!" when none are), reviews the due set first, and the dashboard's Practice card carries a **"N due"** badge. Answering reschedules the kana. (`src/lib/srs.ts` + a `useNow` hook; the Practice hub now freezes its review set at session start so answering can't rebuild the queue mid-review.)
 - **Gojūon reference chart** (`/learn/chart`, from a dashboard link) — the classic 5×10 Hiragana/Katakana grid with the usual gaps (y/w rows) and ん. Cells are **tinted by mastery**; tap any one for a detail card with its reading, a Listen button, the "sounds like" anchor, the mnemonic, and an example word — all from the `/database` books. The reference beginners keep reaching for.
+- **"Meet the Sounds" primer** (`/learn/sounds`) — a 3-step intro for absolute beginners: the **5 vowels** with their pronunciation anchors (from `/database`), then how every other kana is just a **consonant + a vowel** (the k-row falls out of "k + あいうえお"), then off to the path. A **"New here? Meet the sounds" card** appears on the dashboard while you've met fewer than 5 kana, and hides once you're rolling.
 
 ---
 

@@ -8,6 +8,7 @@ import { Onboarding } from "@/features/onboarding/onboarding";
 import { PathView } from "@/features/path/path-view";
 import { DailyQuests } from "@/features/quests/daily-quests";
 import { ALL_KANA } from "@/data/curriculum";
+import { totalSeen } from "@/lib/achievements";
 import { isDue } from "@/lib/srs";
 import { useMounted } from "@/lib/use-mounted";
 import { useNow } from "@/lib/use-now";
@@ -31,6 +32,7 @@ export function LearnDashboard() {
     () => ALL_KANA.filter((k) => isDue(kanaProgress[k.id], now)).length,
     [kanaProgress, now],
   );
+  const seenCount = useMemo(() => totalSeen(kanaProgress), [kanaProgress]);
 
   if (!mounted) {
     return (
@@ -68,6 +70,26 @@ export function LearnDashboard() {
               </button>
             ))}
           </div>
+
+          {seenCount < 5 ? (
+            <Link
+              href="/learn/sounds"
+              className="flex items-center justify-between gap-3 rounded-blob-lg border border-primary/30 bg-gradient-to-r from-primary-tint to-secondary-tint px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
+            >
+              <span className="flex items-center gap-3">
+                <span aria-hidden className="text-2xl">
+                  🔰
+                </span>
+                <span>
+                  <span className="block font-display font-bold text-ink">New here? Meet the sounds</span>
+                  <span className="text-sm text-muted">The 5 vowels + how kana are built — 1 min</span>
+                </span>
+              </span>
+              <span aria-hidden className="font-display text-xl text-primary">
+                ▸
+              </span>
+            </Link>
+          ) : null}
 
           <DailyQuests />
 
