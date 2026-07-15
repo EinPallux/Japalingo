@@ -14,7 +14,19 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
-## [0.9.0] - 2026-07-15
+## [0.9.1] - 2026-07-15
+
+**Phase 2 — Audio fix.** Speech that failed silently now works more often, and fails honestly when it can't.
+
+### Fixed
+
+- **Japanese pronunciation was silent for some browsers.** `ttsAvailable()` only checked that the Speech API *existed*, not that any voice was installed — so a voice-less browser showed the Ear Training game and Listen buttons but every `speak()` failed with `synthesis-failed` (silence). Speech now:
+  - **Waits for the voice list to load** before the first utterance (`getVoices()` is empty on the first call in Chrome/Edge, so early calls — like Ear Training speaking on mount — were being dropped),
+  - **resumes a spontaneously-paused synth** and only cancels when something is actually queued (a known Chrome quirk that swallowed utterances), and
+  - **prefers a Japanese voice**, falling back to the `ja-JP` language hint.
+- **Honest fallback when no voice exists.** Ear Training now shows a clear "this browser has no speech voice" message (with a tip) instead of a silent game, and the Listen buttons show a muted "No audio" chip instead of doing nothing. Detection waits for voices to load so it doesn't false-trigger.
+
+
 
 **Phase 2 — Hoshi's Shop.** A two-currency economy with real ways to spend.
 
@@ -183,7 +195,8 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.9.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.9.1...HEAD
+[0.9.1]: https://github.com/japalingo/japalingo/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/japalingo/japalingo/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/japalingo/japalingo/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/japalingo/japalingo/compare/v0.6.1...v0.7.0

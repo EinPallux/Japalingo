@@ -6,8 +6,9 @@ import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon, SpeakerIcon } from "@/components/ui/icons";
 import { trackKana } from "@/data/curriculum";
-import { sfx, speakJa, ttsAvailable } from "@/lib/audio";
+import { sfx, speakJa } from "@/lib/audio";
 import { useMounted } from "@/lib/use-mounted";
+import { useSpeechStatus } from "@/lib/use-speech";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
 import type { Kana, Track } from "@/types";
@@ -28,6 +29,7 @@ function pickRound(pool: Kana[]): { target: Kana; options: Kana[] } {
 export function EarTraining({ track }: { track: Track }) {
   const router = useRouter();
   const mounted = useMounted();
+  const speech = useSpeechStatus();
   const pool = useMemo(() => trackKana(track), [track]);
 
   const [round, setRound] = useState(0);
@@ -39,12 +41,12 @@ export function EarTraining({ track }: { track: Track }) {
   const [xpBefore, setXpBefore] = useState(() => useProgress.getState().xp);
 
   useEffect(() => {
-    if (mounted && !done && ttsAvailable()) speakJa(rd.target.char);
-  }, [rd, mounted, done]);
+    if (speech === "ready" && !done) speakJa(rd.target.char);
+  }, [rd, speech, done]);
 
-  // Gate the randomized round behind mount so the server HTML (which would pick
-  // a different random kana) never mismatches the client's first render.
-  if (!mounted) {
+  // Gate on mount (so the randomized round doesn't mismatch the SSR HTML) and on
+  // resolving whether speech works, so we never show a silent game.
+  if (!mounted || speech === "checking") {
     return (
       <main id="main" className="grid min-h-dvh place-items-center">
         <HoshiStatic className="size-24 opacity-70" />
@@ -52,12 +54,18 @@ export function EarTraining({ track }: { track: Track }) {
     );
   }
 
-  if (!ttsAvailable()) {
+  if (speech === "unavailable") {
     return (
       <main id="main" className="grid min-h-dvh place-items-center px-5 text-center">
         <div className="flex max-w-sm flex-col items-center gap-4">
           <HoshiStatic className="size-28" />
-          <p className="text-ink">Ear Training needs speech audio, which this browser doesn&apos;t support.</p>
+          <p className="text-ink">
+            Ear Training needs a speech voice, and this browser doesn&apos;t have one installed.
+          </p>
+          <p className="text-sm text-muted">
+            Tip: Chrome or Edge usually work out of the box; on some systems you may need to add a
+            Japanese text-to-speech voice. The other games and lessons don&apos;t need audio.
+          </p>
           <Button href="/learn" size="lg">
             Back to path
           </Button>

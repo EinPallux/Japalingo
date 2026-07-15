@@ -44,39 +44,103 @@ export const sfx = {
   complete: () => tones([523, 659, 784, 1047, 1319], "triangle", 0.11, 0.18),
 };
 
+/** Whether the Speech Synthesis API even exists. Note: this being true does NOT
+ *  guarantee any voice is installed — use `ensureSpeech()` to confirm sound. */
 export function ttsAvailable(): boolean {
-  return typeof window !== "undefined" && "speechSynthesis" in window;
+  return (
+    typeof window !== "undefined" &&
+    "speechSynthesis" in window &&
+    "SpeechSynthesisUtterance" in window
+  );
 }
 
-let jaVoice: SpeechSynthesisVoice | null = null;
-let voicesBound = false;
+function currentVoices(): SpeechSynthesisVoice[] {
+  return ttsAvailable() ? window.speechSynthesis.getVoices() : [];
+}
 
-/** Resolve the best ja-JP voice, caching it and refreshing when the voice list
- *  loads (getVoices() is frequently empty on the first call in Chrome). */
-function resolveJaVoice(): SpeechSynthesisVoice | null {
-  if (!ttsAvailable()) return null;
+let voicesPromise: Promise<SpeechSynthesisVoice[]> | null = null;
+
+/** Resolve once the browser's voice list is populated. `getVoices()` is often
+ *  empty on the first call (voices load asynchronously in Chrome/Edge), so we
+ *  wait for `voiceschanged` — with a timeout, since some engines never fire it. */
+function ensureVoices(): Promise<SpeechSynthesisVoice[]> {
+  if (!ttsAvailable()) return Promise.resolve([]);
+  const immediate = currentVoices();
+  if (immediate.length) return Promise.resolve(immediate);
+  if (voicesPromise) return voicesPromise;
+
   const synth = window.speechSynthesis;
-  const pick = () =>
-    synth.getVoices().find((v) => v.lang?.toLowerCase().startsWith("ja")) ?? null;
-  jaVoice = pick();
-  if (!voicesBound && typeof synth.addEventListener === "function") {
-    voicesBound = true;
-    synth.addEventListener("voiceschanged", () => {
-      jaVoice = pick();
-    });
-  }
-  return jaVoice;
+  voicesPromise = new Promise((resolve) => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      resolve(currentVoices());
+    };
+    if (typeof synth.addEventListener === "function") {
+      const handler = () => {
+        synth.removeEventListener("voiceschanged", handler);
+        finish();
+      };
+      synth.addEventListener("voiceschanged", handler);
+    }
+    window.setTimeout(finish, 1500);
+  });
+  return voicesPromise;
 }
 
-/** Speak Japanese text with the best available ja-JP voice. */
+function pickJaVoice(): SpeechSynthesisVoice | null {
+  const vs = currentVoices();
+  return (
+    vs.find((v) => (v.lang || "").toLowerCase().replace("_", "-").startsWith("ja")) ??
+    vs.find((v) => /japan|日本|にほん/i.test(v.name)) ??
+    null
+  );
+}
+
+export type SpeechStatus = "ready" | "unavailable";
+
+/**
+ * Resolve whether spoken audio will actually work: the API must exist AND the
+ * browser must have at least one installed voice (a voice-less browser fails
+ * every `speak()` with `synthesis-failed` — silent). Lets the UI show an honest
+ * fallback instead of a dead Listen button.
+ */
+export function ensureSpeech(): Promise<SpeechStatus> {
+  if (!ttsAvailable()) return Promise.resolve("unavailable");
+  return ensureVoices().then((voices) => (voices.length > 0 ? "ready" : "unavailable"));
+}
+
+/** Speak Japanese text with the best available ja-JP voice. Waits for voices on
+ *  first use, prefers a Japanese voice (falling back to the lang hint), and
+ *  nudges a spontaneously-paused synth (a known Chrome quirk). */
 export function speakJa(text: string, rate = 0.9): void {
   if (!ttsAvailable()) return;
   const synth = window.speechSynthesis;
-  const utter = new SpeechSynthesisUtterance(text);
-  utter.lang = "ja-JP";
-  utter.rate = rate;
-  const ja = jaVoice ?? resolveJaVoice();
-  if (ja) utter.voice = ja;
-  synth.cancel();
-  synth.speak(utter);
+
+  const doSpeak = () => {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "ja-JP";
+    utter.rate = rate;
+    const voice = pickJaVoice();
+    if (voice) utter.voice = voice;
+    // Only cancel when something is actually queued — cancelling then speaking
+    // in the same tick can drop the new utterance on some Chrome builds.
+    if (synth.speaking || synth.pending) {
+      try {
+        synth.cancel();
+      } catch {
+        /* ignore */
+      }
+    }
+    synth.speak(utter);
+    try {
+      synth.resume();
+    } catch {
+      /* ignore */
+    }
+  };
+
+  if (currentVoices().length === 0) void ensureVoices().then(doSpeak);
+  else doSpeak();
 }
