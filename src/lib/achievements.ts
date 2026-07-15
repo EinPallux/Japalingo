@@ -27,6 +27,7 @@ export interface Badge {
 export interface ProgressSnapshot {
   xp: number;
   streakCount: number;
+  bestStreak?: number;
   completedLessons: string[];
   kana: Record<string, KanaProgress>;
 }
@@ -42,10 +43,13 @@ export function totalMastered(kana: Record<string, KanaProgress>): number {
 }
 
 export function badgesFor(s: ProgressSnapshot): Badge[] {
+  // Streak badges reward the *peak* streak ever reached, so a broken streak
+  // never revokes a badge the learner already earned.
+  const peakStreak = Math.max(s.bestStreak ?? 0, s.streakCount);
   return [
     { id: "first", name: "First Steps", desc: "Finish your first lesson", emoji: "👣", earned: s.completedLessons.length >= 1 },
-    { id: "onfire", name: "On Fire", desc: "Reach a 3-day streak", emoji: "🔥", earned: s.streakCount >= 3 },
-    { id: "week", name: "Week Warrior", desc: "Reach a 7-day streak", emoji: "📅", earned: s.streakCount >= 7 },
+    { id: "onfire", name: "On Fire", desc: "Reach a 3-day streak", emoji: "🔥", earned: peakStreak >= 3 },
+    { id: "week", name: "Week Warrior", desc: "Reach a 7-day streak", emoji: "📅", earned: peakStreak >= 7 },
     { id: "rising", name: "Rising Star", desc: "Earn 500 XP", emoji: "⭐", earned: s.xp >= 500 },
     { id: "hira", name: "Hiragana Hero", desc: "Meet all 46 hiragana", emoji: "あ", earned: trackSeen(s.kana, "hiragana") >= 46 },
     { id: "kata", name: "Katakana Champ", desc: "Meet all 46 katakana", emoji: "ア", earned: trackSeen(s.kana, "katakana") >= 46 },

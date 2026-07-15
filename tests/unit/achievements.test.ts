@@ -26,4 +26,11 @@ describe("badgesFor", () => {
     expect(badges.find((b) => b.id === "week")?.earned).toBe(false);
     expect(badges.find((b) => b.id === "rising")?.earned).toBe(false);
   });
+
+  it("keeps streak badges earned via bestStreak even after the streak breaks", () => {
+    // Current streak is 0 (broken), but the learner once reached 7 days.
+    const badges = badgesFor({ xp: 0, streakCount: 0, bestStreak: 7, completedLessons: [], kana: emptyKana });
+    expect(badges.find((b) => b.id === "onfire")?.earned).toBe(true);
+    expect(badges.find((b) => b.id === "week")?.earned).toBe(true);
+  });
 });

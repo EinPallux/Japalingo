@@ -28,7 +28,9 @@ export function JourneyView() {
     for (const k of ALL_KANA) {
       const p = kana[k.id];
       if (p) {
-        attempts += p.seen;
+        // Accuracy is over graded answers only — `attempts` (falling back to
+        // `seen` for pre-attempts saves), never passive "met it" views.
+        attempts += p.attempts ?? p.seen;
         correct += p.correct;
       }
     }
