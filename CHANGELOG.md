@@ -14,6 +14,26 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.9.0] - 2026-07-15
+
+**Phase 2 — Hoshi's Shop.** A two-currency economy with real ways to spend.
+
+### Added
+
+- **Second currency — Coins 🪙** — earned from every correct answer across games, lessons, and practice, alongside the existing **Gems 💎** (from finishing lessons and claiming quests). The header now shows both.
+- **Hoshi's Shop** (`/learn/shop`) — reachable from the header and a dashboard card, with **three kinds of sink**:
+  - **Hoshi cosmetics** — hats, face, and neck items you buy and **equip**; equipped pieces render right on the mascot (shown on the shop hero and your profile).
+  - **Streak Freeze** — banked (up to 3) and **auto-spent to bridge a single missed day** so your streak survives.
+  - **XP Boost** — 15 minutes of **double XP**, applied in the store's XP math and shown as a live countdown.
+- 13 launch items across Boosts & Protection, Hats, Face, and Neck, priced in whichever currency fits. Purchases validate affordability, ownership, freeze cap, and active-boost state; the profile gains Coins + Freezes stats and shows Hoshi in their current outfit.
+- Unit tests for the catalog and the economy (coin earning, buy/deny, equip toggle, streak-freeze bridging, XP-boost doubling) — 39 total.
+
+### Notes
+
+- Cosmetics and boosts are pure mascot/UI + gamification — no learning content — so the shop is **not** content-gated.
+
+---
+
 ## [0.8.0] - 2026-07-15
 
 **Phase 2 — Romaji Rush.** The fifth game mode: a tap-based speed round.
@@ -163,7 +183,8 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.9.0...HEAD
+[0.9.0]: https://github.com/japalingo/japalingo/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/japalingo/japalingo/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/japalingo/japalingo/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/japalingo/japalingo/compare/v0.6.0...v0.6.1

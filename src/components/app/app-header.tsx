@@ -60,6 +60,7 @@ function DailyGoalRing({ value, goal }: { value: number; goal: number }) {
 export function AppHeader() {
   const mounted = useMounted();
   const xp = useProgress((s) => s.xp);
+  const coins = useProgress((s) => s.coins);
   const gems = useProgress((s) => s.gems);
   const streak = useProgress(selectStreak);
   const todayXp = useProgress(selectTodayXp);
@@ -75,15 +76,22 @@ export function AppHeader() {
           <HoshiStatic className="size-8" />
           <span className="hidden font-display text-lg font-bold text-ink sm:inline">Japalingo</span>
         </Link>
-        <div className="flex items-center gap-2.5 font-display font-bold sm:gap-3">
+        <div className="flex items-center gap-2 font-display font-bold sm:gap-3">
           <Stat icon="🔥" value={mounted ? streak : 0} label="Day streak" className="text-secondary-strong" />
-          <Stat icon="⚡" value={mounted ? xp : 0} label="Total XP" className="text-primary" />
+          <Stat icon="🪙" value={mounted ? coins : 0} label="Coins" className="text-accent-strong" />
           <Stat icon="💎" value={mounted ? gems : 0} label="Gems" className="text-info" />
           <DailyGoalRing value={mounted ? todayXp : 0} goal={mounted ? goal : 30} />
           <Link
+            href="/learn/shop"
+            aria-label="Shop"
+            className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-border bg-surface text-lg transition hover:bg-surface-2"
+          >
+            <span aria-hidden>🛍️</span>
+          </Link>
+          <Link
             href="/profile"
             aria-label="Your profile"
-            className="grid size-10 place-items-center rounded-full border-2 border-border bg-surface text-ink transition hover:bg-surface-2"
+            className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-border bg-surface text-ink transition hover:bg-surface-2"
           >
             <span className="font-display text-sm font-bold">{initial}</span>
           </Link>
