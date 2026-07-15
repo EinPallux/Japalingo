@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { selectStreak, selectTodayXp, useProgress } from "@/stores/progress";
+import { selectDaily, selectStreak, selectTodayXp, useProgress } from "@/stores/progress";
 
 const s = () => useProgress.getState();
 
@@ -77,5 +77,32 @@ describe("progress store", () => {
     s().addXp(10);
     expect(selectTodayXp(s())).toBe(10);
     expect(s().todayDate).toBe("2026-03-02");
+  });
+
+  it("counts correct answers toward the daily quest metric", () => {
+    s().answer("hira-a", true);
+    s().answer("hira-i", true);
+    s().answer("hira-u", false);
+    expect(selectDaily(s()).correct).toBe(2);
+  });
+
+  it("claims a quest reward once (idempotent) and resets claims on a new day", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 0, 1, 12, 0, 0));
+    s().addXp(30);
+    const before = s().gems;
+
+    s().claimQuest("goal", 15);
+    expect(s().gems).toBe(before + 15);
+    expect(selectDaily(s()).claimed).toContain("goal");
+
+    s().claimQuest("goal", 15); // already claimed today — no double reward
+    expect(s().gems).toBe(before + 15);
+
+    // Next day: claims (and the daily correct/XP counters) reset.
+    vi.setSystemTime(new Date(2026, 0, 2, 12, 0, 0));
+    expect(selectDaily(s()).claimed).toEqual([]);
+    expect(selectDaily(s()).correct).toBe(0);
+    expect(selectDaily(s()).xp).toBe(0);
   });
 });

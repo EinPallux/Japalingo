@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/app/app-header";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Onboarding } from "@/features/onboarding/onboarding";
 import { PathView } from "@/features/path/path-view";
+import { DailyQuests } from "@/features/quests/daily-quests";
 import { useMounted } from "@/lib/use-mounted";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
@@ -57,6 +58,8 @@ export function LearnDashboard() {
               </button>
             ))}
           </div>
+
+          <DailyQuests />
 
           <Link
             href="/learn/practice"

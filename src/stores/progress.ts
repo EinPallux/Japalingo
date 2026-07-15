@@ -34,6 +34,10 @@ export interface ProgressState {
   streakDate: string | null;
   todayXp: number;
   todayDate: string | null;
+  /** Correct answers today (drives daily quests). Rolls over with `todayDate`. */
+  dailyCorrect: number;
+  /** Quest ids already claimed today. Rolls over with `todayDate`. */
+  claimedQuests: string[];
   kana: Record<string, KanaProgress>;
   completedLessons: string[];
   activeTrack: Track;
@@ -45,6 +49,7 @@ export interface ProgressState {
   rate(kanaId: string, grade: Grade): void;
   markSeen(kanaId: string): void;
   completeLesson(lessonId: string): { alreadyDone: boolean };
+  claimQuest(id: string, reward: number): void;
   progressFor(kanaId: string): KanaProgress;
   reset(): void;
 }
@@ -60,10 +65,43 @@ const initial = {
   streakDate: null as string | null,
   todayXp: 0,
   todayDate: null as string | null,
+  dailyCorrect: 0,
+  claimedQuests: [] as string[],
   kana: {} as Record<string, KanaProgress>,
   completedLessons: [] as string[],
   activeTrack: "hiragana" as Track,
 };
+
+type DailyOpts = { xp?: number; correct?: number };
+
+/**
+ * Roll the day-scoped counters over to `today` (zeroing them on a new day),
+ * then apply this activity's XP + correct-answer deltas and advance the streak.
+ * Centralising the lazy rollover keeps `todayXp`, `dailyCorrect`, the streak,
+ * and `claimedQuests` consistent no matter which action fires first.
+ */
+function applyDaily(s: ProgressState, opts: DailyOpts): Partial<ProgressState> {
+  const t = today();
+  const sameDay = s.todayDate === t;
+  const addXp = opts.xp ?? 0;
+
+  let streakCount = s.streakCount;
+  let streakDate = s.streakDate;
+  if (addXp > 0 && s.streakDate !== t) {
+    streakCount = s.streakDate === yesterday() ? s.streakCount + 1 : 1;
+    streakDate = t;
+  }
+
+  return {
+    xp: s.xp + addXp,
+    todayDate: t,
+    todayXp: (sameDay ? s.todayXp : 0) + addXp,
+    dailyCorrect: (sameDay ? s.dailyCorrect : 0) + (opts.correct ?? 0),
+    claimedQuests: sameDay ? s.claimedQuests : [],
+    streakCount,
+    streakDate,
+  };
+}
 
 export const useProgress = create<ProgressState>()(
   persist(
@@ -75,42 +113,35 @@ export const useProgress = create<ProgressState>()(
 
       setActiveTrack: (activeTrack) => set({ activeTrack }),
 
-      addXp: (n) =>
+      addXp: (n) => set((s) => applyDaily(s, { xp: n })),
+
+      answer: (kanaId, correct) =>
         set((s) => {
-          const t = today();
-          const todayXp = s.todayDate === t ? s.todayXp + n : n;
-          let streakCount = s.streakCount;
-          let streakDate = s.streakDate;
-          if (s.streakDate !== t) {
-            streakCount = s.streakDate === yesterday() ? s.streakCount + 1 : 1;
-            streakDate = t;
-          }
-          return { xp: s.xp + n, todayXp, todayDate: t, streakCount, streakDate };
+          const cur = s.kana[kanaId] ?? emptyProgress();
+          return {
+            kana: { ...s.kana, [kanaId]: applyAnswer(cur, correct) },
+            ...applyDaily(s, correct ? { xp: XP_PER_CORRECT, correct: 1 } : {}),
+          };
         }),
 
-      answer: (kanaId, correct) => {
+      rate: (kanaId, grade) =>
         set((s) => {
           const cur = s.kana[kanaId] ?? emptyProgress();
-          return { kana: { ...s.kana, [kanaId]: applyAnswer(cur, correct) } };
-        });
-        if (correct) get().addXp(XP_PER_CORRECT);
-      },
+          const ok = grade !== "again";
+          return {
+            kana: { ...s.kana, [kanaId]: applyRating(cur, grade) },
+            ...applyDaily(s, ok ? { xp: XP_PER_CORRECT, correct: 1 } : {}),
+          };
+        }),
 
-      rate: (kanaId, grade) => {
+      markSeen: (kanaId) =>
         set((s) => {
           const cur = s.kana[kanaId] ?? emptyProgress();
-          return { kana: { ...s.kana, [kanaId]: applyRating(cur, grade) } };
-        });
-        if (grade !== "again") get().addXp(XP_PER_CORRECT);
-      },
-
-      markSeen: (kanaId) => {
-        set((s) => {
-          const cur = s.kana[kanaId] ?? emptyProgress();
-          return { kana: { ...s.kana, [kanaId]: { ...cur, seen: cur.seen + 1 } } };
-        });
-        get().addXp(2);
-      },
+          return {
+            kana: { ...s.kana, [kanaId]: { ...cur, seen: cur.seen + 1 } },
+            ...applyDaily(s, { xp: 2 }),
+          };
+        }),
 
       completeLesson: (lessonId) => {
         const alreadyDone = get().completedLessons.includes(lessonId);
@@ -118,11 +149,19 @@ export const useProgress = create<ProgressState>()(
           set((s) => ({
             completedLessons: [...s.completedLessons, lessonId],
             gems: s.gems + 5,
+            ...applyDaily(s, { xp: XP_LESSON_COMPLETE }),
           }));
-          get().addXp(XP_LESSON_COMPLETE);
         }
         return { alreadyDone };
       },
+
+      claimQuest: (id, reward) =>
+        set((s) => {
+          const base = applyDaily(s, {});
+          const claimed = base.claimedQuests ?? [];
+          if (claimed.includes(id)) return {};
+          return { ...base, gems: s.gems + reward, claimedQuests: [...claimed, id] };
+        }),
 
       progressFor: (kanaId) => get().kana[kanaId] ?? emptyProgress(),
 
@@ -149,4 +188,25 @@ export function selectTodayXp(s: ProgressState): number {
 export function selectStreak(s: ProgressState): number {
   if (!s.streakDate) return 0;
   return s.streakDate === today() || s.streakDate === yesterday() ? s.streakCount : 0;
+}
+
+/** The current local day key — for comparing against the stored `todayDate`. */
+export function todayKey(): string {
+  return today();
+}
+
+/** Today's quest metrics, derived at read time (zeroed once the day rolls). */
+export function selectDaily(s: ProgressState): { xp: number; correct: number; claimed: string[] } {
+  const active = s.todayDate === today();
+  return {
+    xp: active ? s.todayXp : 0,
+    correct: active ? s.dailyCorrect : 0,
+    claimed: active ? s.claimedQuests : [],
+  };
+}
+
+/** Stable day number (local) — rotates the daily quest set deterministically. */
+export function dayNumber(): number {
+  const d = new Date();
+  return Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86_400_000);
 }

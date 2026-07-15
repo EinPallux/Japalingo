@@ -10,7 +10,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
-Continuing **Phase 2**: Romaji Rush, daily quests, and full app-UI i18n (EN/DE).
+Continuing **Phase 2**: Romaji Rush, and full app-UI i18n (EN/DE).
+
+---
+
+## [0.7.0] - 2026-07-15
+
+**Phase 2 — Daily Quests.** A motivation loop over the games and lessons you already have.
+
+### Added
+
+- **Daily Quests** — a three-quest board on the dashboard (reach your daily goal, nail N correct answers, earn N XP) that refreshes each day. The set rotates deterministically by the day, tracks your real activity from every game and lesson, and each completed quest is **claimable for gems** with a satisfying reward. Quests reset at your local midnight and read correctly across day boundaries.
+- Store support: day-scoped `dailyCorrect` counter and `claimedQuests`, a consolidated daily-rollover helper, a `claimQuest` action, and read-time selectors — with unit tests for quest rotation, completion, and claim idempotency (30 tests total).
+
+### Notes
+
+- Quests are pure gamification over **existing** activity (today's XP + correct answers); no new learning content, so this stays within the `/database` content-gating rule.
 
 ---
 
@@ -138,7 +153,8 @@ Continuing **Phase 2**: Romaji Rush, daily quests, and full app-UI i18n (EN/DE).
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/japalingo/japalingo/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/japalingo/japalingo/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/japalingo/japalingo/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/japalingo/japalingo/compare/v0.4.0...v0.5.0
