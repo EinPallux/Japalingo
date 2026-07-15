@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { AudioSync } from "@/components/app/audio-sync";
+import { ServiceWorkerRegister } from "@/components/app/service-worker-register";
 import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 
@@ -63,11 +64,25 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     icons: {
       icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    },
+    // Installable-app metadata for iOS "Add to Home Screen".
+    appleWebApp: {
+      capable: true,
+      title: "Japalingo",
+      statusBarStyle: "default",
+    },
+    other: {
+      // Next emits the standard `mobile-web-app-capable` from appleWebApp.capable;
+      // add the legacy Apple tag too, for iOS versions before 16.4.
+      "apple-mobile-web-app-capable": "yes",
     },
   };
 }
 
 export const viewport: Viewport = {
+  // Extend under the notch/home indicator so safe-area insets can be honored.
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f7f7fd" },
     { media: "(prefers-color-scheme: dark)", color: "#111129" },
@@ -95,6 +110,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider attribute="data-theme" defaultTheme="light" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <AudioSync />
+            <ServiceWorkerRegister />
             {children}
           </NextIntlClientProvider>
         </ThemeProvider>

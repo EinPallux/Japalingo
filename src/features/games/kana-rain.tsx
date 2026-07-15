@@ -208,7 +208,7 @@ function KanaRainGame({ pool }: { pool: Kana[] }) {
   }
 
   return (
-    <main id="main" className="mx-auto flex min-h-dvh max-w-md flex-col px-4 py-4">
+    <main id="main" className="mx-auto flex min-h-dvh max-w-md flex-col px-4 pt-4 pb-safe">
       <div className="mb-3 flex items-center justify-between gap-3">
         <button
           type="button"

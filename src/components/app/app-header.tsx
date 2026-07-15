@@ -70,7 +70,7 @@ export function AppHeader() {
   const initial = mounted && name.trim() ? name.trim()[0]!.toUpperCase() : "・";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-border bg-bg/85 pt-safe backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-3xl items-center justify-between gap-3 px-4">
         <Link href="/learn" className="flex items-center gap-2" aria-label="Japalingo — learn">
           <HoshiStatic className="size-8" />
