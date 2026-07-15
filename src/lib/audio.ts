@@ -101,14 +101,14 @@ function pickJaVoice(): SpeechSynthesisVoice | null {
 export type SpeechStatus = "ready" | "unavailable";
 
 /**
- * Resolve whether spoken audio will actually work: the API must exist AND the
- * browser must have at least one installed voice (a voice-less browser fails
- * every `speak()` with `synthesis-failed` — silent). Lets the UI show an honest
- * fallback instead of a dead Listen button.
+ * Resolve whether *Japanese* speech will actually work. The API existing isn't
+ * enough — nor is having some voice: a browser with only, say, English voices
+ * either stays silent or mangles Japanese text. So we require an installed
+ * ja voice, letting the UI show an honest fallback instead of silence.
  */
 export function ensureSpeech(): Promise<SpeechStatus> {
   if (!ttsAvailable()) return Promise.resolve("unavailable");
-  return ensureVoices().then((voices) => (voices.length > 0 ? "ready" : "unavailable"));
+  return ensureVoices().then(() => (pickJaVoice() ? "ready" : "unavailable"));
 }
 
 /** Speak Japanese text with the best available ja-JP voice. Waits for voices on
