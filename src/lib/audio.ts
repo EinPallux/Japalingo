@@ -4,6 +4,13 @@
  * ship; recorded audio can replace `speakJa` later behind this same surface.
  */
 
+/** Runtime audio preferences, synced from the store (see AudioSync). */
+const audioPrefs = { sfxEnabled: true, speechRate: 0.9 };
+
+export function configureAudio(prefs: Partial<typeof audioPrefs>): void {
+  Object.assign(audioPrefs, prefs);
+}
+
 let audioCtx: AudioContext | null = null;
 
 function getCtx(): AudioContext | null {
@@ -17,6 +24,7 @@ function getCtx(): AudioContext | null {
 
 /** Play a short sequence of tones with a gentle envelope. */
 function tones(freqs: number[], type: OscillatorType, step = 0.09, dur = 0.14) {
+  if (!audioPrefs.sfxEnabled) return;
   const ac = getCtx();
   if (!ac) return;
   if (ac.state === "suspended") void ac.resume();
@@ -114,7 +122,7 @@ export function ensureSpeech(): Promise<SpeechStatus> {
 /** Speak Japanese text with the best available ja-JP voice. Waits for voices on
  *  first use, prefers a Japanese voice (falling back to the lang hint), and
  *  nudges a spontaneously-paused synth (a known Chrome quirk). */
-export function speakJa(text: string, rate = 0.9): void {
+export function speakJa(text: string, rate = audioPrefs.speechRate): void {
   if (!ttsAvailable()) return;
   const synth = window.speechSynthesis;
 

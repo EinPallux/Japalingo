@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AppHeader } from "@/components/app/app-header";
 import { HoshiAvatar } from "@/components/mascot/hoshi-avatar";
@@ -62,7 +61,6 @@ function Stat({ value, label }: { value: string | number; label: string }) {
 }
 
 export function ProfileView() {
-  const router = useRouter();
   const mounted = useMounted();
   const state = useProgress();
   const [gridTrack, setGridTrack] = useState<Track>("hiragana");
@@ -79,13 +77,6 @@ export function ProfileView() {
   const badges = badgesFor(state);
   const seen = totalSeen(state.kana);
   const mastered = totalMastered(state.kana);
-
-  const reset = () => {
-    if (window.confirm("Reset all progress? This can't be undone.")) {
-      state.reset();
-      router.push("/learn");
-    }
-  };
 
   return (
     <>
@@ -166,13 +157,9 @@ export function ProfileView() {
           <Button href="/learn" size="lg" className="w-full">
             Back to learning
           </Button>
-          <button
-            type="button"
-            onClick={reset}
-            className="text-sm font-semibold text-muted transition hover:text-error-strong"
-          >
-            Reset all progress
-          </button>
+          <Button href="/settings" size="lg" variant="ghost" className="w-full">
+            ⚙️ Settings
+          </Button>
         </div>
       </main>
     </>

@@ -54,12 +54,18 @@ export interface ProgressState {
   equipped: { hat: string | null; face: string | null; neck: string | null };
   /** Epoch ms until which XP is doubled (0 = no active boost). */
   xpBoostUntil: number;
+  /** Preferences. */
+  sfxEnabled: boolean;
+  speechRate: number;
   kana: Record<string, KanaProgress>;
   completedLessons: string[];
   activeTrack: Track;
 
   completeOnboarding(data: { name: string; reason: string | null; dailyGoalXp: number }): void;
   setActiveTrack(track: Track): void;
+  setDailyGoal(xp: number): void;
+  setSfxEnabled(on: boolean): void;
+  setSpeechRate(rate: number): void;
   addXp(n: number): void;
   answer(kanaId: string, correct: boolean): void;
   rate(kanaId: string, grade: Grade): void;
@@ -96,6 +102,8 @@ const initial = {
     neck: string | null;
   },
   xpBoostUntil: 0,
+  sfxEnabled: true,
+  speechRate: 0.9,
   kana: {} as Record<string, KanaProgress>,
   completedLessons: [] as string[],
   activeTrack: "hiragana" as Track,
@@ -154,6 +162,10 @@ export const useProgress = create<ProgressState>()(
         set({ onboardingComplete: true, name, reason, dailyGoalXp }),
 
       setActiveTrack: (activeTrack) => set({ activeTrack }),
+
+      setDailyGoal: (dailyGoalXp) => set({ dailyGoalXp }),
+      setSfxEnabled: (sfxEnabled) => set({ sfxEnabled }),
+      setSpeechRate: (speechRate) => set({ speechRate }),
 
       addXp: (n) => set((s) => applyDaily(s, { xp: n })),
 
