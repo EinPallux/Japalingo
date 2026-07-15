@@ -6,6 +6,7 @@ import {
   applyRating,
   emptyProgress,
   type Grade,
+  nextDue,
   XP_LESSON_COMPLETE,
   XP_PER_CORRECT,
 } from "@/lib/srs";
@@ -53,12 +54,18 @@ export interface ProgressState {
   equipped: { hat: string | null; face: string | null; neck: string | null };
   /** Epoch ms until which XP is doubled (0 = no active boost). */
   xpBoostUntil: number;
+  /** Preferences. */
+  sfxEnabled: boolean;
+  speechRate: number;
   kana: Record<string, KanaProgress>;
   completedLessons: string[];
   activeTrack: Track;
 
   completeOnboarding(data: { name: string; reason: string | null; dailyGoalXp: number }): void;
   setActiveTrack(track: Track): void;
+  setDailyGoal(xp: number): void;
+  setSfxEnabled(on: boolean): void;
+  setSpeechRate(rate: number): void;
   addXp(n: number): void;
   answer(kanaId: string, correct: boolean): void;
   rate(kanaId: string, grade: Grade): void;
@@ -95,6 +102,8 @@ const initial = {
     neck: string | null;
   },
   xpBoostUntil: 0,
+  sfxEnabled: true,
+  speechRate: 0.9,
   kana: {} as Record<string, KanaProgress>,
   completedLessons: [] as string[],
   activeTrack: "hiragana" as Track,
@@ -154,13 +163,18 @@ export const useProgress = create<ProgressState>()(
 
       setActiveTrack: (activeTrack) => set({ activeTrack }),
 
+      setDailyGoal: (dailyGoalXp) => set({ dailyGoalXp }),
+      setSfxEnabled: (sfxEnabled) => set({ sfxEnabled }),
+      setSpeechRate: (speechRate) => set({ speechRate }),
+
       addXp: (n) => set((s) => applyDaily(s, { xp: n })),
 
       answer: (kanaId, correct) =>
         set((s) => {
           const cur = s.kana[kanaId] ?? emptyProgress();
+          const next = applyAnswer(cur, correct);
           return {
-            kana: { ...s.kana, [kanaId]: applyAnswer(cur, correct) },
+            kana: { ...s.kana, [kanaId]: { ...next, due: nextDue(next.mastery, Date.now()) } },
             ...applyDaily(s, correct ? { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT } : {}),
           };
         }),
@@ -168,10 +182,10 @@ export const useProgress = create<ProgressState>()(
       rate: (kanaId, grade) =>
         set((s) => {
           const cur = s.kana[kanaId] ?? emptyProgress();
-          const ok = grade !== "again";
+          const next = applyRating(cur, grade);
           return {
-            kana: { ...s.kana, [kanaId]: applyRating(cur, grade) },
-            ...applyDaily(s, ok ? { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT } : {}),
+            kana: { ...s.kana, [kanaId]: { ...next, due: nextDue(next.mastery, Date.now()) } },
+            ...applyDaily(s, grade !== "again" ? { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT } : {}),
           };
         }),
 
@@ -179,7 +193,10 @@ export const useProgress = create<ProgressState>()(
         set((s) => {
           const cur = s.kana[kanaId] ?? emptyProgress();
           return {
-            kana: { ...s.kana, [kanaId]: { ...cur, seen: cur.seen + 1 } },
+            kana: {
+              ...s.kana,
+              [kanaId]: { ...cur, seen: cur.seen + 1, due: nextDue(cur.mastery, Date.now()) },
+            },
             ...applyDaily(s, { xp: 2 }),
           };
         }),

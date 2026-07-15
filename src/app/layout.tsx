@@ -3,6 +3,7 @@ import { Fredoka, Nunito } from "next/font/google";
 import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { AudioSync } from "@/components/app/audio-sync";
 import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 
@@ -93,6 +94,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </a>
         <ThemeProvider attribute="data-theme" defaultTheme="light" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider locale={locale} messages={messages}>
+            <AudioSync />
             {children}
           </NextIntlClientProvider>
         </ThemeProvider>

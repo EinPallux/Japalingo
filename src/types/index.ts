@@ -50,4 +50,6 @@ export interface KanaProgress {
   correct: number;
   streak: number; // consecutive correct
   lastResult: "correct" | "wrong" | null;
+  /** Epoch ms when this kana is next due for review (set once seen). */
+  due?: number;
 }

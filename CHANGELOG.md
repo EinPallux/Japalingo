@@ -14,6 +14,20 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.11.0] - 2026-07-15
+
+**Phase 2 — Beginner toolkit.** Five additions that help an absolute beginner: real spaced-repetition scheduling, a reference chart, a sounds primer, a settings screen, and a progress view.
+
+### Added
+
+- **Real SRS "due today" scheduling.** Each kana now carries a review **due-date** whose interval grows with mastery (4h → 1d → … → 16d) and shrinks on a miss. The Practice hub shows how many kana are **due now** (and "all caught up!" when none are), reviews the due set first, and the dashboard's Practice card carries a **"N due"** badge. Answering reschedules the kana. (`src/lib/srs.ts` + a `useNow` hook; the Practice hub now freezes its review set at session start so answering can't rebuild the queue mid-review.)
+- **Gojūon reference chart** (`/learn/chart`, from a dashboard link) — the classic 5×10 Hiragana/Katakana grid with the usual gaps (y/w rows) and ん. Cells are **tinted by mastery**; tap any one for a detail card with its reading, a Listen button, the "sounds like" anchor, the mnemonic, and an example word — all from the `/database` books. The reference beginners keep reaching for.
+- **"Meet the Sounds" primer** (`/learn/sounds`) — a 3-step intro for absolute beginners: the **5 vowels** with their pronunciation anchors (from `/database`), then how every other kana is just a **consonant + a vowel** (the k-row falls out of "k + あいうえお"), then off to the path. A **"New here? Meet the sounds" card** appears on the dashboard while you've met fewer than 5 kana, and hides once you're rolling.
+- **Settings** (`/settings`, from the profile) — **theme** (light / dark / system), **daily goal**, **sound effects** on/off, and **pronunciation speed** (Normal / Slow, with a test button — handy for beginners who want kana spoken slower), plus a note that motion follows the device's Reduce-Motion setting, and Reset. Sound prefs are saved and applied to the audio engine via a small `AudioSync` at the app root.
+- **"Your Journey" view** (`/journey`, from the profile) — the insights the profile didn't cover: per-script **progress bars** (Hiragana/Katakana met out of 46), overall **accuracy** (correct ÷ answers), **mastered** and **due-now** counts, and a **"focus on these next"** list of your lowest-mastery kana with a one-tap **"Drill your weakest"** into Free Drill.
+
+---
+
 ## [0.10.0] - 2026-07-15
 
 **Phase 2 — Free Drill.** MARU-style free practice, outside the learning path.
@@ -211,7 +225,8 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/japalingo/japalingo/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/japalingo/japalingo/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/japalingo/japalingo/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/japalingo/japalingo/compare/v0.8.0...v0.9.0
