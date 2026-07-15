@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { applyAnswer, applyRating, emptyProgress, MAX_MASTERY } from "@/lib/srs";
+import {
+  applyAnswer,
+  applyRating,
+  emptyProgress,
+  isDue,
+  MAX_MASTERY,
+  nextDue,
+  reviewIntervalMs,
+} from "@/lib/srs";
 
 describe("applyAnswer", () => {
   it("bumps mastery and streak on correct", () => {
@@ -40,5 +48,27 @@ describe("applyRating", () => {
   it("counts non-again grades as correct", () => {
     expect(applyRating(emptyProgress(), "again").streak).toBe(0);
     expect(applyRating(emptyProgress(), "good").streak).toBe(1);
+  });
+});
+
+describe("review scheduling", () => {
+  it("gives longer intervals for higher mastery", () => {
+    expect(reviewIntervalMs(0)).toBeLessThan(reviewIntervalMs(2));
+    expect(reviewIntervalMs(2)).toBeLessThan(reviewIntervalMs(5));
+    // clamps out-of-range mastery
+    expect(reviewIntervalMs(99)).toBe(reviewIntervalMs(5));
+    expect(reviewIntervalMs(-3)).toBe(reviewIntervalMs(0));
+  });
+
+  it("marks a kana due only once seen and past its due time", () => {
+    const now = 1_000_000_000;
+    // unseen -> never due
+    expect(isDue({ ...emptyProgress() }, now)).toBe(false);
+    // seen, scheduled in the future -> not due yet
+    expect(isDue({ ...emptyProgress(), seen: 1, due: nextDue(1, now) }, now)).toBe(false);
+    // seen, due time passed -> due
+    expect(isDue({ ...emptyProgress(), seen: 1, due: now - 1 }, now)).toBe(true);
+    // seen with no schedule (legacy save) -> treated as due
+    expect(isDue({ mastery: 1, seen: 1, correct: 1, streak: 1, lastResult: "correct" }, now)).toBe(true);
   });
 });

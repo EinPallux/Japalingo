@@ -6,6 +6,7 @@ import {
   applyRating,
   emptyProgress,
   type Grade,
+  nextDue,
   XP_LESSON_COMPLETE,
   XP_PER_CORRECT,
 } from "@/lib/srs";
@@ -159,8 +160,9 @@ export const useProgress = create<ProgressState>()(
       answer: (kanaId, correct) =>
         set((s) => {
           const cur = s.kana[kanaId] ?? emptyProgress();
+          const next = applyAnswer(cur, correct);
           return {
-            kana: { ...s.kana, [kanaId]: applyAnswer(cur, correct) },
+            kana: { ...s.kana, [kanaId]: { ...next, due: nextDue(next.mastery, Date.now()) } },
             ...applyDaily(s, correct ? { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT } : {}),
           };
         }),
@@ -168,10 +170,10 @@ export const useProgress = create<ProgressState>()(
       rate: (kanaId, grade) =>
         set((s) => {
           const cur = s.kana[kanaId] ?? emptyProgress();
-          const ok = grade !== "again";
+          const next = applyRating(cur, grade);
           return {
-            kana: { ...s.kana, [kanaId]: applyRating(cur, grade) },
-            ...applyDaily(s, ok ? { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT } : {}),
+            kana: { ...s.kana, [kanaId]: { ...next, due: nextDue(next.mastery, Date.now()) } },
+            ...applyDaily(s, grade !== "again" ? { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT } : {}),
           };
         }),
 
@@ -179,7 +181,10 @@ export const useProgress = create<ProgressState>()(
         set((s) => {
           const cur = s.kana[kanaId] ?? emptyProgress();
           return {
-            kana: { ...s.kana, [kanaId]: { ...cur, seen: cur.seen + 1 } },
+            kana: {
+              ...s.kana,
+              [kanaId]: { ...cur, seen: cur.seen + 1, due: nextDue(cur.mastery, Date.now()) },
+            },
             ...applyDaily(s, { xp: 2 }),
           };
         }),

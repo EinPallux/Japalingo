@@ -14,6 +14,16 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.11.0] - 2026-07-15
+
+**Phase 2 — Beginner toolkit.** Five additions that help an absolute beginner: real spaced-repetition scheduling, a reference chart, a sounds primer, a settings screen, and a progress view.
+
+### Added
+
+- **Real SRS "due today" scheduling.** Each kana now carries a review **due-date** whose interval grows with mastery (4h → 1d → … → 16d) and shrinks on a miss. The Practice hub shows how many kana are **due now** (and "all caught up!" when none are), reviews the due set first, and the dashboard's Practice card carries a **"N due"** badge. Answering reschedules the kana. (`src/lib/srs.ts` + a `useNow` hook; the Practice hub now freezes its review set at session start so answering can't rebuild the queue mid-review.)
+
+---
+
 ## [0.10.0] - 2026-07-15
 
 **Phase 2 — Free Drill.** MARU-style free practice, outside the learning path.
@@ -211,7 +221,8 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/japalingo/japalingo/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/japalingo/japalingo/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/japalingo/japalingo/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/japalingo/japalingo/compare/v0.8.0...v0.9.0
