@@ -154,12 +154,17 @@ export function ProfileView() {
         </section>
 
         <div className="flex flex-col gap-3 pt-2">
-          <Button href="/learn" size="lg" className="w-full">
-            Back to learning
+          <Button href="/journey" size="lg" className="w-full">
+            📊 Your journey
           </Button>
-          <Button href="/settings" size="lg" variant="ghost" className="w-full">
-            ⚙️ Settings
-          </Button>
+          <div className="grid grid-cols-2 gap-3">
+            <Button href="/learn" size="lg" variant="ghost">
+              Back to learning
+            </Button>
+            <Button href="/settings" size="lg" variant="ghost">
+              ⚙️ Settings
+            </Button>
+          </div>
         </div>
       </main>
     </>
