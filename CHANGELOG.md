@@ -14,6 +14,22 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.10.0] - 2026-07-15
+
+**Phase 2 — Free Drill.** MARU-style free practice, outside the learning path.
+
+### Added
+
+- **Free Drill** (`/learn/drill`, from a dashboard card) — pick any gojūon rows of Hiragana or Katakana and train just those, independent of the winding path. Each row card shows a **mastery bar** and how many of its kana you've met, so you can see at a glance what needs work; an **"⚠️ Weakest"** preset auto-selects your lowest rows (plus "All rows" / "Clear").
+- **SRS-guided sessions** — a drill prioritizes the **weakest kana** in your selection and caps each round to 12, so even "All rows" becomes a focused session on what you need most. Answers feed the same XP + per-kana mastery + daily-quest pipeline, and the row bars update as you improve.
+- `src/lib/drill.ts` (row grouping, row-mastery summary, weakest-row + session selection) with unit tests — 43 total.
+
+### Notes
+
+- Free Drill reuses the existing exercise engine (Quick Match + Kana Drill) over your chosen kana — no new learning content, so it stays within the `/database` rule.
+
+---
+
 ## [0.9.1] - 2026-07-15
 
 **Phase 2 — Audio fix.** Speech that failed silently now works more often, and fails honestly when it can't.
@@ -195,7 +211,8 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 - Canonical **gamification** design: XP, streaks (with Streak Freeze), daily goals + quests, Gems, Crowns/mastery with SRS review, badges, and leaderboard-ready structures.
 - **Content model** extracted from the `/database` Tofugu books (*Learn Hiragana*, *Learn Katakana*): 46 basic kana per script plus dakuten / handakuten / yōon combos, katakana extended foreign-sound combos, the long-vowel mark ー, real mnemonics, conversion mnemonics, and example words — the sole ground truth for all learning content.
 
-[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.9.1...HEAD
+[Unreleased]: https://github.com/japalingo/japalingo/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/japalingo/japalingo/compare/v0.9.1...v0.10.0
 [0.9.1]: https://github.com/japalingo/japalingo/compare/v0.9.0...v0.9.1
 [0.9.0]: https://github.com/japalingo/japalingo/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/japalingo/japalingo/compare/v0.7.0...v0.8.0

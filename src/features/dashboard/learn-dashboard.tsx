@@ -61,23 +61,28 @@ export function LearnDashboard() {
 
           <DailyQuests />
 
-          <Link
-            href="/learn/practice"
-            className="flex items-center justify-between rounded-blob-lg border border-border bg-gradient-to-r from-info/15 to-primary-tint px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
-          >
-            <span className="flex items-center gap-3">
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              href="/learn/practice"
+              className="flex flex-col gap-1 rounded-blob-lg border border-border bg-gradient-to-br from-info/15 to-primary-tint px-4 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
+            >
               <span aria-hidden className="text-2xl">
                 🧠
               </span>
-              <span>
-                <span className="block font-display font-bold text-ink">Practice</span>
-                <span className="text-sm text-muted">Review your weakest kana</span>
+              <span className="font-display font-bold text-ink">Practice</span>
+              <span className="text-xs text-muted">Review your weakest kana</span>
+            </Link>
+            <Link
+              href="/learn/drill"
+              className="flex flex-col gap-1 rounded-blob-lg border border-border bg-gradient-to-br from-secondary-tint to-primary-tint px-4 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
+            >
+              <span aria-hidden className="text-2xl">
+                🎯
               </span>
-            </span>
-            <span aria-hidden className="font-display text-xl text-primary">
-              ▸
-            </span>
-          </Link>
+              <span className="font-display font-bold text-ink">Free Drill</span>
+              <span className="text-xs text-muted">Train any rows, MARU-style</span>
+            </Link>
+          </div>
 
           <Link
             href="/learn/shop"
