@@ -1,6 +1,7 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { AppHeader } from "@/components/app/app-header";
 import { ListenButton } from "@/components/app/listen-button";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
@@ -167,6 +168,19 @@ function Legend({ cls, label }: { cls: string; label: string }) {
 
 function KanaDetail({ kana, mastery, onClose }: { kana: Kana; mastery: number; onClose: () => void }) {
   const ex = kana.examples?.[0];
+  const closeRef = useRef<HTMLButtonElement | null>(null);
+
+  // Minimal dialog a11y: Escape closes, and focus lands on the Close button so
+  // keyboard users aren't left tabbing the chart underneath the overlay.
+  useEffect(() => {
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
     <div
       className="fixed inset-0 z-50 grid place-items-end bg-ink/40 p-3 sm:place-items-center"
@@ -175,12 +189,16 @@ function KanaDetail({ kana, mastery, onClose }: { kana: Kana; mastery: number; o
       aria-label={`${kana.romaji} details`}
       onClick={onClose}
     >
-      <div
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.96 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: "spring", stiffness: 380, damping: 30 }}
         className="w-full max-w-sm rounded-blob-xl border border-border bg-surface p-6 text-center shadow-[var(--shadow-lift)]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-1 flex justify-end">
           <button
+            ref={closeRef}
             type="button"
             onClick={onClose}
             aria-label="Close"
@@ -216,7 +234,7 @@ function KanaDetail({ kana, mastery, onClose }: { kana: Kana; mastery: number; o
         <p className="mt-4 text-xs font-semibold text-muted">
           Mastery {mastery}/5 {"👑".repeat(mastery)}
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

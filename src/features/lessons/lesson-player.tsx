@@ -1,5 +1,6 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
@@ -83,39 +84,49 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-center py-4">
-        {ex?.kind === "mnemonic" && (
-          <MnemonicStory
+      <div className="flex flex-1 items-center justify-center overflow-x-clip py-4">
+        {/* Each exercise slides in from the right and out to the left —
+            the Duolingo-style forward momentum between steps. */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
             key={index}
-            kana={ex.kana}
-            onContinue={() => {
-              markSeen(ex.kana.id);
-              advance();
-            }}
-          />
-        )}
-        {ex?.kind === "choice" && (
-          <QuickMatch
-            key={index}
-            kana={ex.kana}
-            direction={ex.direction}
-            options={ex.options}
-            onAnswer={(correct) => {
-              answer(ex.kana.id, correct);
-              advance();
-            }}
-          />
-        )}
-        {ex?.kind === "drill" && (
-          <KanaDrill
-            key={index}
-            kana={ex.kana}
-            onRate={(grade) => {
-              rate(ex.kana.id, grade);
-              advance();
-            }}
-          />
-        )}
+            initial={{ opacity: 0, x: 60 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -60 }}
+            transition={{ type: "spring", stiffness: 380, damping: 32 }}
+            className="flex w-full items-center justify-center"
+          >
+            {ex?.kind === "mnemonic" && (
+              <MnemonicStory
+                kana={ex.kana}
+                onContinue={() => {
+                  markSeen(ex.kana.id);
+                  advance();
+                }}
+              />
+            )}
+            {ex?.kind === "choice" && (
+              <QuickMatch
+                kana={ex.kana}
+                direction={ex.direction}
+                options={ex.options}
+                onAnswer={(correct) => {
+                  answer(ex.kana.id, correct);
+                  advance();
+                }}
+              />
+            )}
+            {ex?.kind === "drill" && (
+              <KanaDrill
+                kana={ex.kana}
+                onRate={(grade) => {
+                  rate(ex.kana.id, grade);
+                  advance();
+                }}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </main>
   );

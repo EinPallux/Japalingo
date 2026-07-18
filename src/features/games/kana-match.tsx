@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Confetti } from "@/components/feedback/confetti";
 import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
@@ -116,8 +117,11 @@ function KanaMatchGame({ learned }: { learned: Kana[] }) {
   if (done) {
     return (
       <main id="main" className="grid min-h-dvh place-items-center px-5 py-10">
+        <Confetti />
         <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-          <HoshiStatic className="size-32" />
+          <div className="anim-bob">
+            <HoshiStatic className="size-32" />
+          </div>
           <h1 className="font-display text-3xl font-bold text-ink">All matched! 🎉</h1>
           <p className="text-muted">Cleared {PAIRS} pairs in {moves} moves.</p>
           <div className="flex w-full flex-col gap-3">
@@ -165,7 +169,7 @@ function KanaMatchGame({ learned }: { learned: Kana[] }) {
                 "grid aspect-square place-items-center rounded-blob-lg border-2 font-bold transition",
                 card.kind === "kana" ? "font-jp text-4xl" : "font-display text-2xl",
                 isMatched
-                  ? "border-success bg-success/15 text-success-strong"
+                  ? "anim-pop border-success bg-success/15 text-success-strong"
                   : isUp
                     ? "border-primary bg-primary-tint text-ink"
                     : "border-transparent bg-primary text-primary shadow-[0_4px_0_0_var(--jl-primary-strong)] hover:brightness-105",

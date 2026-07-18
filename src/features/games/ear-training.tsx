@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { Confetti } from "@/components/feedback/confetti";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { Button } from "@/components/ui/button";
@@ -101,9 +102,14 @@ function EarTrainingGame({ pool }: { pool: Kana[] }) {
   const [xpBefore, setXpBefore] = useState(() => useProgress.getState().xp);
 
   // Reaching this component means a Japanese voice is ready, so auto-play each
-  // round's sound (until the game is done).
+  // round's sound (until the game is done). The cleanup cancels any in-flight
+  // utterance so exiting mid-round doesn't keep talking on the next screen —
+  // and it also swallows StrictMode's dev double-invoke.
   useEffect(() => {
     if (!done) speakJa(rd.target.char);
+    return () => {
+      if (typeof window !== "undefined") window.speechSynthesis?.cancel();
+    };
   }, [rd, done]);
 
   const pick = (k: Kana) => {
@@ -134,8 +140,11 @@ function EarTrainingGame({ pool }: { pool: Kana[] }) {
   if (done) {
     return (
       <main id="main" className="grid min-h-dvh place-items-center px-5 py-10">
+        {correctCount >= ROUNDS / 2 ? <Confetti /> : null}
         <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-          <HoshiStatic className="size-32" />
+          <div className="anim-bob">
+            <HoshiStatic className="size-32" />
+          </div>
           <h1 className="font-display text-3xl font-bold text-ink">Nice ears! 🎧</h1>
           <p className="text-muted">
             {correctCount}/{ROUNDS} correct · +{earned} XP
@@ -206,8 +215,8 @@ function EarTrainingGame({ pool }: { pool: Kana[] }) {
                 className={cn(
                   "grid place-items-center rounded-blob-lg border-2 py-6 font-jp text-5xl font-bold transition",
                   state === "idle" && "border-border bg-surface text-ink hover:border-primary/50 hover:bg-primary-tint",
-                  state === "correct" && "border-success bg-success/15 text-success-strong",
-                  state === "wrong" && "border-error bg-error/15 text-error-strong",
+                  state === "correct" && "anim-pop border-success bg-success/15 text-success-strong",
+                  state === "wrong" && "anim-shake border-error bg-error/15 text-error-strong",
                   state === "dim" && "border-border bg-surface text-muted opacity-60",
                 )}
               >

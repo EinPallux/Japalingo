@@ -196,8 +196,12 @@ function RomajiRushGame({ pool }: { pool: Kana[] }) {
           <CloseIcon className="size-6" />
         </button>
         <div className="flex items-center gap-3 font-display font-bold">
-          {combo > 1 ? <span className="text-sm text-secondary-strong">×{combo}</span> : null}
-          <span className="text-primary" aria-label={`Score ${score}`}>
+          {combo > 1 ? (
+            <span key={combo} className="anim-pop text-sm text-secondary-strong">
+              ×{combo}
+            </span>
+          ) : null}
+          <span key={`s-${score}`} className={cn(score > 0 && "anim-pop", "text-primary")} aria-label={`Score ${score}`}>
             {score}
           </span>
         </div>
@@ -250,8 +254,8 @@ function RomajiRushGame({ pool }: { pool: Kana[] }) {
                   "grid place-items-center rounded-blob-lg border-2 py-5 font-bold transition",
                   round.direction === "r2k" ? "font-jp text-4xl" : "font-display text-2xl",
                   state === "idle" && "border-border bg-surface text-ink hover:border-primary/50 hover:bg-primary-tint",
-                  state === "correct" && "border-success bg-success/15 text-success-strong",
-                  state === "wrong" && "border-error bg-error/15 text-error-strong",
+                  state === "correct" && "anim-pop border-success bg-success/15 text-success-strong",
+                  state === "wrong" && "anim-shake border-error bg-error/15 text-error-strong",
                   state === "dim" && "border-border bg-surface text-muted opacity-60",
                 )}
               >

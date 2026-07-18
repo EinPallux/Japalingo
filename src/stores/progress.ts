@@ -22,12 +22,19 @@ function dateKey(d: Date): string {
 function today(): string {
   return dateKey(new Date());
 }
+/** N *calendar* days ago. Uses Date's day-field rollover (not fixed 24h math),
+ *  so a 23/25-hour DST day can never make "yesterday" resolve two days back
+ *  and silently break an active streak. */
+function daysAgo(n: number): string {
+  const d = new Date();
+  return dateKey(new Date(d.getFullYear(), d.getMonth(), d.getDate() - n));
+}
 function yesterday(): string {
-  return dateKey(new Date(Date.now() - 86_400_000));
+  return daysAgo(1);
 }
 /** Two days ago — the last active day when exactly one day was missed. */
 function dayBefore(): string {
-  return dateKey(new Date(Date.now() - 2 * 86_400_000));
+  return daysAgo(2);
 }
 
 export interface ProgressState {
@@ -317,10 +324,12 @@ export function selectDaily(s: ProgressState): { xp: number; correct: number; cl
   };
 }
 
-/** Stable day number (local) — rotates the daily quest set deterministically. */
+/** Stable day number (local) — rotates the daily quest set deterministically.
+ *  Math.round (not floor) so the ±1h DST offset of local midnight vs UTC can't
+ *  skip or repeat a number. */
 export function dayNumber(): number {
   const d = new Date();
-  return Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86_400_000);
+  return Math.round(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86_400_000);
 }
 
 /**

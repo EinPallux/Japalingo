@@ -14,6 +14,36 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.13.0] - 2026-07-18
+
+**Phase 2 — Full check, tidy-up & game-feel.** A second full audit (all findings fixed), a decluttered dashboard, and a Duolingo-level animation pass.
+
+### Changed
+
+- **Tidier dashboard — the path comes first.** The Shop banner (already in the header), the Kana Chart row, and the five stacked game cards are gone; in their place one clean **2×2 quick-action grid** (Practice · Free Drill · Arcade · Kana Chart). The learning path now starts within one screen of the top.
+- **New Arcade hub** (`/learn/games`) — all five games on one dedicated page, each labeled with the skill it trains (Speed / Recall / Memory / Listening / Reading), with a staggered entrance.
+
+### Added
+
+- **Duolingo-level animation pass** (all honoring `prefers-reduced-motion`):
+  - **Confetti** celebration (token-colored, no libraries) + **counting-up XP** + a bobbing Hoshi on lesson results and game wins.
+  - Answer feedback everywhere: correct choices **pop**, wrong choices **shake** (lessons + all games).
+  - A floating **"+10 XP"** on every correct lesson answer.
+  - Exercises **slide** between steps in the lesson player (spring transitions).
+  - The header's daily-goal ring now **springs** to its new fill and the streak **flame flickers** while the streak is alive; claimable quest rewards **pulse**.
+  - The current path node **pulses** its halo; unlocked nodes lift on hover; combo badges pop in the games; the chart's kana detail card springs open.
+
+### Fixed
+
+- **Streak could silently reset on DST changeover (MEDIUM).** "Yesterday" was computed with fixed 24-hour math, so on the morning after a spring-forward clock change an unbroken streak could read as broken and reset to 1. Day arithmetic is now calendar-based.
+- **Service worker could cache error responses (MEDIUM).** A transient 404/500 (e.g. mid-deploy) was cached and later served offline — a poisoned hashed asset would have stuck forever. Only OK responses are cached now.
+- **Review lessons always drilled the same kana (MEDIUM).** The capped reverse-recall/drill picks sliced an *unshuffled* gojūon-ordered pool, so the final review's extra practice always hit the first rows (あ–く) and never the tail (わ/を/ん). Picks are shuffled before capping.
+- **Ear Training kept talking after exit (LOW).** Speech is now cancelled when leaving mid-round (also fixes a dev-mode double-speak).
+- **Kana Rain double-demotion (LOW).** Two copies of the same kana landing in one frame counted as two misses; now deduped to one.
+- **Chart detail dialog a11y (LOW).** Escape now closes it and focus moves into the dialog (and back out) properly.
+
+---
+
 ## [0.12.0] - 2026-07-15
 
 **Phase 2 — Installable PWA.** Japalingo can now be added to the iPhone/iPad home screen and run full-screen like a native app, with offline support.

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ListenButton } from "@/components/app/listen-button";
+import { Confetti } from "@/components/feedback/confetti";
 import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
@@ -111,8 +112,11 @@ function WordBuilderGame({ words }: { words: ExampleWord[] }) {
   if (done) {
     return (
       <main id="main" className="grid min-h-dvh place-items-center px-5 py-10">
+        {correctCount >= rounds.length / 2 ? <Confetti /> : null}
         <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-          <HoshiStatic className="size-32" />
+          <div className="anim-bob">
+            <HoshiStatic className="size-32" />
+          </div>
           <h1 className="font-display text-3xl font-bold text-ink">You can read Japanese! 📖</h1>
           <p className="text-muted">
             {correctCount}/{rounds.length} words · +{earned} XP
@@ -165,8 +169,8 @@ function WordBuilderGame({ words }: { words: ExampleWord[] }) {
                 className={cn(
                   "rounded-blob-lg border-2 px-4 py-4 font-display font-bold transition",
                   state === "idle" && "border-border bg-surface text-ink hover:border-primary/50 hover:bg-primary-tint",
-                  state === "correct" && "border-success bg-success/15 text-success-strong",
-                  state === "wrong" && "border-error bg-error/15 text-error-strong",
+                  state === "correct" && "anim-pop border-success bg-success/15 text-success-strong",
+                  state === "wrong" && "anim-shake border-error bg-error/15 text-error-strong",
                   state === "dim" && "border-border bg-surface text-muted opacity-60",
                 )}
               >
