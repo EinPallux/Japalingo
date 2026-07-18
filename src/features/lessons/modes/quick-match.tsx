@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ListenButton } from "@/components/app/listen-button";
 import { Button } from "@/components/ui/button";
 import { sfx } from "@/lib/audio";
+import { XP_PER_CORRECT } from "@/lib/srs";
 import { cn } from "@/lib/utils";
 import type { Kana } from "@/types";
 
@@ -37,7 +38,15 @@ export function QuickMatch({
         {direction === "k2r" ? "Which reading?" : "Which character?"}
       </p>
 
-      <div className="grid size-40 place-items-center rounded-blob-xl bg-surface-2">
+      <motion.div
+        initial={{ scale: 0.85, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 320, damping: 20 }}
+        className={cn(
+          "relative grid size-40 place-items-center rounded-blob-xl bg-surface-2",
+          picked && !correct && "anim-shake",
+        )}
+      >
         <span
           lang={direction === "k2r" ? "ja" : undefined}
           className={cn(
@@ -47,7 +56,19 @@ export function QuickMatch({
         >
           {prompt}
         </span>
-      </div>
+        {/* Floating "+XP" reward on a correct pick — the little dopamine hit. */}
+        {picked && correct ? (
+          <motion.span
+            initial={{ opacity: 0, y: 6, scale: 0.7 }}
+            animate={{ opacity: [0, 1, 1, 0], y: -46, scale: 1.05 }}
+            transition={{ duration: 1.1, ease: "easeOut" }}
+            className="pointer-events-none absolute -top-2 right-0 font-display text-lg font-bold text-accent-strong"
+            aria-hidden
+          >
+            +{XP_PER_CORRECT} XP
+          </motion.span>
+        ) : null}
+      </motion.div>
 
       {direction === "k2r" ? <ListenButton text={kana.char} /> : null}
 
@@ -73,8 +94,8 @@ export function QuickMatch({
                 direction === "r2k" ? "font-jp text-4xl" : "font-display text-2xl",
                 state === "idle" &&
                   "border-border bg-surface text-ink hover:border-primary/50 hover:bg-primary-tint",
-                state === "correct" && "border-success bg-success/15 text-success-strong",
-                state === "wrong" && "border-error bg-error/15 text-error-strong",
+                state === "correct" && "anim-pop border-success bg-success/15 text-success-strong",
+                state === "wrong" && "anim-shake border-error bg-error/15 text-error-strong",
                 state === "dim" && "border-border bg-surface text-muted opacity-60",
               )}
             >

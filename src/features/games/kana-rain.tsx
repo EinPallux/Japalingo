@@ -123,8 +123,10 @@ function KanaRainGame({ pool }: { pool: Kana[] }) {
         setCombo(0);
         // A kana hitting the line is a genuine miss — record it so mastery and
         // the SRS schedule reflect the ones the learner couldn't read in time.
+        // Dedupe by kana id: two copies of the same character landing in one
+        // frame is one conceptual miss, not a double demotion.
         const { answer } = useProgress.getState();
-        for (const d of landedDrops) answer(d.kana.id, false);
+        for (const id of new Set(landedDrops.map((d) => d.kana.id))) answer(id, false);
       }
 
       spawnRef.current += dt;
@@ -228,7 +230,11 @@ function KanaRainGame({ pool }: { pool: Kana[] }) {
 
       <div className="relative flex-1 overflow-hidden rounded-blob-lg border-2 border-border bg-surface-2/50">
         {combo > 1 ? (
-          <span className="absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-full bg-secondary px-3 py-1 text-sm font-bold text-white">
+          // key={combo} remounts the badge each hit so it pops every time.
+          <span
+            key={combo}
+            className="anim-pop absolute left-1/2 top-3 z-10 -translate-x-1/2 rounded-full bg-secondary px-3 py-1 text-sm font-bold text-white"
+          >
             ×{combo} combo
           </span>
         ) : null}

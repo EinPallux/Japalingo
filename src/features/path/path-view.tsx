@@ -71,12 +71,15 @@ export function PathView({ track }: { track: Track }) {
                 }}
                 className={cn(
                   "grid size-[76px] place-items-center rounded-full transition active:translate-y-1",
+                  state !== "locked" && "hover:scale-105",
                   state === "complete" &&
                     (isReview
                       ? "bg-secondary text-white shadow-[0_5px_0_0_var(--jl-secondary-strong)]"
                       : "bg-accent text-ink shadow-[0_5px_0_0_var(--jl-accent-strong)]"),
+                  // ring-4 is the static halo for reduced-motion users; the pulse
+                  // animation takes over box-shadow entirely when motion is allowed.
                   state === "current" &&
-                    "bg-primary text-white shadow-[0_5px_0_0_var(--jl-primary-strong)] ring-4 ring-primary/25",
+                    "anim-ring-pulse bg-primary text-white shadow-[0_5px_0_0_var(--jl-primary-strong)] ring-4 ring-primary/25",
                   state === "locked" && "bg-surface-2 text-muted",
                 )}
               >
