@@ -95,98 +95,80 @@ export function LearnDashboard() {
 
           <DailyQuests />
 
+          {/* Quick actions — one tidy 2×2 grid, so the path stays close to the top.
+              (The Shop lives in the header; all five games live in the Arcade.) */}
           <div className="grid grid-cols-2 gap-3">
-            <Link
+            <QuickAction
               href="/learn/practice"
-              className="relative flex flex-col gap-1 rounded-blob-lg border border-border bg-gradient-to-br from-info/15 to-primary-tint px-4 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
-            >
-              {dueCount > 0 ? (
-                <span className="absolute right-2 top-2 rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-white">
-                  {dueCount} due
-                </span>
-              ) : null}
-              <span aria-hidden className="text-2xl">
-                🧠
-              </span>
-              <span className="font-display font-bold text-ink">Practice</span>
-              <span className="text-xs text-muted">
-                {dueCount > 0 ? `${dueCount} kana ready to review` : "Review your weakest kana"}
-              </span>
-            </Link>
-            <Link
+              emoji="🧠"
+              label="Practice"
+              desc={dueCount > 0 ? `${dueCount} kana ready` : "Review weak kana"}
+              tint="from-info/15 to-primary-tint"
+              badge={dueCount > 0 ? `${dueCount} due` : undefined}
+            />
+            <QuickAction
               href="/learn/drill"
-              className="flex flex-col gap-1 rounded-blob-lg border border-border bg-gradient-to-br from-secondary-tint to-primary-tint px-4 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
-            >
-              <span aria-hidden className="text-2xl">
-                🎯
-              </span>
-              <span className="font-display font-bold text-ink">Free Drill</span>
-              <span className="text-xs text-muted">Train any rows, MARU-style</span>
-            </Link>
-          </div>
-
-          <Link
-            href="/learn/shop"
-            className="flex items-center justify-between rounded-blob-lg border border-border bg-gradient-to-r from-accent-tint to-secondary-tint px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
-          >
-            <span className="flex items-center gap-3">
-              <span aria-hidden className="text-2xl">
-                🛍️
-              </span>
-              <span>
-                <span className="block font-display font-bold text-ink">Shop</span>
-                <span className="text-sm text-muted">Dress up Hoshi &amp; power up</span>
-              </span>
-            </span>
-            <span aria-hidden className="font-display text-xl text-secondary-strong">
-              ▸
-            </span>
-          </Link>
-
-          <Link
-            href="/learn/chart"
-            className="flex items-center justify-between rounded-blob-lg border border-border bg-surface px-5 py-3 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
-          >
-            <span className="flex items-center gap-3">
-              <span aria-hidden className="text-2xl">
-                📖
-              </span>
-              <span className="font-display font-bold text-ink">Kana Chart</span>
-            </span>
-            <span className="text-xs text-muted">tap any kana to hear &amp; review ▸</span>
-          </Link>
-
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { href: `/learn/games/romaji-rush?track=${activeTrack}`, emoji: "⏱️", label: "Romaji Rush", desc: "Beat the 60s clock", tint: "from-secondary-tint to-accent-tint", wide: true },
-              { href: `/learn/games/kana-rain?track=${activeTrack}`, emoji: "🌸", label: "Kana Rain", desc: "Type before it lands", tint: "from-primary-tint to-secondary-tint" },
-              { href: `/learn/games/kana-match?track=${activeTrack}`, emoji: "🃏", label: "Kana Match", desc: "Flip & pair", tint: "from-accent-tint to-secondary-tint" },
-              { href: `/learn/games/ear-training?track=${activeTrack}`, emoji: "🎧", label: "Ear Training", desc: "Hear it, pick it", tint: "from-info/15 to-secondary-tint" },
-              { href: `/learn/games/word-builder`, emoji: "📖", label: "Word Builder", desc: "Read real words", tint: "from-accent-tint to-primary-tint" },
-            ].map((a) => (
-              <Link
-                key={a.label}
-                href={a.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-blob-lg border border-border bg-gradient-to-br px-3 py-3 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]",
-                  a.tint,
-                  a.wide && "col-span-2",
-                )}
-              >
-                <span aria-hidden className="text-2xl">
-                  {a.emoji}
-                </span>
-                <span>
-                  <span className="block font-display text-sm font-bold text-ink">{a.label}</span>
-                  <span className="text-xs text-muted">{a.desc}</span>
-                </span>
-              </Link>
-            ))}
+              emoji="🎯"
+              label="Free Drill"
+              desc="Train any rows"
+              tint="from-secondary-tint to-primary-tint"
+            />
+            <QuickAction
+              href="/learn/games"
+              emoji="🕹️"
+              label="Arcade"
+              desc="5 kana games"
+              tint="from-accent-tint to-secondary-tint"
+            />
+            <QuickAction
+              href="/learn/chart"
+              emoji="📖"
+              label="Kana Chart"
+              desc="Tap to hear & review"
+              tint="from-primary-tint to-accent-tint"
+            />
           </div>
         </div>
 
         <PathView track={activeTrack} />
       </main>
     </>
+  );
+}
+
+function QuickAction({
+  href,
+  emoji,
+  label,
+  desc,
+  tint,
+  badge,
+}: {
+  href: string;
+  emoji: string;
+  label: string;
+  desc: string;
+  tint: string;
+  badge?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "relative flex flex-col gap-1 rounded-blob-lg border border-border bg-gradient-to-br px-4 py-3.5 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]",
+        tint,
+      )}
+    >
+      {badge ? (
+        <span className="absolute right-2 top-2 rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-white">
+          {badge}
+        </span>
+      ) : null}
+      <span aria-hidden className="text-2xl">
+        {emoji}
+      </span>
+      <span className="font-display text-sm font-bold text-ink">{label}</span>
+      <span className="text-xs text-muted">{desc}</span>
+    </Link>
   );
 }
