@@ -79,9 +79,12 @@ export function buildQueue(lesson: Lesson): Exercise[] {
     // A pure-review lesson has no new kana, so add reverse recall + a few drills
     // over its pool — otherwise it degrades to one-way matching. Cap the extra
     // steps so a big final review (whole script) stays a digestible length: the
-    // k2r pass already covers every kana for recognition.
-    for (const kana of pool.slice(0, 12)) practice.push(makeChoice(kana, "r2k", pool));
-    for (const kana of pool.slice(0, Math.min(4, pool.length))) {
+    // k2r pass already covers every kana for recognition. Shuffle BEFORE slicing
+    // so the capped picks vary run to run instead of always favouring the first
+    // rows of the pool.
+    const r2kPicks = shuffle(pool).slice(0, 12);
+    for (const kana of r2kPicks) practice.push(makeChoice(kana, "r2k", pool));
+    for (const kana of shuffle(pool).slice(0, Math.min(4, pool.length))) {
       practice.push({ kind: "drill", kana });
     }
   }
@@ -96,7 +99,8 @@ export function buildReviewQueue(kana: Kana[]): Exercise[] {
     queue.push(makeChoice(k, "k2r", kana));
     queue.push(makeChoice(k, "r2k", kana));
   }
-  for (const k of kana.slice(0, Math.min(4, kana.length))) {
+  // Shuffle before capping so the drilled subset isn't always the same kana.
+  for (const k of shuffle(kana).slice(0, Math.min(4, kana.length))) {
     queue.push({ kind: "drill", kana: k });
   }
   return shuffle(queue);

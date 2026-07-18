@@ -49,18 +49,20 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
+  // Never cache non-OK responses: a transient 404/500 must not shadow the real
+  // content later (especially a hashed asset, which would be poisoned forever).
+  const cacheIfOk = (res) => {
+    if (res && res.ok) {
+      const copy = res.clone();
+      caches.open(CACHE).then((cache) => cache.put(request, copy));
+    }
+    return res;
+  };
+
   // Cache-first for hashed/immutable assets.
   if (isStaticAsset(url)) {
     event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((res) => {
-            const copy = res.clone();
-            caches.open(CACHE).then((cache) => cache.put(request, copy));
-            return res;
-          }),
-      ),
+      caches.match(request).then((cached) => cached || fetch(request).then(cacheIfOk)),
     );
     return;
   }
@@ -68,11 +70,7 @@ self.addEventListener("fetch", (event) => {
   // Network-first for navigations + data; fall back to cache, then offline page.
   event.respondWith(
     fetch(request)
-      .then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((cache) => cache.put(request, copy));
-        return res;
-      })
+      .then(cacheIfOk)
       .catch(() =>
         caches.match(request).then((cached) => {
           if (cached) return cached;
