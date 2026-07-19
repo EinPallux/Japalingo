@@ -14,6 +14,35 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.20.0] - 2026-07-19
+
+**Phase 2 — Full-app audit: bug fixes, content restoration & UX pass.** Three parallel audits (bugs/logic, UX, database coverage) drove this release.
+
+### Fixed (bugs)
+
+- **Grammar review dead-screen (critical):** example-less grammar points could build an empty review queue (blank screen) and an uncleatable "N due" badge — due-counts and review sets now draw only from reviewable points.
+- **わたし taught the wrong meaning:** a transcription flaw dropped one-letter meanings; わたし/わたくし now correctly mean "I".
+- **Two-correct-options in vocab quizzes** via slash-variant readings (はし vs はし/おはし) — distractors now compare normalized reading variants.
+- **Locks were UI-only:** direct URLs to locked decks/chapters/lessons played and completed them; all three players now enforce their gate.
+- Double-tap grading (all five players), Speed Review timer/answer race, Kana Match homophone deals (じ/ぢ…), altRomaji leaks in Romaji Rush & Ear Training (ヴ/ブ), silent vocab listening without a Japanese voice, "0 due" first-frame flash, badges earned via variation rows, pre-solved build-the-sentence deals, kana-less Speed Review dead loop.
+
+### Added (content restored from `/database`)
+
+- **The grammar book's in-chapter tables** — 21 tables that were flattened during transcription now render inside their teaching cards: particle functions (に・で・と・や・の), particle readings (は→わ…), writing systems, five vowels, plain/polite registers, honorific suffixes, family words, degree words, ところ, 前に/後で/時, **numbers & sound changes, counters, clock time**, casual contractions, beginner errors, **passive/causative formation, the keigo table**. The 11 formerly-blank teaching cards all have their content back.
+- **Mini Checks & common-mistake warnings** — every chapter now ends with the book's ⚠️ warning + 3 self-check questions as a closing reflection step (and a transcription-pipeline bug that had buried appendix text inside chapter 24's data is fixed).
+- **Appendix B "Particle Quick Reference"** — all 20 particles as a collapsible hub reference.
+- **80 practice-reading words from the two kana books** (visually transcribed from the page images): all 8 missing hiragana rows (しお, ねこ, つき, ゆき…) and all 10 katakana rows (コーヒー, ワイン, サイズ, ヨガ…). They show on mnemonic teach cards, in the chart, and grow **Word Builder from 10 to ~100 words — now cross-track** (katakana learners get katakana words).
+
+### Changed (UX)
+
+- **Dashboard reordered for beginners:** a hero **"Start here / Continue learning"** button deep-links the next kana lesson (no more hunting below the fold); quick actions moved up; Vocabulary/Grammar became compact cards with a "Best after some hiragana" hint for newcomers; Journey & Settings are now one tap away.
+- **Beginner primer:** close button added, reachable forever via Settings → "Replay Meet the sounds", and no longer forces returning users into replaying lesson 1.
+- **Locked decks/chapters say why** ("Finish X to unlock") and announce their locked state to screen readers.
+- **Journey & Profile now cover all three tracks** — vocab/grammar progress bars, words/chapters stats, and 4 new badges (First Words, Word Collector, Sentence Starter, Grammar Graduate).
+- Branded 404 + error pages; offline precache now includes vocab/grammar/chart/arcade; vocab hub gained the kana-first newcomer hint; `/learn` title no longer says just "Hiragana".
+
+---
+
 ## [0.19.0] - 2026-07-19
 
 **Phase 2 — Grammar (Absolute Beginners).** The third learning track: go from reading characters to building real sentences. Content-gated to the newly-added `database/Japalingo_Japanese_Grammar_for_Absolute_Beginners.pdf` — an original beginner adaptation based on Tae Kim's Japanese Grammar Guide.

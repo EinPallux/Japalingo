@@ -18,6 +18,7 @@ import { GrammarChoice } from "./grammar-choice";
 import { GrammarResults } from "./grammar-results";
 import { GrammarTableCard } from "./table-card";
 import { PointCard } from "./point-card";
+import { WrapupCard } from "./wrapup-card";
 
 export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
   const router = useRouter();
@@ -148,6 +149,14 @@ export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
                 <GrammarTableCard table={ex.table} />
                 <Button onClick={advance} size="lg" className="w-full max-w-lg">
                   Got it
+                </Button>
+              </div>
+            )}
+            {ex?.kind === "wrapup" && (
+              <div className="flex w-full flex-col items-center gap-6">
+                <WrapupCard chapter={ex.chapter} />
+                <Button onClick={advance} size="lg" className="w-full max-w-lg">
+                  Finish chapter
                 </Button>
               </div>
             )}

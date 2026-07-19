@@ -1,4 +1,5 @@
 import type { ExampleWord } from "@/types";
+import { ALL_KANA } from "./curriculum";
 
 /**
  * Real Japanese words for Word Builder, all sourced from the reading pages of
@@ -18,3 +19,19 @@ export const WORDS: ExampleWord[] = [
   { kana: "け", romaji: "ke", meaning: "hair" },
   { kana: "こえ", romaji: "koe", meaning: "voice" },
 ];
+
+/**
+ * The full Word Builder pool: the seed words above plus every example word the
+ * kana datasets carry from BOTH books' reading-practice pages (hiragana and
+ * katakana, ~100 words total) — deduped by spelling. All /database-attested.
+ */
+export const BUILDER_WORDS: ExampleWord[] = (() => {
+  const seen = new Set<string>();
+  const out: ExampleWord[] = [];
+  for (const w of [...WORDS, ...ALL_KANA.flatMap((k) => k.examples ?? [])]) {
+    if (seen.has(w.kana)) continue;
+    seen.add(w.kana);
+    out.push(w);
+  }
+  return out;
+})();

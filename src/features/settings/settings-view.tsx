@@ -1,6 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/app/app-header";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
@@ -120,6 +121,21 @@ export function SettingsView() {
             Animations automatically follow your device&apos;s <strong>Reduce Motion</strong> setting —
             no toggle needed.
           </p>
+        </Section>
+
+        <Section title="Learning">
+          <Link
+            href="/learn/sounds"
+            className="flex items-center justify-between gap-2 rounded-blob-lg border border-border bg-surface-2 px-4 py-3 transition hover:border-primary/40"
+          >
+            <span>
+              <span className="block font-display font-bold text-ink">Replay “Meet the sounds”</span>
+              <span className="text-sm text-muted">The 1-minute intro to how kana are built</span>
+            </span>
+            <span aria-hidden className="font-display text-primary">
+              ▸
+            </span>
+          </Link>
         </Section>
 
         <div className="flex flex-col gap-3 pt-2">

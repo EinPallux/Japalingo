@@ -15,7 +15,9 @@ export type GrammarExercise =
   | { kind: "table"; table: GrammarTable }
   | { kind: "translate"; item: TaggedExample; options: string[] }
   | { kind: "reverse"; item: TaggedExample; options: string[] }
-  | { kind: "build"; item: TaggedExample; tiles: string[]; answer: string[] };
+  | { kind: "build"; item: TaggedExample; tiles: string[]; answer: string[] }
+  /** The chapter's closing reflection: its common-mistake warning + Mini Check. */
+  | { kind: "wrapup"; chapter: GrammarChapter };
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -83,7 +85,12 @@ export function buildGrammarQueue(chapter: GrammarChapter): GrammarExercise[] {
     practice.push(build ?? makeChoice("reverse", item, pool));
   }
 
-  return [...intro, ...tables, ...shuffle(practice)];
+  // Close with the book's own reflection step — the "Common mistake" warning
+  // and the chapter's three Mini Check self-test questions.
+  const wrapup: GrammarExercise[] =
+    chapter.commonMistake || chapter.miniCheck?.length ? [{ kind: "wrapup", chapter }] : [];
+
+  return [...intro, ...tables, ...shuffle(practice), ...wrapup];
 }
 
 /** A pure-review queue over a set of already-seen sentences (no teaching). */

@@ -33,6 +33,18 @@ export function MnemonicStory({ kana, onContinue }: { kana: Kana; onContinue: ()
         <p className="text-ink">{kana.mnemonic}</p>
       </div>
 
+      {/* A real word from the book's reading-practice pages — the kana in the wild. */}
+      {kana.examples?.[0] ? (
+        <p className="text-sm text-muted">
+          Seen in{" "}
+          <span lang="ja" className="font-jp text-base font-bold text-ink">
+            {kana.examples[0].kana}
+          </span>{" "}
+          <span className="font-semibold">({kana.examples[0].romaji})</span> —{" "}
+          {kana.examples[0].meaning}
+        </p>
+      ) : null}
+
       <Button onClick={onContinue} size="lg" className="w-full max-w-xs">
         Got it!
       </Button>

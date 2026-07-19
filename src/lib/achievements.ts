@@ -30,6 +30,9 @@ export interface ProgressSnapshot {
   bestStreak?: number;
   completedLessons: string[];
   kana: Record<string, KanaProgress>;
+  /** Optional (newer tracks) — absent in old snapshots/tests, treated as empty. */
+  vocab?: Record<string, KanaProgress>;
+  completedGrammarChapters?: string[];
 }
 
 const DAKUTEN_ROWS = new Set(["g", "z", "d", "b", "p"]);
@@ -66,6 +69,8 @@ export function badgesFor(s: ProgressSnapshot): Badge[] {
   // Streak badges reward the *peak* streak ever reached, so a broken streak
   // never revokes a badge the learner already earned.
   const peakStreak = Math.max(s.bestStreak ?? 0, s.streakCount);
+  const wordsLearned = Object.values(s.vocab ?? {}).filter((p) => p.seen > 0).length;
+  const chaptersDone = s.completedGrammarChapters?.length ?? 0;
   return [
     { id: "first", name: "First Steps", desc: "Finish your first lesson", emoji: "👣", earned: s.completedLessons.length >= 1 },
     { id: "onfire", name: "On Fire", desc: "Reach a 3-day streak", emoji: "🔥", earned: peakStreak >= 3 },
@@ -77,5 +82,10 @@ export function badgesFor(s: ProgressSnapshot): Badge[] {
     { id: "yoon", name: "Combo Master", desc: "Meet every combination kana (yōon)", emoji: "ゃ", earned: rowsSeen(s.kana, (r) => r === "yoon") >= YOON_TOTAL },
     { id: "ext", name: "Loanword Pro", desc: "Meet every extended katakana (ファ, ティ…)", emoji: "ヴ", earned: rowsSeen(s.kana, (r) => r === "ext") >= EXT_TOTAL },
     { id: "master", name: "Kana Master", desc: "Fully master 25 kana", emoji: "👑", earned: totalMastered(s.kana) >= 25 },
+    // Vocabulary & grammar — the other two tracks earn lasting recognition too.
+    { id: "words25", name: "First Words", desc: "Learn 25 vocabulary words", emoji: "📖", earned: wordsLearned >= 25 },
+    { id: "words200", name: "Word Collector", desc: "Learn 200 vocabulary words", emoji: "📚", earned: wordsLearned >= 200 },
+    { id: "grammar1", name: "Sentence Starter", desc: "Finish your first grammar chapter", emoji: "🧩", earned: chaptersDone >= 1 },
+    { id: "grammar24", name: "Grammar Graduate", desc: "Finish all 24 grammar chapters", emoji: "🎓", earned: chaptersDone >= 24 },
   ];
 }

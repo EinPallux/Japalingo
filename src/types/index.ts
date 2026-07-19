@@ -129,14 +129,20 @@ export interface GrammarPattern {
   meaning: string; // e.g. "A is B"
 }
 
-/** A conjugation reference table (from the book's Appendix A + chapter tables). */
+/** A reference table transcribed from the grammar book (Appendix A + the
+ *  chapters' own formation/function tables). */
 export interface GrammarTable {
   id: string;
   title: string;
   columns: string[]; // header cells
   rows: string[][]; // each row's cells, aligned to `columns`
   note?: string; // exceptions / special cases from the book
-  chapterIds: string[]; // chapters this table is shown in
+  chapterIds: string[]; // chapters this table belongs to
+  /** When set, the table renders INSIDE these points' teach cards (and not as
+   *  its own lesson step) — restoring the book's in-chapter tables in place. */
+  pointIds?: string[];
+  /** Part of the hub's "Conjugation at a glance" quick reference. */
+  reference?: boolean;
 }
 
 /** An ordered, gated batch of vocab words — the vocabulary path's progression node. */

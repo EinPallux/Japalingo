@@ -10,6 +10,7 @@ import { VOCAB } from "@/data/vocab";
 import {
   getVocabWords,
   isVocabDeckUnlocked,
+  VOCAB_DECKS,
   vocabSections,
 } from "@/data/vocab-decks";
 import { isDue } from "@/lib/srs";
@@ -67,6 +68,13 @@ export function VocabHub() {
               {VOCAB.length} JLPT N5 words — learn to read them in kana, no kanji required.
             </p>
           </div>
+
+          {learned.length === 0 ? (
+            <div className="rounded-blob-lg border border-info/30 bg-info/10 px-4 py-3 text-sm text-ink">
+              💡 Words here are written in <strong>kana</strong>. New to Japanese? Learn some hiragana
+              on the path first — then everything here becomes readable.
+            </div>
+          ) : null}
 
           {/* Progress at a glance */}
           <div className="grid grid-cols-3 gap-3">
@@ -185,9 +193,27 @@ function DeckRow({
   );
 
   if (!unlocked) {
+    const prev = VOCAB_DECKS.find((d) => d.order === deck.order - 1);
     return (
-      <div className="flex cursor-not-allowed items-center gap-3 rounded-blob-lg border border-border bg-surface px-4 py-3 opacity-70">
-        {inner}
+      <div
+        aria-label={`${deck.title} — locked. Finish ${prev?.title ?? "the previous deck"} to unlock.`}
+        className="flex cursor-not-allowed items-center gap-3 rounded-blob-lg border border-border bg-surface px-4 py-3 opacity-70"
+      >
+        <span
+          aria-hidden
+          className="grid size-12 shrink-0 place-items-center rounded-blob-lg bg-surface-2 opacity-70"
+        >
+          <LockIcon className="size-5 text-muted" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="font-display font-bold text-muted">{deck.title}</span>
+          <span className="block truncate text-sm text-muted">
+            Finish {prev?.title ?? "the previous deck"} to unlock
+          </span>
+        </span>
+        <span className="shrink-0 text-xs font-semibold text-muted">
+          {learned}/{words.length}
+        </span>
       </div>
     );
   }

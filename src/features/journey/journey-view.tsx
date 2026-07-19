@@ -5,6 +5,8 @@ import { AppHeader } from "@/components/app/app-header";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { ALL_KANA, trackKana } from "@/data/curriculum";
+import { GRAMMAR_CHAPTERS } from "@/data/grammar";
+import { VOCAB } from "@/data/vocab";
 import { totalMastered, totalSeen, trackSeen } from "@/lib/achievements";
 import { isDue } from "@/lib/srs";
 import { useMounted } from "@/lib/use-mounted";
@@ -20,7 +22,16 @@ function masteredInTrack(kana: ReturnType<typeof useProgress.getState>["kana"], 
 export function JourneyView() {
   const mounted = useMounted();
   const kana = useProgress((s) => s.kana);
+  const vocab = useProgress((s) => s.vocab);
+  const grammarChaptersDone = useProgress((s) => s.completedGrammarChapters.length);
   const now = useNow();
+
+  // The other two tracks' headline numbers — the journey covers ALL learning.
+  const vocabStats = useMemo(() => {
+    const learned = VOCAB.filter((w) => (vocab[w.id]?.seen ?? 0) > 0).length;
+    const mastered = VOCAB.filter((w) => (vocab[w.id]?.mastery ?? 0) >= 3).length;
+    return { learned, mastered };
+  }, [vocab]);
 
   const stats = useMemo(() => {
     let attempts = 0;
@@ -57,7 +68,7 @@ export function JourneyView() {
     );
   }
 
-  if (stats.seen === 0) {
+  if (stats.seen === 0 && vocabStats.learned === 0 && grammarChaptersDone === 0) {
     return (
       <>
         <AppHeader />
@@ -94,6 +105,21 @@ export function JourneyView() {
         <p className="-mt-3 text-center text-xs text-muted">
           {stats.accuracy}% right across {stats.attempts} answers.
         </p>
+
+        {/* The other two tracks — words and grammar are part of the journey too. */}
+        <section className="flex flex-col gap-4 rounded-blob-lg border border-border bg-surface p-5">
+          <Bar label="Vocabulary" sample="語" value={vocabStats.learned} max={VOCAB.length} />
+          <Bar
+            label="Grammar"
+            sample="文"
+            value={grammarChaptersDone}
+            max={GRAMMAR_CHAPTERS.length}
+          />
+          <p className="text-center text-xs text-muted">
+            {vocabStats.learned} words met ({vocabStats.mastered} solid) · {grammarChaptersDone} of{" "}
+            {GRAMMAR_CHAPTERS.length} grammar chapters finished.
+          </p>
+        </section>
 
         <section className="flex flex-col gap-3 rounded-blob-lg border border-border bg-surface p-5">
           <h2 className="font-display text-lg font-bold text-ink">Focus on these next</h2>

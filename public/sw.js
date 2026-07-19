@@ -10,12 +10,12 @@
  * All learning state lives in localStorage, so once the shell is cached the whole
  * app (lessons, games, SRS) keeps working with no network.
  */
-const CACHE = "japalingo-v1";
+const CACHE = "japalingo-v2";
 const OFFLINE_URL = "/offline";
 // Precache the offline screen + the app's entry route, so opening the installed
 // app offline lands on the learning path (not a dead page). allSettled so one
 // failed fetch never aborts the whole install.
-const PRECACHE = [OFFLINE_URL, "/learn"];
+const PRECACHE = [OFFLINE_URL, "/learn", "/learn/vocab", "/learn/grammar", "/learn/chart", "/learn/games"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
