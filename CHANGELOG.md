@@ -14,6 +14,21 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.21.0] - 2026-07-19
+
+**Phase 2 — Satisfying sound design.** The app no longer feels quiet: rich audio feedback everywhere, still 100% generated with the Web Audio API (no audio assets).
+
+### Added / Changed
+
+- **A new layered SFX engine** — filtered, enveloped, pitch-bent notes with bell-like shimmer partials, glued by a master compressor (replaces the thin two-oscillator blips).
+- **Combo-climbing correct sound** — each consecutive right answer plays a step higher up a pentatonic scale (reset by a miss or ~8s pause): the "you're on a roll" feel.
+- **A soft, non-punishing wrong "bonk"** (muted triangle with a downward bend) instead of the old harsh square-wave buzz.
+- **New sounds:** a bubbly **pop** (build-the-sentence tiles, every "Got it" teach card), a **coin sparkle** (quest claims, shop purchases), a gentle **deny** (failed purchases — you didn't make a mistake, so no error buzz), and a richer **completion fanfare** (arpeggio into a shimmering chord) + level-up jingle.
+- Wired sound into previously-silent moments: sentence-tile placement/removal, all teach-card continues (kana, vocab, grammar, tables, chapter wrap-ups).
+- Everything respects the existing **Sound effects** toggle in Settings.
+
+---
+
 ## [0.20.1] - 2026-07-19
 
 **Phase 2 — Re-audit follow-up: grammar restoration wave 2 + last fixes.** A full re-audit confirmed all previous fixes; this release closes what it surfaced.

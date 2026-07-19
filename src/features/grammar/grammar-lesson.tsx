@@ -134,6 +134,7 @@ export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
                 <Button
                   onClick={() => {
                     if (steppedRef.current === index) return; // double-tap guard
+                    sfx.pop();
                     markGrammarSeen(ex.point.id);
                     advance();
                   }}
@@ -147,7 +148,14 @@ export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
             {ex?.kind === "table" && (
               <div className="flex w-full flex-col items-center gap-6">
                 <GrammarTableCard table={ex.table} />
-                <Button onClick={advance} size="lg" className="w-full max-w-lg">
+                <Button
+                  onClick={() => {
+                    sfx.pop();
+                    advance();
+                  }}
+                  size="lg"
+                  className="w-full max-w-lg"
+                >
                   Got it
                 </Button>
               </div>
@@ -155,7 +163,14 @@ export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
             {ex?.kind === "wrapup" && (
               <div className="flex w-full flex-col items-center gap-6">
                 <WrapupCard chapter={ex.chapter} />
-                <Button onClick={advance} size="lg" className="w-full max-w-lg">
+                <Button
+                  onClick={() => {
+                    sfx.pop();
+                    advance();
+                  }}
+                  size="lg"
+                  className="w-full max-w-lg"
+                >
                   Finish chapter
                 </Button>
               </div>
