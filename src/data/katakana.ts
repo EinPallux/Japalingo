@@ -1,4 +1,5 @@
 import type { Kana } from "@/types";
+import { KATAKANA_EXT } from "./katakana-ext";
 import { buildYoon } from "./yoon";
 
 /**
@@ -257,5 +258,9 @@ const BASE_KATAKANA: Kana[] = [
     mnemonic: "ウ + ゛(dakuten) → ヴ. The only vowel that takes dakuten — it makes the “vu” sound for loanwords (ヴァイオリン = violin)." },
 ];
 
-/** Basic + dakuten + the 33 generated yōon + the ヴ (vu) extended kana. */
-export const KATAKANA: Kana[] = [...BASE_KATAKANA, ...buildYoon("katakana", "kata")];
+/** Basic + dakuten + ヴ + the 33 generated yōon + the 22 extended combinations. */
+export const KATAKANA: Kana[] = [
+  ...BASE_KATAKANA,
+  ...buildYoon("katakana", "kata"),
+  ...KATAKANA_EXT,
+];

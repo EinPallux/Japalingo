@@ -7,9 +7,8 @@ import { Confetti } from "@/components/feedback/confetti";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
-import { SOKUON_WORDS } from "@/data/sokuon";
+import { CONCEPTS } from "@/data/concepts";
 import { sfx } from "@/lib/audio";
-import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
 import type { Lesson } from "@/types";
 
@@ -20,23 +19,23 @@ const anim = {
 };
 
 /**
- * A self-contained concept lesson for the small っ. Unlike a normal kana lesson,
- * っ has no reading of its own — it's a doubling rule — so this teaches the rule
- * (from the book) and then has the learner read the book's example words. Routed
- * to by the lesson player when `lesson.kind === "sokuon"`.
+ * A self-contained lesson for a writing *rule* rather than a kana with a reading
+ * — the small っ (doubling) and the long vowel ー (stretch). It teaches the rule,
+ * then has the learner read the book's example words. Routed to by the lesson
+ * player when `lesson.kind` is "sokuon" or "chouon".
  */
-export function SokuonLesson({ lesson, onExit }: { lesson: Lesson; onExit: () => void }) {
+export function ConceptLesson({ lesson, onExit }: { lesson: Lesson; onExit: () => void }) {
+  const concept = CONCEPTS[lesson.kind as "sokuon" | "chouon"];
   const completeLesson = useProgress((s) => s.completeLesson);
   // step 0 = concept intro, 1..N = read a word, then the finish screen.
   const [step, setStep] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [done, setDone] = useState(false);
 
-  const word = SOKUON_WORDS[step - 1];
+  const word = concept.words[step - 1];
 
   const next = () => {
-    if (step > SOKUON_WORDS.length) return;
-    if (step === SOKUON_WORDS.length) {
+    if (step === concept.words.length) {
       completeLesson(lesson.id);
       sfx.complete();
       setDone(true);
@@ -55,8 +54,8 @@ export function SokuonLesson({ lesson, onExit }: { lesson: Lesson; onExit: () =>
             <HoshiStatic className="size-36" />
           </div>
           <div>
-            <h1 className="font-display text-3xl font-bold text-ink">Small っ mastered! 🎉</h1>
-            <p className="mt-1 text-muted">Now you can spot the little pause and double it.</p>
+            <h1 className="font-display text-3xl font-bold text-ink">{concept.doneTitle}</h1>
+            <p className="mt-1 text-muted">{concept.doneNote}</p>
           </div>
           <Button onClick={onExit} size="lg" className="w-full max-w-xs">
             Continue
@@ -80,7 +79,7 @@ export function SokuonLesson({ lesson, onExit }: { lesson: Lesson; onExit: () =>
         <div className="h-4 flex-1 overflow-hidden rounded-full bg-surface-2">
           <div
             className="h-full rounded-full bg-success transition-all duration-300"
-            style={{ width: `${Math.round((step / (SOKUON_WORDS.length + 1)) * 100)}%` }}
+            style={{ width: `${Math.round((step / (concept.words.length + 1)) * 100)}%` }}
           />
         </div>
       </div>
@@ -89,29 +88,24 @@ export function SokuonLesson({ lesson, onExit }: { lesson: Lesson; onExit: () =>
         <AnimatePresence mode="wait" initial={false}>
           {step === 0 ? (
             <motion.div key="intro" {...anim} className="flex w-full flex-col items-center gap-6 text-center">
-              <p className="text-sm font-bold uppercase tracking-wide text-secondary-strong">New idea</p>
+              <p className="text-sm font-bold uppercase tracking-wide text-secondary-strong">
+                {concept.eyebrow}
+              </p>
               <div className="grid size-40 place-items-center rounded-blob-xl bg-primary-tint">
                 <span lang="ja" className="font-jp text-7xl font-bold text-primary">
-                  っ
+                  {concept.markChar}
                 </span>
               </div>
               <div className="max-w-md">
-                <h1 className="font-display text-2xl font-bold text-ink">The small っ</h1>
-                <p className="mt-2 text-muted">
-                  A little half-size っ (a mini つ) has <strong>no sound of its own</strong>. It marks a
-                  quick pause and <strong>doubles the next consonant</strong>.
-                </p>
-                <p className="mt-3 text-ink">
-                  So{" "}
-                  <span lang="ja" className="font-jp text-xl font-bold">
-                    いっか
-                  </span>{" "}
-                  is read <strong>ikka</strong> — the k is doubled. (Katakana&apos;s ッ works exactly the
-                  same way.)
-                </p>
+                <h1 className="font-display text-2xl font-bold text-ink">{concept.title}</h1>
+                {concept.paragraphs.map((para) => (
+                  <p key={para} className="mt-2 text-muted">
+                    {para}
+                  </p>
+                ))}
               </div>
               <Button onClick={next} size="lg" className="w-full max-w-xs">
-                Got it — let&apos;s read some
+                Got it — let&apos;s read
               </Button>
             </motion.div>
           ) : word ? (
@@ -124,14 +118,14 @@ export function SokuonLesson({ lesson, onExit }: { lesson: Lesson; onExit: () =>
                 {revealed ? (
                   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                     <p className="font-display text-3xl font-bold text-primary">{word.romaji}</p>
-                    <p className="mt-1 text-sm text-muted">The small っ {word.note}.</p>
+                    <p className="mt-1 text-sm text-muted">{word.note}.</p>
                   </motion.div>
                 ) : null}
               </div>
               <ListenButton text={word.kana} />
               {revealed ? (
                 <Button onClick={next} size="lg" className="w-full max-w-xs">
-                  {step === SOKUON_WORDS.length ? "Finish" : "Next"}
+                  {step === concept.words.length ? "Finish" : "Next"}
                 </Button>
               ) : (
                 <Button
@@ -141,7 +135,7 @@ export function SokuonLesson({ lesson, onExit }: { lesson: Lesson; onExit: () =>
                   }}
                   size="lg"
                   variant="ghost"
-                  className={cn("w-full max-w-xs")}
+                  className="w-full max-w-xs"
                 >
                   Reveal the reading
                 </Button>

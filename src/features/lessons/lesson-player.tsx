@@ -14,8 +14,8 @@ import { buildQueue } from "./build-queue";
 import { KanaDrill } from "./modes/kana-drill";
 import { MnemonicStory } from "./modes/mnemonic-story";
 import { QuickMatch } from "./modes/quick-match";
+import { ConceptLesson } from "./concept-lesson";
 import { LessonResults } from "./results";
-import { SokuonLesson } from "./sokuon-lesson";
 
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const router = useRouter();
@@ -68,9 +68,9 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     );
   }
 
-  // The small っ is a concept, not a kana — it has its own self-contained lesson.
-  if (lesson.kind === "sokuon") {
-    return <SokuonLesson lesson={lesson} onExit={exit} />;
+  // The small っ and long-vowel ー are writing rules, not kana — self-contained.
+  if (lesson.kind === "sokuon" || lesson.kind === "chouon") {
+    return <ConceptLesson lesson={lesson} onExit={exit} />;
   }
 
   if (done) {

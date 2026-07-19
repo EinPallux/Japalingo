@@ -8,7 +8,7 @@ import type { Kana, KanaProgress, KanaRow, Track } from "@/types";
 
 const ROW_ORDER: KanaRow[] = [
   "a", "k", "s", "t", "n", "h", "m", "y", "r", "w",
-  "g", "z", "d", "b", "p", "yoon", "v",
+  "g", "z", "d", "b", "p", "yoon", "v", "ext",
 ];
 
 const ROW_TITLE: Record<KanaRow, string> = {
@@ -29,6 +29,7 @@ const ROW_TITLE: Record<KanaRow, string> = {
   p: "P row ゜",
   yoon: "Combos ゃゅょ",
   v: "ヴ (vu)",
+  ext: "Foreign ァィゥェォ",
 };
 
 /** Cap a single drill session so a big selection stays focused. */

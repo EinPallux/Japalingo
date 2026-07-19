@@ -21,7 +21,8 @@ export type KanaRow =
   | "b"
   | "p"
   | "yoon"
-  | "v";
+  | "v"
+  | "ext";
 
 export interface ExampleWord {
   kana: string;
@@ -61,8 +62,8 @@ export interface Lesson {
   newKanaIds: string[];
   reviewKanaIds: string[];
   order: number;
-  /** "sokuon" is a self-contained concept lesson (the small っ doubling rule). */
-  kind: "lesson" | "review" | "sokuon";
+  /** "sokuon"/"chouon" are self-contained concept lessons (small っ, long vowel ー). */
+  kind: "lesson" | "review" | "sokuon" | "chouon";
 }
 
 /** Per-kana mastery state for the local user (SRS-lite Leitner box 0–5). */

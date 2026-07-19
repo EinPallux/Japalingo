@@ -44,6 +44,38 @@ describe("ヴ (vu)", () => {
   });
 });
 
+describe("extended combination katakana", () => {
+  it("adds 22 extended combos, katakana only, with clean ids", () => {
+    const ext = trackKana("katakana").filter((k) => k.row === "ext");
+    expect(ext).toHaveLength(22);
+    expect(trackKana("hiragana").some((k) => k.row === "ext")).toBe(false);
+    expect(new Set(ext.map((k) => k.id)).size).toBe(22);
+  });
+
+  it("keeps homophone ids distinct from existing kana", () => {
+    // these readings collide with basic kana, so the extended kana use other ids
+    expect(getKana("kata-uwo")).toMatchObject({ char: "ウォ", romaji: "wo" }); // vs ヲ (kata-wo)
+    expect(getKana("kata-dhi")).toMatchObject({ char: "ディ", romaji: "di" }); // vs ヂ (kata-di)
+    expect(getKana("kata-dwu")).toMatchObject({ char: "ドゥ", romaji: "du" }); // vs ヅ (kata-du)
+    expect(getKana("kata-wo")?.char).toBe("ヲ"); // unchanged
+    expect(getKana("kata-di")?.char).toBe("ヂ");
+  });
+
+  it("spells the loanword sounds the book teaches", () => {
+    expect(getKana("kata-fa")).toMatchObject({ char: "ファ", romaji: "fa" });
+    expect(getKana("kata-va")).toMatchObject({ char: "ヴァ", romaji: "va" });
+    expect(getKana("kata-tsa")).toMatchObject({ char: "ツァ", romaji: "tsa" });
+    expect(getKana("kata-she")).toMatchObject({ char: "シェ", romaji: "she" });
+    expect(getKana("kata-che")).toMatchObject({ char: "チェ", romaji: "che" });
+  });
+
+  it("teaches the long-vowel ー as a katakana concept lesson", () => {
+    const lesson = getLesson("kata-chouon-learn");
+    expect(lesson?.kind).toBe("chouon");
+    expect(lesson?.newKanaIds).toEqual([]);
+  });
+});
+
 describe("small っ sokuon lesson", () => {
   it("is a hiragana concept lesson with no kana, using the book's words", () => {
     const lesson = getLesson("hira-sokuon-learn");

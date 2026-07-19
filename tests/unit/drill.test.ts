@@ -14,8 +14,9 @@ describe("free drill", () => {
     expect(hira.map((r) => r.row)).not.toContain("v"); // ヴ is katakana-only
 
     const kata = trackRows("katakana", {});
-    expect(kata.reduce((n, r) => n + r.kana.length, 0)).toBe(105);
+    expect(kata.reduce((n, r) => n + r.kana.length, 0)).toBe(127);
     expect(kata.map((r) => r.row)).toContain("v"); // ヴ row present here
+    expect(kata.map((r) => r.row)).toContain("ext"); // extended combos row
     // no row is ever empty for the track it's shown in
     expect(kata.every((r) => r.kana.length > 0)).toBe(true);
   });

@@ -37,6 +37,8 @@ const DAKUTEN_ROWS = new Set(["g", "z", "d", "b", "p"]);
 export const DAKUTEN_TOTAL = ALL_KANA.filter((k) => DAKUTEN_ROWS.has(k.row)).length;
 /** Total combination kana (yōon) across both tracks. */
 export const YOON_TOTAL = ALL_KANA.filter((k) => k.row === "yoon").length;
+/** Total extended combination katakana (foreign sounds). */
+export const EXT_TOTAL = ALL_KANA.filter((k) => k.row === "ext").length;
 
 export function trackSeen(kana: Record<string, KanaProgress>, track: Track): number {
   return ALL_KANA.filter((k) => k.track === track && (kana[k.id]?.seen ?? 0) > 0).length;
@@ -64,6 +66,7 @@ export function badgesFor(s: ProgressSnapshot): Badge[] {
     { id: "kata", name: "Katakana Champ", desc: "Meet all 46 basic katakana", emoji: "ア", earned: trackSeen(s.kana, "katakana") >= 46 },
     { id: "dakuten", name: "Dakuten Master", desc: "Meet every dakuten & han-dakuten kana", emoji: "゛", earned: rowsSeen(s.kana, (r) => DAKUTEN_ROWS.has(r)) >= DAKUTEN_TOTAL },
     { id: "yoon", name: "Combo Master", desc: "Meet every combination kana (yōon)", emoji: "ゃ", earned: rowsSeen(s.kana, (r) => r === "yoon") >= YOON_TOTAL },
+    { id: "ext", name: "Loanword Pro", desc: "Meet every extended katakana (ファ, ティ…)", emoji: "ヴ", earned: rowsSeen(s.kana, (r) => r === "ext") >= EXT_TOTAL },
     { id: "master", name: "Kana Master", desc: "Fully master 25 kana", emoji: "👑", earned: totalMastered(s.kana) >= 25 },
   ];
 }

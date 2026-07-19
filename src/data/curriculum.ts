@@ -116,32 +116,50 @@ function buildTrack(track: Track, prefix: string): { units: Unit[]; lessons: Les
   // Track-specific extras, taught last:
   //  • katakana adds ヴ (vu) — the one dakuten vowel, for foreign v-sounds.
   //  • hiragana adds the small っ concept lesson (the doubling rule).
-  if (track === "katakana") {
-    const unitId = `${prefix}-v`;
+  const addUnit = (id: string, title: string, kanaIds: string[], learnTitle: string, review?: string[]) => {
     units.push({
-      id: unitId,
+      id,
       track,
-      title: "Extended: ヴ",
-      subtitle: getKana(`${prefix}-vu`)?.char ?? "",
-      kanaIds: [`${prefix}-vu`],
+      title,
+      subtitle: kanaIds.map((k) => getKana(k)?.char ?? "").join(" ") || "—",
+      kanaIds,
       order: units.length + 1,
     });
     lessons.push({
-      id: `${unitId}-learn`,
-      unitId,
-      title: "The ヴ (vu) sound",
-      newKanaIds: [`${prefix}-vu`],
-      reviewKanaIds: [`${prefix}-po`, `${prefix}-bu`],
+      id: `${id}-learn`,
+      unitId: id,
+      title: learnTitle,
+      newKanaIds: kanaIds,
+      reviewKanaIds: review ?? [],
       order: (order += 1),
-      kind: "lesson",
+      kind: kanaIds.length ? "lesson" : "sokuon",
+    });
+  };
+
+  if (track === "katakana") {
+    const p = prefix;
+    addUnit(`${p}-v`, "Extended: ヴ", [`${p}-vu`], "The ヴ (vu) sound", [`${p}-po`, `${p}-bu`]);
+    // Extended combination katakana (foreign sounds), taught in three chunks.
+    addUnit(`${p}-ext1`, "Katakana: F・V", [`${p}-fa`, `${p}-fi`, `${p}-fe`, `${p}-fo`, `${p}-va`, `${p}-vi`, `${p}-ve`, `${p}-vo`], "Foreign sounds: ファ・ヴァ");
+    addUnit(`${p}-ext2`, "Katakana: W・TS", [`${p}-wi`, `${p}-we`, `${p}-uwo`, `${p}-tsa`, `${p}-tsi`, `${p}-tse`, `${p}-tso`], "Foreign sounds: ウィ・ツァ");
+    addUnit(`${p}-ext3`, "Katakana: TI・SHE…", [`${p}-ti`, `${p}-dhi`, `${p}-tu`, `${p}-dwu`, `${p}-she`, `${p}-je`, `${p}-che`], "Foreign sounds: ティ・シェ");
+    // Long-vowel dash ー — a concept, not a kana.
+    units.push({ id: `${p}-chouon`, track, title: "Long vowel ー", subtitle: "ー", kanaIds: [], order: units.length + 1 });
+    lessons.push({
+      id: `${p}-chouon-learn`,
+      unitId: `${p}-chouon`,
+      title: "The long vowel ー",
+      newKanaIds: [],
+      reviewKanaIds: [],
+      order: (order += 1),
+      kind: "chouon",
     });
   }
   if (track === "hiragana") {
-    const unitId = `${prefix}-sokuon`;
-    units.push({ id: unitId, track, title: "Small っ", subtitle: "っ", kanaIds: [], order: units.length + 1 });
+    units.push({ id: `${prefix}-sokuon`, track, title: "Small っ", subtitle: "っ", kanaIds: [], order: units.length + 1 });
     lessons.push({
-      id: `${unitId}-learn`,
-      unitId,
+      id: `${prefix}-sokuon-learn`,
+      unitId: `${prefix}-sokuon`,
       title: "The small っ (double it!)",
       newKanaIds: [],
       reviewKanaIds: [],

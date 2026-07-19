@@ -33,6 +33,7 @@ const ROW_LABEL: Record<KanaRow, string> = {
   p: "p",
   yoon: "yō",
   v: "v",
+  ext: "ext",
 };
 
 // Yōon are a separate grid: consonant clusters × the three small-y columns.
@@ -184,6 +185,7 @@ export function ChartView() {
   }, [track]);
   const nKana = useMemo(() => trackKana(track).find((k) => k.vowel === null), [track]);
   const vuKana = useMemo(() => trackKana(track).find((k) => k.row === "v"), [track]);
+  const extKana = useMemo(() => trackKana(track).filter((k) => k.row === "ext"), [track]);
 
   if (!mounted) {
     return (
@@ -254,6 +256,30 @@ export function ChartView() {
             </button>
             <span className="text-xs text-muted">ヴ (vu) — for foreign v-sounds</span>
           </div>
+        ) : null}
+
+        {extKana.length > 0 ? (
+          <>
+            <Divider>Extended katakana (foreign sounds)</Divider>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {extKana.map((k) => (
+                <button
+                  key={k.id}
+                  type="button"
+                  onClick={() => setSelected(k)}
+                  aria-label={`${k.romaji}, mastery ${masteryOf(k)} of 5`}
+                  className={cn(
+                    "grid h-11 min-w-11 place-items-center rounded-blob-sm border px-1 font-jp text-lg font-bold transition hover:brightness-105",
+                    tint(masteryOf(k)),
+                  )}
+                >
+                  <span lang="ja" aria-hidden>
+                    {k.char}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
         ) : null}
 
         {nKana ? (

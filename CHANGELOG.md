@@ -14,6 +14,20 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.17.0] - 2026-07-19
+
+**Phase 2 — Extended katakana & the long vowel ー.** The last of the katakana book's content, completing the full katakana system.
+
+### Added
+
+- **Extended combination katakana** — 22 foreign-sound combos from the book's "Combination Katakana" pages: **ファ/フィ/フェ/フォ** (f), **ヴァ/ヴィ/ヴェ/ヴォ** (v), **ウィ/ウェ/ウォ** (w), **ツァ/ツィ/ツェ/ツォ** (ts), plus **ティ・ディ・トゥ・ドゥ・シェ・ジェ・チェ**. Each uses the standard transliteration you read, with the book's pronunciation notes and its own example words (ファン = fan, ヴァイオリン = violin, ウィンドウ = window, モッツァレラ = mozzarella…). Taught in three new katakana units after ヴ.
+- **The long vowel ー (chōonpu)** — a concept lesson (like the small っ) teaching that the dash stretches the preceding vowel, with the book's minimal pair チーズ ("chiizu", cheese) vs チズ ("chizu", map).
+- **Kana Chart** gains an **Extended Katakana (foreign sounds)** section; **Free Drill** gains a "Foreign ァィゥェォ" row; new **Loanword Pro** badge. Lessons, games, SRS, Speed Review, and mastery all pick them up automatically. That completes the katakana book — the full set is now **127 katakana** (104 hiragana), 231 kana total.
+
+> The two concept lessons (small っ, long vowel ー) now share one `ConceptLesson` component.
+
+---
+
 ## [0.16.0] - 2026-07-19
 
 **Phase 2 — Combination kana, ヴ & the small っ.** The rest of the books' "variation" content, all from `/database`.
