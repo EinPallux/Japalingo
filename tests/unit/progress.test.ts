@@ -132,6 +132,29 @@ describe("progress store", () => {
     expect(selectDaily(s()).correct).toBe(1);
   });
 
+  it("crowns a unit once, granting gems idempotently", () => {
+    const before = s().gems;
+    expect(s().crownUnit("hira-vowels").alreadyCrowned).toBe(false);
+    expect(s().crownedUnits).toContain("hira-vowels");
+    expect(s().gems).toBe(before + 10);
+
+    expect(s().crownUnit("hira-vowels").alreadyCrowned).toBe(true);
+    expect(s().crownedUnits).toHaveLength(1);
+    expect(s().gems).toBe(before + 10); // no second reward
+  });
+
+  it("records a game score only when it beats the previous best", () => {
+    expect(s().recordScore("kana-rain:hiragana", 120)).toEqual({ best: 120, isRecord: true });
+    expect(s().bestScores["kana-rain:hiragana"]).toBe(120);
+
+    expect(s().recordScore("kana-rain:hiragana", 90)).toEqual({ best: 120, isRecord: false });
+    expect(s().bestScores["kana-rain:hiragana"]).toBe(120); // unchanged
+
+    expect(s().recordScore("kana-rain:hiragana", 200)).toEqual({ best: 200, isRecord: true });
+    // per-track keys are independent
+    expect(s().recordScore("kana-rain:katakana", 10)).toEqual({ best: 10, isRecord: true });
+  });
+
   it("ratchets bestStreak up and never lets it fall after a break", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2026, 0, 1, 12, 0, 0));

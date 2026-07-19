@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Confetti } from "@/components/feedback/confetti";
+import { ScoreBanner } from "@/components/feedback/score-banner";
 import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
@@ -76,10 +78,10 @@ export function RomajiRush({ track }: { track: Track }) {
     return <NotEnoughKana need={MIN_KANA} have={pool.length} />;
   }
 
-  return <RomajiRushGame pool={pool} />;
+  return <RomajiRushGame pool={pool} track={track} />;
 }
 
-function RomajiRushGame({ pool }: { pool: Kana[] }) {
+function RomajiRushGame({ pool, track }: { pool: Kana[]; track: Track }) {
   const router = useRouter();
 
   const [status, setStatus] = useState<"playing" | "over">("playing");
@@ -90,9 +92,11 @@ function RomajiRushGame({ pool }: { pool: Kana[] }) {
   const [combo, setCombo] = useState(0);
   const [bestCombo, setBestCombo] = useState(0);
   const [leftMs, setLeftMs] = useState(DURATION_MS);
+  const [record, setRecord] = useState<{ best: number; isRecord: boolean }>({ best: 0, isRecord: false });
 
   const deadlineRef = useRef(0);
   const advanceRef = useRef<number | null>(null);
+  const scoreRef = useRef(0);
 
   // Countdown clock. Restarts whenever a game (re)starts.
   useEffect(() => {
@@ -103,12 +107,14 @@ function RomajiRushGame({ pool }: { pool: Kana[] }) {
       if (remaining <= 0) {
         window.clearInterval(id);
         setLeftMs(0);
+        setRecord(useProgress.getState().recordScore(`romaji-rush:${track}`, scoreRef.current));
         setStatus("over");
       } else {
         setLeftMs(remaining);
       }
     }, 100);
     return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   useEffect(
@@ -127,7 +133,8 @@ function RomajiRushGame({ pool }: { pool: Kana[] }) {
       const next = combo + 1;
       setCombo(next);
       setBestCombo((b) => Math.max(b, next));
-      setScore((s) => s + 10 * Math.min(next, 5));
+      scoreRef.current += 10 * Math.min(next, 5);
+      setScore(scoreRef.current);
       setCorrect((c) => c + 1);
       sfx.correct();
     } else {
@@ -146,6 +153,7 @@ function RomajiRushGame({ pool }: { pool: Kana[] }) {
 
   const restart = () => {
     if (advanceRef.current) window.clearTimeout(advanceRef.current);
+    scoreRef.current = 0;
     setScore(0);
     setCorrect(0);
     setCombo(0);
@@ -159,9 +167,13 @@ function RomajiRushGame({ pool }: { pool: Kana[] }) {
   if (status === "over") {
     return (
       <main id="main" className="grid min-h-dvh place-items-center px-5 py-10">
+        {record.isRecord ? <Confetti /> : null}
         <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-          <HoshiStatic className="size-32" />
+          <div className={cn(record.isRecord && "anim-bob")}>
+            <HoshiStatic className="size-32" />
+          </div>
           <h1 className="font-display text-3xl font-bold text-ink">Time! ⏱️</h1>
+          <ScoreBanner record={record} score={score} />
           <div className="grid w-full grid-cols-3 gap-3">
             <Stat label="Score" value={score} tone="text-primary" />
             <Stat label="Correct" value={correct} tone="text-success-strong" />

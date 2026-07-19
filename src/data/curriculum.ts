@@ -117,6 +117,18 @@ export function getUnit(id: string): Unit | undefined {
 export function getTrackLessons(track: Track): Lesson[] {
   return LESSONS_BY_TRACK[track];
 }
+export function getTrackUnits(track: Track): Unit[] {
+  return UNITS_BY_TRACK[track];
+}
+/** Every lesson (learn + review) that belongs to a unit. */
+export function getUnitLessons(unitId: string): Lesson[] {
+  return ALL_LESSONS.filter((l) => l.unitId === unitId);
+}
+/** A unit is "cleared" once all its lessons are done — the Speed Review unlock. */
+export function isUnitComplete(unitId: string, completed: string[]): boolean {
+  const lessons = getUnitLessons(unitId);
+  return lessons.length > 0 && lessons.every((l) => completed.includes(l.id));
+}
 export function trackKana(track: Track): Kana[] {
   return track === "hiragana" ? HIRAGANA : KATAKANA;
 }

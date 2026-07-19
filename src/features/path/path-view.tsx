@@ -1,10 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { CheckIcon, LockIcon, StarIcon } from "@/components/ui/icons";
-import { getTrackLessons, getUnit } from "@/data/curriculum";
+import { getTrackLessons, getUnit, isUnitComplete } from "@/data/curriculum";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
 import type { Track } from "@/types";
@@ -14,6 +15,7 @@ type NodeState = "complete" | "current" | "locked";
 export function PathView({ track }: { track: Track }) {
   const router = useRouter();
   const completed = useProgress((s) => s.completedLessons);
+  const crownedUnits = useProgress((s) => s.crownedUnits);
   const lessons = getTrackLessons(track);
 
   const stateFor = (i: number): NodeState => {
@@ -40,15 +42,20 @@ export function PathView({ track }: { track: Track }) {
         const showHeader = i === 0 || lessons[i - 1]?.unitId !== lesson.unitId;
         const offset = Math.sin(i * 0.8) * 70;
         const isReview = lesson.kind === "review";
+        const unitComplete = isUnitComplete(unit.id, completed);
+        const unitCrowned = crownedUnits.includes(unit.id);
 
         return (
           <div key={lesson.id} className="flex w-full flex-col items-center">
             {showHeader ? (
-              <div className="mb-2 mt-8 w-full rounded-blob-lg bg-surface-2 px-5 py-3 text-center">
-                <p className="font-display font-bold text-ink">{unit.title}</p>
-                <p lang="ja" className="font-jp text-sm text-muted">
-                  {unit.subtitle}
-                </p>
+              <div className="mb-2 mt-8 flex w-full items-center gap-3 rounded-blob-lg bg-surface-2 px-5 py-3">
+                <div className="min-w-0 flex-1 text-center">
+                  <p className="font-display font-bold text-ink">{unit.title}</p>
+                  <p lang="ja" className="font-jp text-sm text-muted">
+                    {unit.subtitle}
+                  </p>
+                </div>
+                <UnitCrown unitId={unit.id} complete={unitComplete} crowned={unitCrowned} />
               </div>
             ) : null}
 
@@ -109,5 +116,50 @@ export function PathView({ track }: { track: Track }) {
         );
       })}
     </div>
+  );
+}
+
+/**
+ * The unit's Speed Review affordance: a gold crown once earned, a tappable
+ * "Speed Review" pill once the unit's lessons are done, or a dim locked crown
+ * while the unit is still in progress.
+ */
+function UnitCrown({
+  unitId,
+  complete,
+  crowned,
+}: {
+  unitId: string;
+  complete: boolean;
+  crowned: boolean;
+}) {
+  if (crowned) {
+    return (
+      <Link
+        href={`/learn/review/${unitId}`}
+        aria-label="Unit crowned — replay Speed Review"
+        className="grid size-11 shrink-0 place-items-center rounded-full bg-accent text-xl shadow-[0_3px_0_0_var(--jl-accent-strong)] transition hover:brightness-105 active:translate-y-0.5"
+      >
+        <span aria-hidden>👑</span>
+      </Link>
+    );
+  }
+  if (complete) {
+    return (
+      <Link
+        href={`/learn/review/${unitId}`}
+        className="anim-claim flex shrink-0 items-center gap-1 rounded-full border-2 border-accent-strong/40 bg-accent-tint px-3 py-1.5 font-display text-xs font-bold text-accent-strong transition hover:brightness-105"
+      >
+        <span aria-hidden>⚡</span> Speed Review
+      </Link>
+    );
+  }
+  return (
+    <span
+      aria-label="Speed Review locked — finish the unit to unlock"
+      className="grid size-11 shrink-0 place-items-center rounded-full bg-surface text-lg text-muted opacity-50"
+    >
+      <span aria-hidden>👑</span>
+    </span>
   );
 }

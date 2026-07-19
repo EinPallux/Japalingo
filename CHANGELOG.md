@@ -14,6 +14,18 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.14.0] - 2026-07-18
+
+**Phase 2 — Progression & personality.** Three additions that deepen the loop: a second path progression layer, arcade high scores, and an in-lesson mascot coach.
+
+### Added
+
+- **Speed Review checkpoints.** Once every lesson in a unit is done, a gold **⚡ Speed Review** appears on that unit's header — a timed recognition run (≈4s/kana) over the whole unit. Beat the clock with ≥80% correct and the unit earns a **gold 👑 crown** (a one-time **+10 💎** bonus), a second progression layer on top of finishing lessons. Locked units show a dimmed crown; crowned units keep the gold crown (tap to replay). Route: `/learn/review/[unitId]`. (`src/lib/speed-review.ts`, unit tests included.)
+- **Local high-score boards for Kana Rain & Romaji Rush.** Each game now keeps a **personal best per track**. A run that beats it triggers a **🏆 "New personal record!"** celebration with confetti on the game-over screen; otherwise it shows your best so far. The Arcade cards surface each game's best (🏆 N) at a glance. Bests persist locally with the rest of your progress.
+- **Hoshi coaches you through lessons.** A small **corner Hoshi** now reacts live: hit a **3-in-a-row streak** and it cheers ("On fire! すごい！", "You're flying! ✨", with a ×N badge past 5); slip up and it encourages you ("がんばって！ Keep going"). Reduced-motion friendly (the bubble fades via opacity, no movement required).
+
+---
+
 ## [0.13.0] - 2026-07-18
 
 **Phase 2 — Full check, tidy-up & game-feel.** A second full audit (all findings fixed), a decluttered dashboard, and a Duolingo-level animation pass.

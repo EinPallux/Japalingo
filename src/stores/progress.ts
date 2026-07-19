@@ -69,6 +69,10 @@ export interface ProgressState {
   speechRate: number;
   kana: Record<string, KanaProgress>;
   completedLessons: string[];
+  /** Unit ids that earned a gold crown by beating their Speed Review. */
+  crownedUnits: string[];
+  /** Personal-best scores per game, keyed `${gameId}:${track}`. */
+  bestScores: Record<string, number>;
   activeTrack: Track;
 
   completeOnboarding(data: { name: string; reason: string | null; dailyGoalXp: number }): void;
@@ -83,6 +87,10 @@ export interface ProgressState {
   /** Word Builder solve: XP + coins + daily-correct, no per-kana SRS change. */
   rewardCorrect(): void;
   completeLesson(lessonId: string): { alreadyDone: boolean };
+  /** Crown a unit gold after a won Speed Review (idempotent; grants gems once). */
+  crownUnit(unitId: string): { alreadyCrowned: boolean };
+  /** Record a game score; returns the best so far and whether it beat it. */
+  recordScore(key: string, score: number): { best: number; isRecord: boolean };
   claimQuest(id: string, reward: number, metric: QuestMetric, target: number): void;
   /** Attempt a purchase; returns why it failed so the UI can explain. */
   buyItem(id: string): { ok: boolean; reason?: "unknown" | "owned" | "max" | "active" | "funds" };
@@ -119,8 +127,13 @@ const initial = {
   speechRate: 0.9,
   kana: {} as Record<string, KanaProgress>,
   completedLessons: [] as string[],
+  crownedUnits: [] as string[],
+  bestScores: {} as Record<string, number>,
   activeTrack: "hiragana" as Track,
 };
+
+/** Gems awarded the first time a unit's Speed Review is beaten. */
+export const GEM_CROWN_REWARD = 10;
 
 type DailyOpts = { xp?: number; correct?: number; coins?: number };
 
@@ -230,6 +243,24 @@ export const useProgress = create<ProgressState>()(
           }));
         }
         return { alreadyDone };
+      },
+
+      crownUnit: (unitId) => {
+        const alreadyCrowned = get().crownedUnits.includes(unitId);
+        if (!alreadyCrowned) {
+          set((s) => ({
+            crownedUnits: [...s.crownedUnits, unitId],
+            gems: s.gems + GEM_CROWN_REWARD,
+          }));
+        }
+        return { alreadyCrowned };
+      },
+
+      recordScore: (key, score) => {
+        const prev = get().bestScores[key] ?? 0;
+        const isRecord = score > prev;
+        if (isRecord) set((s) => ({ bestScores: { ...s.bestScores, [key]: score } }));
+        return { best: Math.max(prev, score), isRecord };
       },
 
       claimQuest: (id, reward, metric, target) =>

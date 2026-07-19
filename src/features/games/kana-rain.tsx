@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Confetti } from "@/components/feedback/confetti";
+import { ScoreBanner } from "@/components/feedback/score-banner";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { Button } from "@/components/ui/button";
@@ -40,10 +42,10 @@ export function KanaRain({ track }: { track: Track }) {
     return <NotEnoughKana need={MIN_KANA} have={pool.length} />;
   }
 
-  return <KanaRainGame pool={pool} />;
+  return <KanaRainGame pool={pool} track={track} />;
 }
 
-function KanaRainGame({ pool }: { pool: Kana[] }) {
+function KanaRainGame({ pool, track }: { pool: Kana[]; track: Track }) {
   const router = useRouter();
   // Touch devices can't comfortably type into a timed game — offer a tap keypad.
   const coarse = useMediaQuery("(pointer: coarse)");
@@ -59,11 +61,13 @@ function KanaRainGame({ pool }: { pool: Kana[] }) {
   const [lives, setLives] = useState(START_LIVES);
   const [cleared, setCleared] = useState(0);
   const [input, setInput] = useState("");
+  const [record, setRecord] = useState<{ best: number; isRecord: boolean }>({ best: 0, isRecord: false });
 
   // mutable game state (updated in the RAF loop / handlers, never read in render)
   const dropsRef = useRef<Drop[]>([]);
   const livesRef = useRef(START_LIVES);
   const comboRef = useRef(0);
+  const scoreRef = useRef(0);
   const spawnRef = useRef(0);
   const elapsedRef = useRef(0);
   const lastRef = useRef<number | null>(null);
@@ -87,6 +91,7 @@ function KanaRainGame({ pool }: { pool: Kana[] }) {
     dropsRef.current = [];
     livesRef.current = START_LIVES;
     comboRef.current = 0;
+    scoreRef.current = 0;
     spawnRef.current = 0;
     elapsedRef.current = 0;
     lastRef.current = null;
@@ -140,6 +145,7 @@ function KanaRainGame({ pool }: { pool: Kana[] }) {
       setDrops(cur);
 
       if (livesRef.current <= 0) {
+        setRecord(useProgress.getState().recordScore(`kana-rain:${track}`, scoreRef.current));
         setStatus("over");
         return;
       }
@@ -170,7 +176,8 @@ function KanaRainGame({ pool }: { pool: Kana[] }) {
     const nextCombo = comboRef.current;
     setCombo(nextCombo);
     setBestCombo((b) => Math.max(b, nextCombo));
-    setScore((s) => s + 10 * nextCombo);
+    scoreRef.current += 10 * nextCombo;
+    setScore(scoreRef.current);
     setCleared((c) => c + 1);
     sfx.correct();
     useProgress.getState().answer(match.kana.id, true);
@@ -188,9 +195,13 @@ function KanaRainGame({ pool }: { pool: Kana[] }) {
   if (status === "over") {
     return (
       <main id="main" className="grid min-h-dvh place-items-center px-5 py-10">
+        {record.isRecord ? <Confetti /> : null}
         <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-          <HoshiStatic className="size-32" />
+          <div className={cn(record.isRecord && "anim-bob")}>
+            <HoshiStatic className="size-32" />
+          </div>
           <h1 className="font-display text-3xl font-bold text-ink">Game over!</h1>
+          <ScoreBanner record={record} score={score} />
           <div className="grid w-full grid-cols-3 gap-3">
             <Stat label="Score" value={score} tone="text-primary" />
             <Stat label="Best combo" value={`×${bestCombo}`} tone="text-secondary-strong" />
