@@ -14,6 +14,27 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.19.0] - 2026-07-19
+
+**Phase 2 — Grammar (Absolute Beginners).** The third learning track: go from reading characters to building real sentences. Content-gated to the newly-added `database/Japalingo_Japanese_Grammar_for_Absolute_Beginners.pdf` — an original beginner adaptation based on Tae Kim's Japanese Grammar Guide.
+
+### Added
+
+- **24 grammar chapters in the book's researched beginner order**, transcribed into a typed dataset (`src/data/grammar.ts`): 130 teaching points and 108 example sentences across three parts — **Foundations** (sentence logic, です／だ, は／が／も, adjectives, verbs, particles, existence), **Building Sentences** (the て-form, questions, requests, ability/desire, conditions, giving/receiving), and **Everyday Japanese** (comparison, appearance/hearsay, counters, casual speech, keigo). Chapter order is the book's own — informed by Tae Kim's progression for learners with **no prior knowledge**, not invented here.
+- **A gamified grammar path** at **`/learn/grammar`.** Chapters are grouped by part and gate the next one open as you clear them. Each chapter is a lesson that teaches its points (heading, formation pattern, the book's own explanation, example sentences with audio) then drills them three ways:
+  - **Translate** — read the Japanese sentence, pick the meaning.
+  - **Say it in Japanese** — read the English, pick the sentence.
+  - **Build the sentence** — assemble the sentence by tapping phrase tiles (the flagship exercise), using the book's own phrase segmentation. **Kana-first**: the Japanese side is always the kana reading, so a learner who can't yet read every kanji is never blocked.
+- **SRS-backed grammar review.** Every point met enters its own spaced-repetition pool; the hub surfaces "N due" and a one-tap review session.
+- **Conjugation reference tables** (the book's Appendix A "Conjugation at a Glance" plus the class/formation tables): clean, scrollable tables for nouns & な-adjectives, い-adjectives, the three verb groups, verb plain & polite forms, the full Godan endings grid (ない／た／て／potential), and て-form formation. They appear as reference cards inside the verb, adjective, and て-form lessons (right after the teaching, before drilling), and as a collapsible "Conjugation at a glance" reference in the hub.
+- **The 50 Core Patterns** (the book's Appendix C) as a collapsible quick-reference in the hub.
+- **Dashboard entry** — a **Grammar** card (due-count badge + chapter progress) alongside Kana and Vocabulary, with a gentle "learn hiragana first" nudge for newcomers, reflecting the book's stated prerequisite.
+- Reuses the whole feel of the app: pop/shake feedback, the in-lesson Hoshi coach, confetti results, and XP/coins/gems/streak. New store slice (`grammar` SRS map + `completedGrammarChapters`), kept separate from kana/vocab.
+
+> On placement & order: the source book is a beginner adaptation whose chapter sequence was, per its own note, "informed by the two supplied editions of Tae Kim's Japanese Grammar Guide" — so the app follows that sequence rather than deriving one.
+
+---
+
 ## [0.18.0] - 2026-07-19
 
 **Phase 2 — Vocabulary (JLPT N5).** A whole new learning track: read and understand real Japanese words, not just kana. Content-gated to the newly-added `database/Vocabulary_of_JLPT_N5.pdf` (MLC Meguro Language Center).

@@ -10,6 +10,7 @@ import { PathView } from "@/features/path/path-view";
 import { DailyQuests } from "@/features/quests/daily-quests";
 import { ALL_KANA } from "@/data/curriculum";
 import { VOCAB } from "@/data/vocab";
+import { GRAMMAR_CHAPTERS } from "@/data/grammar";
 import { totalSeen } from "@/lib/achievements";
 import { isDue } from "@/lib/srs";
 import { useMounted } from "@/lib/use-mounted";
@@ -43,6 +44,14 @@ export function LearnDashboard() {
   const vocabLearned = useMemo(
     () => VOCAB.filter((w) => (vocabProgress[w.id]?.seen ?? 0) > 0).length,
     [vocabProgress],
+  );
+  const grammarProgress = useProgress((s) => s.grammar);
+  const completedGrammar = useProgress((s) => s.completedGrammarChapters);
+  const grammarChaptersDone = completedGrammar.length;
+  const grammarDue = useMemo(
+    () =>
+      GRAMMAR_CHAPTERS.flatMap((c) => c.points).filter((p) => isDue(grammarProgress[p.id], now)).length,
+    [grammarProgress, now],
   );
 
   if (!mounted) {
@@ -129,6 +138,34 @@ export function LearnDashboard() {
               </span>
             </span>
             <span aria-hidden className="font-display text-xl text-secondary-strong">
+              ▸
+            </span>
+          </Link>
+
+          {/* Grammar — the sentence-building track, alongside kana and vocab. */}
+          <Link
+            href="/learn/grammar"
+            className="relative flex items-center justify-between gap-3 rounded-blob-lg border border-primary/30 bg-gradient-to-r from-primary-tint to-info/15 px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
+          >
+            {grammarDue > 0 ? (
+              <span className="absolute right-3 top-3 rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-white">
+                {grammarDue} due
+              </span>
+            ) : null}
+            <span className="flex items-center gap-3">
+              <span aria-hidden className="text-2xl">
+                🧩
+              </span>
+              <span>
+                <span className="block font-display font-bold text-ink">Grammar</span>
+                <span className="text-sm text-muted">
+                  {grammarChaptersDone > 0
+                    ? `${grammarChaptersDone} of ${GRAMMAR_CHAPTERS.length} chapters done`
+                    : `Build real sentences — ${GRAMMAR_CHAPTERS.length} beginner chapters`}
+                </span>
+              </span>
+            </span>
+            <span aria-hidden className="font-display text-xl text-primary">
               ▸
             </span>
           </Link>

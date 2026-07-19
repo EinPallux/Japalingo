@@ -17,8 +17,9 @@ All content in Phase 2 derives from source PDFs living in `/database`:
 | `database/tofugu-learn-hiragana-book.pdf` | Tofugu — Learn Hiragana | 71 | Hiragana gojūon, dakuten/handakuten, yōon, sokuon |
 | `database/learn-katakana-book-by-tofugu.pdf` | Tofugu — Learn Katakana | 69 | Katakana gojūon, dakuten/handakuten, yōon, **extended** foreign combos, long-vowel mark ー |
 | `database/Vocabulary_of_JLPT_N5.pdf` | Vocabulary of JLPT N5 (MLC Meguro Language Center) | 75 | 802 JLPT N5 words — kana reading, meaning, optional kanji, example sentence, workbook frequency |
+| `database/Japalingo_Japanese_Grammar_for_Absolute_Beginners.pdf` | Japanese Grammar for Absolute Beginners (adaptation based on Tae Kim's guide) | 88 | 24 beginner grammar chapters (3 parts), 50 core patterns, example sentences with kana readings, exercises |
 
-> The vocabulary book is taught **kana-first**: `reading` is the learned/quizzed form; `kanji` is optional reference and never required to answer. See §7.1 for the `VocabWord` schema.
+> The vocabulary and grammar books are both taught **kana-first**: the kana reading is the learned/quizzed form; kanji is optional reference and never required to answer. See §7.1 (`VocabWord`) and §7.2 (grammar).
 
 ### 1.2 The governance rule (non-negotiable)
 
@@ -462,7 +463,7 @@ Real data from `/database`. `strokeCount`/`strokeOrder` shown as `null` because 
 
 ## 7. Extensibility — Content Packs
 
-New capabilities unlock **only when the owner adds the corresponding source to `/database`** (the content-gating rule from §1.2). When that happens, the same three-layer pattern — **typed dataset → decks/lessons → game modes** — extends cleanly. **Vocabulary (JLPT N5) is now shipped** (§7.1); kanji, grammar, and listening remain gated on their sources.
+New capabilities unlock **only when the owner adds the corresponding source to `/database`** (the content-gating rule from §1.2). When that happens, the same three-layer pattern — **typed dataset → decks/lessons → game modes** — extends cleanly. **Vocabulary (§7.1) and Grammar (§7.2) are now shipped**; kanji and listening remain gated on their sources.
 
 ### 7.1 Vocabulary (SHIPPED — v0.18.0)
 
@@ -485,7 +486,25 @@ interface VocabWord {
 
 Key rules: **kana-first** (every exercise uses `reading`; `kanji` shows only as a small reference chip), **frequency-ordered decks** (highest-`freq` words first — the biggest reading-efficiency lever), and **SRS reuse** (each word gets a `KanaProgress` box in the store's separate `vocab` map, so it schedules exactly like a kana without polluting kana stats).
 
-### 7.2 Still gated on their sources
+### 7.2 Grammar (SHIPPED — v0.19.0)
+
+Backed by `database/Japalingo_Japanese_Grammar_for_Absolute_Beginners.pdf` (an original beginner adaptation based on Tae Kim's Japanese Grammar Guide). Transcribed into `src/data/grammar.ts` (`GRAMMAR_CHAPTERS`, 24 chapters / 130 points / 108 examples; `GRAMMAR_PATTERNS`, the 50 core patterns). Lookups, gating, and the exercise engine live in `src/lib/grammar.ts` + `src/lib/grammar-lesson.ts`.
+
+```ts
+interface GrammarExample { jp: string; kana: string; en: string } // kana reading is space-segmented into phrases
+interface GrammarPoint { id: string; heading: string; explain: string; patterns: string[]; examples: GrammarExample[] }
+interface GrammarChapter {
+  id: string; num: number; part: "I" | "II" | "III";
+  title: string; subtitle: string; objectives: string[];
+  points: GrammarPoint[]; commonMistake?: string; miniCheck?: string[];
+}
+```
+
+Conjugation reference tables (Appendix A "Conjugation at a Glance" + the Ch5/6/12 class & formation tables) are transcribed verbatim into `src/data/grammar-tables.ts` (`GrammarTable { columns, rows, note?, chapterIds }`) and shown as reference cards inside the verb/adjective/て-form lessons and as a collapsible hub reference.
+
+Key rules: **the book's chapter order is the learning order** (its beginner progression was informed by Tae Kim's guide — do not re-derive when/why to teach a topic); **kana-first** (the Japanese side of every exercise is the kana reading — the flagship "build the sentence" game reuses the book's own phrase segmentation as tiles); **auto-generated exercises** (translate / say-in-Japanese / build all derive from the transcribed examples, so no per-exercise authoring); and **SRS reuse** (each grammar *point* gets a `KanaProgress` box in the store's separate `grammar` map).
+
+### 7.3 Still gated on their sources
 
 | Future pack | New source in `/database` | New typed record(s) | How it reuses this model |
 | --- | --- | --- | --- |
@@ -502,4 +521,4 @@ Design principles that keep this open:
 
 ---
 
-*Content sources: `database/tofugu-learn-hiragana-book.pdf`, `database/learn-katakana-book-by-tofugu.pdf`, `database/Vocabulary_of_JLPT_N5.pdf`. All kana facts, mnemonics, example words, and vocabulary above are transcribed from these books per the `/database` governance rule.*
+*Content sources: `database/tofugu-learn-hiragana-book.pdf`, `database/learn-katakana-book-by-tofugu.pdf`, `database/Vocabulary_of_JLPT_N5.pdf`, `database/Japalingo_Japanese_Grammar_for_Absolute_Beginners.pdf`. All kana facts, mnemonics, example words, vocabulary, and grammar above are transcribed from these books per the `/database` governance rule.*
