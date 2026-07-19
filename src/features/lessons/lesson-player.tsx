@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { HoshiCoach, type CoachMood } from "@/components/mascot/hoshi-coach";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { CloseIcon } from "@/components/ui/icons";
 import { sfx } from "@/lib/audio";
@@ -23,11 +24,25 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const [done, setDone] = useState(false);
   const [earnedXp, setEarnedXp] = useState(0);
   const [xpBefore] = useState(() => useProgress.getState().xp);
+  // Hoshi coach: a running correct-streak drives its cheer/encourage reactions.
+  const [coach, setCoach] = useState<{ mood: CoachMood; nonce: number; streak: number }>({
+    mood: "idle",
+    nonce: 0,
+    streak: 0,
+  });
 
   const answer = useProgress((s) => s.answer);
   const rate = useProgress((s) => s.rate);
   const markSeen = useProgress((s) => s.markSeen);
   const completeLesson = useProgress((s) => s.completeLesson);
+
+  // React to an answer: bump the streak (or reset it) and pick Hoshi's mood.
+  const react = (correct: boolean) =>
+    setCoach((c) => {
+      const streak = correct ? c.streak + 1 : 0;
+      const mood: CoachMood = correct ? (streak >= 3 ? "cheer" : "idle") : "encourage";
+      return { mood, streak, nonce: c.nonce + 1 };
+    });
 
   const exit = () => router.push("/learn");
 
@@ -112,6 +127,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 options={ex.options}
                 onAnswer={(correct) => {
                   answer(ex.kana.id, correct);
+                  react(correct);
                   advance();
                 }}
               />
@@ -121,6 +137,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 kana={ex.kana}
                 onRate={(grade) => {
                   rate(ex.kana.id, grade);
+                  react(grade !== "again");
                   advance();
                 }}
               />
@@ -128,6 +145,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
           </motion.div>
         </AnimatePresence>
       </div>
+
+      <HoshiCoach mood={coach.mood} nonce={coach.nonce} streak={coach.streak} />
     </main>
   );
 }
