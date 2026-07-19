@@ -7,6 +7,7 @@ import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { LockIcon } from "@/components/ui/icons";
 import { GRAMMAR_CHAPTERS, GRAMMAR_PATTERNS } from "@/data/grammar";
+import { GRAMMAR_TABLES } from "@/data/grammar-tables";
 import { ALL_GRAMMAR_EXAMPLES, grammarSections, isChapterUnlocked, type TaggedExample } from "@/lib/grammar";
 import { isDue } from "@/lib/srs";
 import { useMounted } from "@/lib/use-mounted";
@@ -15,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
 import type { GrammarChapter, KanaProgress } from "@/types";
 import { GrammarReview } from "./grammar-review";
+import { GrammarTableCard } from "./table-card";
 
 const ALL_POINTS = GRAMMAR_CHAPTERS.flatMap((c) => c.points);
 const REVIEW_POINTS = 6;
@@ -115,10 +117,41 @@ export function GrammarHub() {
             </section>
           ))}
 
+          <ConjugationReference />
           <PatternsReference />
         </div>
       </main>
     </>
+  );
+}
+
+/** The book's Appendix A conjugation tables — a collapsible quick reference. */
+function ConjugationReference() {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="mt-2 rounded-blob-lg border border-border bg-surface">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
+      >
+        <span>
+          <span className="block font-display font-bold text-ink">Conjugation at a glance</span>
+          <span className="text-sm text-muted">Nouns, adjectives, verbs & the て-form</span>
+        </span>
+        <span aria-hidden className={cn("text-muted transition", open && "rotate-90")}>
+          ▸
+        </span>
+      </button>
+      {open ? (
+        <div className="flex flex-col gap-5 border-t border-border px-4 py-4">
+          {GRAMMAR_TABLES.map((t) => (
+            <GrammarTableCard key={t.id} table={t} className="max-w-none" />
+          ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
 

@@ -1,4 +1,5 @@
-import type { GrammarChapter, GrammarPoint } from "@/types";
+import { tablesForChapter } from "@/data/grammar-tables";
+import type { GrammarChapter, GrammarPoint, GrammarTable } from "@/types";
 import { ALL_GRAMMAR_EXAMPLES, chapterExamples, readingChunks, type TaggedExample } from "./grammar";
 
 /**
@@ -11,6 +12,7 @@ import { ALL_GRAMMAR_EXAMPLES, chapterExamples, readingChunks, type TaggedExampl
  */
 export type GrammarExercise =
   | { kind: "teach"; point: GrammarPoint }
+  | { kind: "table"; table: GrammarTable }
   | { kind: "translate"; item: TaggedExample; options: string[] }
   | { kind: "reverse"; item: TaggedExample; options: string[] }
   | { kind: "build"; item: TaggedExample; tiles: string[]; answer: string[] };
@@ -66,6 +68,9 @@ function makeBuild(item: TaggedExample): GrammarExercise | null {
  */
 export function buildGrammarQueue(chapter: GrammarChapter): GrammarExercise[] {
   const intro: GrammarExercise[] = chapter.points.map((point) => ({ kind: "teach", point }));
+  // conjugation reference cards (verb / adjective / て-form chapters) sit right
+  // after the teaching, before drilling begins
+  const tables: GrammarExercise[] = tablesForChapter(chapter.id).map((table) => ({ kind: "table", table }));
   const pool = chapterExamples(chapter);
 
   const practice: GrammarExercise[] = [];
@@ -76,7 +81,7 @@ export function buildGrammarQueue(chapter: GrammarChapter): GrammarExercise[] {
     practice.push(build ?? makeChoice("reverse", item, pool));
   }
 
-  return [...intro, ...shuffle(practice)];
+  return [...intro, ...tables, ...shuffle(practice)];
 }
 
 /** A pure-review queue over a set of already-seen sentences (no teaching). */

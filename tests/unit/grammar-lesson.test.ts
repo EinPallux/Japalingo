@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { GRAMMAR_CHAPTERS } from "@/data/grammar";
-import { chapterExamples } from "@/lib/grammar";
+import { chapterExamples, getGrammarChapter } from "@/lib/grammar";
 import { buildGrammarQueue, buildGrammarReviewQueue } from "@/lib/grammar-lesson";
 
-const chapter = GRAMMAR_CHAPTERS[0]!; // Ch1
+const chapter = GRAMMAR_CHAPTERS[0]!; // Ch1 (no conjugation tables)
 
 describe("grammar exercise queue", () => {
   it("teaches every point, then drills each sentence twice", () => {
@@ -42,5 +42,20 @@ describe("grammar exercise queue", () => {
     const q = buildGrammarReviewQueue(items);
     expect(q.every((e) => e.kind !== "teach")).toBe(true);
     expect(q.length).toBeGreaterThan(0);
+  });
+
+  it("inserts conjugation tables after teaching, before practice (verb chapter)", () => {
+    const q = buildGrammarQueue(getGrammarChapter("g6")!);
+    const tables = q.filter((e) => e.kind === "table");
+    expect(tables.length).toBeGreaterThan(0);
+    // every table sits after the last teach card and before the first drill
+    const lastTeach = q.map((e) => e.kind).lastIndexOf("teach");
+    const firstDrill = q.findIndex((e) => ["translate", "reverse", "build"].includes(e.kind));
+    for (let i = 0; i < q.length; i++) {
+      if (q[i]!.kind === "table") {
+        expect(i).toBeGreaterThan(lastTeach);
+        expect(i).toBeLessThan(firstDrill);
+      }
+    }
   });
 });

@@ -15,6 +15,7 @@ import type { GrammarChapter } from "@/types";
 import { GrammarBuild } from "./grammar-build";
 import { GrammarChoice } from "./grammar-choice";
 import { GrammarResults } from "./grammar-results";
+import { GrammarTableCard } from "./table-card";
 import { PointCard } from "./point-card";
 
 export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
@@ -122,6 +123,14 @@ export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
                   size="lg"
                   className="w-full max-w-lg"
                 >
+                  Got it
+                </Button>
+              </div>
+            )}
+            {ex?.kind === "table" && (
+              <div className="flex w-full flex-col items-center gap-6">
+                <GrammarTableCard table={ex.table} />
+                <Button onClick={advance} size="lg" className="w-full max-w-lg">
                   Got it
                 </Button>
               </div>

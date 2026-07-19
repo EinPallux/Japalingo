@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GRAMMAR_CHAPTERS, GRAMMAR_PATTERNS } from "@/data/grammar";
+import { GRAMMAR_TABLES, tablesForChapter } from "@/data/grammar-tables";
 import {
   ALL_GRAMMAR_EXAMPLES,
   getGrammarChapter,
@@ -76,5 +77,25 @@ describe("grammar path", () => {
   it("resolves a chapter by id", () => {
     expect(getGrammarChapter("g3")?.title).toContain("Noun Sentences");
     expect(getGrammarChapter("nope")).toBeUndefined();
+  });
+});
+
+describe("conjugation reference tables", () => {
+  it("every table is rectangular — each row matches its column count", () => {
+    expect(GRAMMAR_TABLES.length).toBeGreaterThanOrEqual(8);
+    for (const t of GRAMMAR_TABLES) {
+      expect(t.columns.length).toBeGreaterThan(1);
+      expect(t.rows.length).toBeGreaterThan(0);
+      for (const row of t.rows) expect(row).toHaveLength(t.columns.length);
+      for (const id of t.chapterIds) expect(getGrammarChapter(id), `bad chapter ${id}`).toBeDefined();
+    }
+  });
+
+  it("covers the verb, adjective, and て-form chapters", () => {
+    expect(tablesForChapter("g5").length).toBeGreaterThan(0); // adjectives
+    expect(tablesForChapter("g6").map((t) => t.id)).toContain("verb-plain"); // verbs
+    expect(tablesForChapter("g12").map((t) => t.id)).toContain("te-form"); // て-form
+    // a plain grammar chapter with no conjugation gets none
+    expect(tablesForChapter("g1")).toHaveLength(0);
   });
 });

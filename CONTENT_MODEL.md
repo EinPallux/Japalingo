@@ -500,6 +500,8 @@ interface GrammarChapter {
 }
 ```
 
+Conjugation reference tables (Appendix A "Conjugation at a Glance" + the Ch5/6/12 class & formation tables) are transcribed verbatim into `src/data/grammar-tables.ts` (`GrammarTable { columns, rows, note?, chapterIds }`) and shown as reference cards inside the verb/adjective/て-form lessons and as a collapsible hub reference.
+
 Key rules: **the book's chapter order is the learning order** (its beginner progression was informed by Tae Kim's guide — do not re-derive when/why to teach a topic); **kana-first** (the Japanese side of every exercise is the kana reading — the flagship "build the sentence" game reuses the book's own phrase segmentation as tiles); **auto-generated exercises** (translate / say-in-Japanese / build all derive from the transcribed examples, so no per-exercise authoring); and **SRS reuse** (each grammar *point* gets a `KanaProgress` box in the store's separate `grammar` map).
 
 ### 7.3 Still gated on their sources

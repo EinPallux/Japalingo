@@ -129,6 +129,16 @@ export interface GrammarPattern {
   meaning: string; // e.g. "A is B"
 }
 
+/** A conjugation reference table (from the book's Appendix A + chapter tables). */
+export interface GrammarTable {
+  id: string;
+  title: string;
+  columns: string[]; // header cells
+  rows: string[][]; // each row's cells, aligned to `columns`
+  note?: string; // exceptions / special cases from the book
+  chapterIds: string[]; // chapters this table is shown in
+}
+
 /** An ordered, gated batch of vocab words — the vocabulary path's progression node. */
 export interface VocabDeck {
   id: string;
