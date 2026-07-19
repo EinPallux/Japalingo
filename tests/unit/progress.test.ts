@@ -177,6 +177,35 @@ describe("progress store", () => {
     expect(s().gems).toBe(5); // no second reward
   });
 
+  it("scores a grammar answer into its own SRS map, separate from kana/vocab", () => {
+    s().answerGrammar("g1-1", true);
+    expect(s().xp).toBe(10);
+    expect(s().grammar["g1-1"]?.mastery).toBe(1);
+    expect(selectDaily(s()).correct).toBe(1);
+    expect(s().kana["g1-1"]).toBeUndefined();
+    expect(s().vocab["g1-1"]).toBeUndefined();
+  });
+
+  it("marks a grammar point seen without counting it as a graded attempt", () => {
+    s().markGrammarSeen("g2-1");
+    const p = s().grammar["g2-1"]!;
+    expect(p.seen).toBe(1);
+    expect(p.attempts).toBe(0);
+    expect(p.due).toBeGreaterThan(0);
+    expect(s().xp).toBe(2);
+  });
+
+  it("completes a grammar chapter once, granting XP + gems idempotently", () => {
+    expect(s().completeGrammarChapter("g1").alreadyDone).toBe(false);
+    expect(s().completedGrammarChapters).toContain("g1");
+    expect(s().gems).toBe(5);
+    expect(s().xp).toBe(20);
+
+    expect(s().completeGrammarChapter("g1").alreadyDone).toBe(true);
+    expect(s().completedGrammarChapters).toHaveLength(1);
+    expect(s().gems).toBe(5);
+  });
+
   it("records a game score only when it beats the previous best", () => {
     expect(s().recordScore("kana-rain:hiragana", 120)).toEqual({ best: 120, isRecord: true });
     expect(s().bestScores["kana-rain:hiragana"]).toBe(120);

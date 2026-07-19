@@ -70,9 +70,13 @@ export interface ProgressState {
   kana: Record<string, KanaProgress>;
   /** Per-word SRS state for vocabulary (same Leitner shape as kana). */
   vocab: Record<string, KanaProgress>;
+  /** Per-point SRS state for grammar (keyed by grammar-point id). */
+  grammar: Record<string, KanaProgress>;
   completedLessons: string[];
   /** Vocab deck ids the learner has finished at least once (unlocks the next). */
   completedVocabDecks: string[];
+  /** Grammar chapter ids the learner has finished (unlocks the next chapter). */
+  completedGrammarChapters: string[];
   /** Unit ids that earned a gold crown by beating their Speed Review. */
   crownedUnits: string[];
   /** Personal-best scores per game, keyed `${gameId}:${track}`. */
@@ -92,11 +96,17 @@ export interface ProgressState {
   answerVocab(wordId: string, correct: boolean): void;
   /** Passive "met this word" view in a vocab lesson (+2 XP, sets its due date). */
   markVocabSeen(wordId: string): void;
+  /** Graded grammar answer: bumps the point's SRS box + XP/coins/daily. */
+  answerGrammar(pointId: string, correct: boolean): void;
+  /** Passive "met this grammar point" view when its teach card is shown. */
+  markGrammarSeen(pointId: string): void;
   /** Word Builder solve: XP + coins + daily-correct, no per-kana SRS change. */
   rewardCorrect(): void;
   completeLesson(lessonId: string): { alreadyDone: boolean };
   /** Mark a vocab deck cleared (idempotent; grants gems + lesson XP once). */
   completeVocabDeck(deckId: string): { alreadyDone: boolean };
+  /** Mark a grammar chapter cleared (idempotent; grants gems + lesson XP once). */
+  completeGrammarChapter(chapterId: string): { alreadyDone: boolean };
   /** Crown a unit gold after a won Speed Review (idempotent; grants gems once). */
   crownUnit(unitId: string): { alreadyCrowned: boolean };
   /** Record a game score; returns the best so far and whether it beat it. */
@@ -108,6 +118,7 @@ export interface ProgressState {
   equip(id: string): void;
   progressFor(kanaId: string): KanaProgress;
   progressForVocab(wordId: string): KanaProgress;
+  progressForGrammar(pointId: string): KanaProgress;
   reset(): void;
 }
 
@@ -138,8 +149,10 @@ const initial = {
   speechRate: 0.9,
   kana: {} as Record<string, KanaProgress>,
   vocab: {} as Record<string, KanaProgress>,
+  grammar: {} as Record<string, KanaProgress>,
   completedLessons: [] as string[],
   completedVocabDecks: [] as string[],
+  completedGrammarChapters: [] as string[],
   crownedUnits: [] as string[],
   bestScores: {} as Record<string, number>,
   activeTrack: "hiragana" as Track,
@@ -265,6 +278,28 @@ export const useProgress = create<ProgressState>()(
           };
         }),
 
+      answerGrammar: (pointId, correct) =>
+        set((s) => {
+          const cur = s.grammar[pointId] ?? emptyProgress();
+          const next = applyAnswer(cur, correct);
+          return {
+            grammar: { ...s.grammar, [pointId]: { ...next, due: nextDue(next.mastery, Date.now()) } },
+            ...applyDaily(s, correct ? { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT } : {}),
+          };
+        }),
+
+      markGrammarSeen: (pointId) =>
+        set((s) => {
+          const cur = s.grammar[pointId] ?? emptyProgress();
+          return {
+            grammar: {
+              ...s.grammar,
+              [pointId]: { ...cur, seen: cur.seen + 1, due: nextDue(cur.mastery, Date.now()) },
+            },
+            ...applyDaily(s, { xp: 2 }),
+          };
+        }),
+
       rewardCorrect: () =>
         set((s) => applyDaily(s, { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT })),
 
@@ -285,6 +320,18 @@ export const useProgress = create<ProgressState>()(
         if (!alreadyDone) {
           set((s) => ({
             completedVocabDecks: [...s.completedVocabDecks, deckId],
+            gems: s.gems + 5,
+            ...applyDaily(s, { xp: XP_LESSON_COMPLETE }),
+          }));
+        }
+        return { alreadyDone };
+      },
+
+      completeGrammarChapter: (chapterId) => {
+        const alreadyDone = get().completedGrammarChapters.includes(chapterId);
+        if (!alreadyDone) {
+          set((s) => ({
+            completedGrammarChapters: [...s.completedGrammarChapters, chapterId],
             gems: s.gems + 5,
             ...applyDaily(s, { xp: XP_LESSON_COMPLETE }),
           }));
@@ -358,6 +405,7 @@ export const useProgress = create<ProgressState>()(
 
       progressFor: (kanaId) => get().kana[kanaId] ?? emptyProgress(),
       progressForVocab: (wordId) => get().vocab[wordId] ?? emptyProgress(),
+      progressForGrammar: (pointId) => get().grammar[pointId] ?? emptyProgress(),
 
       reset: () => set({ ...initial }),
     }),

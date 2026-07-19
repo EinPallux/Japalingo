@@ -93,6 +93,42 @@ export interface VocabWord {
   tags?: string[]; // "suffix" | "prefix" | "greeting"
 }
 
+/** One example sentence from the grammar book: script + kana reading + translation. */
+export interface GrammarExample {
+  jp: string; // Japanese in natural script (kanji + kana)
+  kana: string; // full kana reading, space-separated into phrases
+  en: string; // natural English translation
+}
+
+/** One grammar point within a chapter (a numbered teaching item). */
+export interface GrammarPoint {
+  id: string; // e.g. "g7-2"
+  heading: string;
+  explain: string; // the book's lead explanation (may be empty for pure tables)
+  patterns: string[]; // formation boxes, e.g. "Noun + です → polite: is/are"
+  examples: GrammarExample[];
+}
+
+/** A grammar chapter — the grammar path's progression node. */
+export interface GrammarChapter {
+  id: string; // e.g. "g7"
+  num: number; // 1..24
+  part: "I" | "II" | "III";
+  title: string;
+  subtitle: string;
+  objectives: string[]; // "After this chapter, you can ..."
+  points: GrammarPoint[];
+  commonMistake?: string;
+  miniCheck?: string[];
+}
+
+/** One of the book's 50 Core Patterns (Appendix C) — a compact review index. */
+export interface GrammarPattern {
+  n: number; // 1..50
+  form: string; // e.g. "N は N です"
+  meaning: string; // e.g. "A is B"
+}
+
 /** An ordered, gated batch of vocab words — the vocabulary path's progression node. */
 export interface VocabDeck {
   id: string;
