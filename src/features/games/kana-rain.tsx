@@ -184,9 +184,35 @@ function KanaRainGame({ pool, track }: { pool: Kana[]; track: Track }) {
     return true;
   };
 
+  /** True if another on-screen reading extends the typed prefix (e.g. typed "n"
+   *  while な "na" is falling) — wait for more keys instead of popping ん early. */
+  const isAmbiguousPrefix = (v: string): boolean =>
+    dropsRef.current.some(
+      (d) =>
+        (d.kana.romaji.startsWith(v) && d.kana.romaji !== v) ||
+        d.kana.altRomaji?.some((r) => r.startsWith(v) && r !== v),
+    );
+
   const handleInput = (value: string) => {
+    const v = value.toLowerCase().trim();
+    // Typing continues past an ambiguous prefix: if the new buffer no longer
+    // matches anything but its head did (ん then "k"…), pop the head first and
+    // start a fresh buffer with the remainder.
+    if (v && isAmbiguousPrefix(v)) {
+      setInput(value);
+      return;
+    }
+    if (clearReading(v)) {
+      setInput("");
+      return;
+    }
+    const head = v.slice(0, -1);
+    const tail = v.slice(-1);
+    if (head && clearReading(head)) {
+      setInput(isAmbiguousPrefix(tail) ? tail : clearReading(tail) ? "" : tail);
+      return;
+    }
     setInput(value);
-    if (clearReading(value)) setInput("");
   };
 
   // Distinct readings currently falling, for the touch keypad (stable order).
