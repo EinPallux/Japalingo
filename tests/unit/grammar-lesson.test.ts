@@ -13,9 +13,9 @@ describe("grammar exercise queue", () => {
     // teaching cards lead
     const firstPractice = q.findIndex((e) => e.kind !== "teach");
     expect(q.slice(0, firstPractice).every((e) => e.kind === "teach")).toBe(true);
-    // two practice exercises per example
+    // two practice exercises per example (+ the closing wrap-up step)
     const exCount = chapterExamples(chapter).length;
-    const practice = q.filter((e) => e.kind !== "teach");
+    const practice = q.filter((e) => e.kind !== "teach" && e.kind !== "wrapup");
     expect(practice).toHaveLength(exCount * 2);
   });
 
@@ -44,18 +44,21 @@ describe("grammar exercise queue", () => {
     expect(q.length).toBeGreaterThan(0);
   });
 
-  it("inserts conjugation tables after teaching, before practice (verb chapter)", () => {
+  it("embeds each chapter table in its point's teach card (verb chapter)", async () => {
+    const { tablesForPoint, tablesForChapter } = await import("@/data/grammar-tables");
+    // the verb tables now live INSIDE their points, not as separate steps
+    expect(tablesForPoint("g6-1").map((t) => t.id)).toContain("verb-groups");
+    expect(tablesForPoint("g6-2").map((t) => t.id)).toContain("verb-plain");
+    expect(tablesForChapter("g6")).toHaveLength(0); // nothing doubled as a step
     const q = buildGrammarQueue(getGrammarChapter("g6")!);
-    const tables = q.filter((e) => e.kind === "table");
-    expect(tables.length).toBeGreaterThan(0);
-    // every table sits after the last teach card and before the first drill
-    const lastTeach = q.map((e) => e.kind).lastIndexOf("teach");
-    const firstDrill = q.findIndex((e) => ["translate", "reverse", "build"].includes(e.kind));
-    for (let i = 0; i < q.length; i++) {
-      if (q[i]!.kind === "table") {
-        expect(i).toBeGreaterThan(lastTeach);
-        expect(i).toBeLessThan(firstDrill);
-      }
+    expect(q.filter((e) => e.kind === "table")).toHaveLength(0);
+  });
+
+  it("closes every chapter with a wrap-up (Mini Check) step", () => {
+    for (const c of GRAMMAR_CHAPTERS) {
+      const q = buildGrammarQueue(c);
+      const last = q[q.length - 1]!;
+      expect(last.kind, `chapter ${c.id} should end on its wrap-up`).toBe("wrapup");
     }
   });
 });

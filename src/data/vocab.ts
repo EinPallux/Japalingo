@@ -765,8 +765,10 @@ export const VOCAB: VocabWord[] = [
   { id: "v-749", reading: "わかい", meaning: "young", pos: "i-adj", example: { jp: "ははは ちちより ５さい わかいです。", en: "My mother is 5 years younger than my father." }, freq: 1 },
   { id: "v-750", reading: "わかります", meaning: "understand, know", example: { jp: "にほんごが わかりますか。", en: "Do you understand Japanese?" }, freq: 4 },
   { id: "v-751", reading: "わすれます", meaning: "forget", example: { jp: "また パスワードを わすれました。", en: "I forgot my password again." } },
-  { id: "v-752", reading: "わたくし", meaning: "(very formal)", example: { jp: "私" } },
-  { id: "v-753", reading: "わたし", meaning: "I'm studying Japanese.", kanji: "私", freq: 20, note: "私は にほんごを べんきょうしています" },
+  // v-752/v-753 hand-corrected against the source PDF (entries 752/753): the
+  // generator mis-parsed the one-letter meaning "I" (see book p.24).
+  { id: "v-752", reading: "わたくし", meaning: "I", kanji: "私", note: "very formal", example: { jp: "私は ABC Company の さとうです。", en: "I'm Sato from ABC Company." } },
+  { id: "v-753", reading: "わたし", meaning: "I", kanji: "私", example: { jp: "私は にほんごを べんきょうしています。", en: "I'm studying Japanese." }, freq: 20 },
   { id: "v-754", reading: "わたします", meaning: "hand over", example: { jp: "これから しゅくだいを わたします。", en: "I will give you homework from now on." }, freq: 4 },
   { id: "v-755", reading: "わたります", meaning: "cross", example: { jp: "おうだんほどうを わたりましょう。", en: "Let's cross the pedestrian crossing." } },
   { id: "v-756", reading: "わるい", meaning: "bad", pos: "i-adj", example: { jp: "わたしは めが わるいです。", en: "I have bad eyesight." } },

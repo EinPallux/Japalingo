@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { VOCAB } from "@/data/vocab";
 import { deckWords, VOCAB_DECKS } from "@/data/vocab-decks";
 import { buildVocabQueue, buildVocabReviewQueue } from "@/lib/vocab-queue";
 
@@ -51,5 +52,23 @@ describe("vocab exercise queue", () => {
     const q = buildVocabReviewQueue(words);
     expect(q.every((e) => e.kind !== "learn")).toBe(true);
     expect(q.length).toBeGreaterThan(0);
+  });
+
+  it("never offers a slash-variant homophone as a distractor (はし vs はし/おはし)", () => {
+    // v-557 "はし/おはし" (chopsticks) and v-558 "はし" (bridge) share the kana
+    // はし — with either as the answer, the other's meaning/reading must never
+    // appear among the options, or two options would both be correct.
+    const pair = VOCAB.filter((w) => w.reading === "はし" || w.reading === "はし/おはし");
+    expect(pair).toHaveLength(2);
+    const pool = [...pair, ...VOCAB.slice(0, 20)];
+    for (let run = 0; run < 20; run++) {
+      for (const ex of buildVocabReviewQueue(pool)) {
+        if (ex.kind === "learn") continue;
+        if (!pair.some((p) => p.id === ex.word.id)) continue;
+        const other = pair.find((p) => p.id !== ex.word.id)!;
+        expect(ex.options).not.toContain(other.meaning);
+        expect(ex.options).not.toContain(other.reading);
+      }
+    }
   });
 });

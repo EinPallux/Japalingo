@@ -7,6 +7,7 @@ import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
+import { sameReading } from "@/features/lessons/build-queue";
 import { sfx } from "@/lib/audio";
 import { learnedKana } from "@/lib/learned";
 import { useMounted } from "@/lib/use-mounted";
@@ -28,7 +29,14 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function buildCards(learned: Kana[]): Card[] {
-  const chosen = shuffle(learned).slice(0, PAIRS);
+  // Never deal two kana that share a reading (じ/ぢ, ず/づ, お/を) — their romaji
+  // cards would look identical while only one is accepted as the match.
+  const chosen: Kana[] = [];
+  for (const k of shuffle(learned)) {
+    if (chosen.some((c) => sameReading(c, k))) continue;
+    chosen.push(k);
+    if (chosen.length === PAIRS) break;
+  }
   const cards = chosen.flatMap((k): Card[] => [
     { uid: `${k.id}-k`, kanaId: k.id, kind: "kana", label: k.char },
     { uid: `${k.id}-r`, kanaId: k.id, kind: "romaji", label: k.romaji },
@@ -75,7 +83,10 @@ function KanaMatchGame({ learned }: { learned: Kana[] }) {
     [],
   );
 
-  const done = matched.size === PAIRS;
+  // The dealt board can hold fewer than PAIRS pairs when homophone filtering
+  // shrinks a small learned pool — always finish against the actual deal.
+  const totalPairs = cards.length / 2;
+  const done = matched.size === totalPairs;
 
   const restart = () => {
     setCards(buildCards(learned));
@@ -97,7 +108,7 @@ function KanaMatchGame({ learned }: { learned: Kana[] }) {
     if (a && b && a.kanaId === b.kanaId && a.kind !== b.kind) {
       sfx.correct();
       useProgress.getState().answer(a.kanaId, true);
-      const isLast = matched.size + 1 === PAIRS;
+      const isLast = matched.size + 1 === totalPairs;
       setMatched((prev) => new Set(prev).add(a.kanaId));
       setFlipped([]);
       if (isLast) {
@@ -123,7 +134,7 @@ function KanaMatchGame({ learned }: { learned: Kana[] }) {
             <HoshiStatic className="size-32" />
           </div>
           <h1 className="font-display text-3xl font-bold text-ink">All matched! 🎉</h1>
-          <p className="text-muted">Cleared {PAIRS} pairs in {moves} moves.</p>
+          <p className="text-muted">Cleared {totalPairs} pairs in {moves} moves.</p>
           <div className="flex w-full flex-col gap-3">
             <Button onClick={restart} size="lg" className="w-full">
               Play again
@@ -149,7 +160,7 @@ function KanaMatchGame({ learned }: { learned: Kana[] }) {
           <CloseIcon className="size-6" />
         </button>
         <p className="font-display font-bold text-ink">
-          {matched.size}/{PAIRS} pairs · {moves} moves
+          {matched.size}/{totalPairs} pairs · {moves} moves
         </p>
       </div>
 

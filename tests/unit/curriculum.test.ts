@@ -46,4 +46,25 @@ describe("curriculum data integrity", () => {
       expect(k.mnemonic.length).toBeGreaterThan(0);
     }
   });
+
+  it("carries the books' practice-reading words on both tracks", async () => {
+    const { HIRAGANA } = await import("@/data/hiragana");
+    const { KATAKANA } = await import("@/data/katakana");
+    // every basic gojūon ROW has at least one example word attached
+    const rows = ["a", "k", "s", "t", "n", "h", "m", "y", "r", "w"];
+    for (const row of rows) {
+      expect(
+        HIRAGANA.some((k) => k.row === row && k.examples?.length),
+        `hiragana ${row}-row has no practice words`,
+      ).toBe(true);
+      expect(
+        KATAKANA.some((k) => k.row === row && k.examples?.length),
+        `katakana ${row}-row has no practice words`,
+      ).toBe(true);
+    }
+    // and the combined Word Builder pool is a real pool now, not 10 words
+    const { BUILDER_WORDS } = await import("@/data/words");
+    expect(BUILDER_WORDS.length).toBeGreaterThanOrEqual(90);
+    expect(new Set(BUILDER_WORDS.map((w) => w.kana)).size).toBe(BUILDER_WORDS.length);
+  });
 });

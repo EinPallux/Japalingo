@@ -8,9 +8,10 @@ import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Onboarding } from "@/features/onboarding/onboarding";
 import { PathView } from "@/features/path/path-view";
 import { DailyQuests } from "@/features/quests/daily-quests";
-import { ALL_KANA } from "@/data/curriculum";
+import { ALL_KANA, getTrackLessons } from "@/data/curriculum";
 import { VOCAB } from "@/data/vocab";
 import { GRAMMAR_CHAPTERS } from "@/data/grammar";
+import { REVIEWABLE_POINT_IDS } from "@/lib/grammar";
 import { totalSeen } from "@/lib/achievements";
 import { isDue } from "@/lib/srs";
 import { useMounted } from "@/lib/use-mounted";
@@ -50,9 +51,22 @@ export function LearnDashboard() {
   const grammarChaptersDone = completedGrammar.length;
   const grammarDue = useMemo(
     () =>
-      GRAMMAR_CHAPTERS.flatMap((c) => c.points).filter((p) => isDue(grammarProgress[p.id], now)).length,
+      GRAMMAR_CHAPTERS.flatMap((c) => c.points).filter(
+        // only quizzable points count as due — example-less rules can't be
+        // reviewed, so counting them would show a badge that never clears
+        (p) => REVIEWABLE_POINT_IDS.has(p.id) && isDue(grammarProgress[p.id], now),
+      ).length,
     [grammarProgress, now],
   );
+  const completedLessons = useProgress((s) => s.completedLessons);
+  // The single most important tap: the next unfinished lesson on the active
+  // kana path, surfaced as a hero button so it's never buried below the fold.
+  const nextLesson = useMemo(
+    () => getTrackLessons(activeTrack).find((l) => !completedLessons.includes(l.id)),
+    [activeTrack, completedLessons],
+  );
+  // A gentle sequence hint while the learner is still early in hiragana.
+  const kanaBeginner = seenCount < 15;
 
   if (!mounted) {
     return (
@@ -112,65 +126,27 @@ export function LearnDashboard() {
             </Link>
           ) : null}
 
+          {/* The hero: continue the kana path — always the first, biggest tap. */}
+          {nextLesson ? (
+            <Link
+              href={`/learn/lesson/${nextLesson.id}`}
+              className="btn-chunky flex items-center justify-between gap-3 rounded-blob-xl bg-primary px-5 py-4 text-white shadow-[0_6px_0_0_var(--jl-primary-strong)] transition hover:brightness-105"
+            >
+              <span className="min-w-0">
+                <span className="block text-xs font-bold uppercase tracking-wide opacity-80">
+                  {completedLessons.length > 0 ? "Continue learning" : "Start here"}
+                </span>
+                <span className="block truncate font-display text-lg font-bold">{nextLesson.title}</span>
+              </span>
+              <span aria-hidden className="shrink-0 font-display text-2xl">
+                ▸
+              </span>
+            </Link>
+          ) : null}
+
           <DailyQuests />
 
-          {/* Vocabulary — a top-level learning track alongside the kana path. */}
-          <Link
-            href="/learn/vocab"
-            className="relative flex items-center justify-between gap-3 rounded-blob-lg border border-secondary/30 bg-gradient-to-r from-secondary-tint to-accent-tint px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
-          >
-            {vocabDue > 0 ? (
-              <span className="absolute right-3 top-3 rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-white">
-                {vocabDue} due
-              </span>
-            ) : null}
-            <span className="flex items-center gap-3">
-              <span aria-hidden className="text-2xl">
-                📚
-              </span>
-              <span>
-                <span className="block font-display font-bold text-ink">Vocabulary</span>
-                <span className="text-sm text-muted">
-                  {vocabLearned > 0
-                    ? `${vocabLearned} of ${VOCAB.length} words learned`
-                    : `Learn ${VOCAB.length} JLPT N5 words — kana only`}
-                </span>
-              </span>
-            </span>
-            <span aria-hidden className="font-display text-xl text-secondary-strong">
-              ▸
-            </span>
-          </Link>
-
-          {/* Grammar — the sentence-building track, alongside kana and vocab. */}
-          <Link
-            href="/learn/grammar"
-            className="relative flex items-center justify-between gap-3 rounded-blob-lg border border-primary/30 bg-gradient-to-r from-primary-tint to-info/15 px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
-          >
-            {grammarDue > 0 ? (
-              <span className="absolute right-3 top-3 rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-white">
-                {grammarDue} due
-              </span>
-            ) : null}
-            <span className="flex items-center gap-3">
-              <span aria-hidden className="text-2xl">
-                🧩
-              </span>
-              <span>
-                <span className="block font-display font-bold text-ink">Grammar</span>
-                <span className="text-sm text-muted">
-                  {grammarChaptersDone > 0
-                    ? `${grammarChaptersDone} of ${GRAMMAR_CHAPTERS.length} chapters done`
-                    : `Build real sentences — ${GRAMMAR_CHAPTERS.length} beginner chapters`}
-                </span>
-              </span>
-            </span>
-            <span aria-hidden className="font-display text-xl text-primary">
-              ▸
-            </span>
-          </Link>
-
-          {/* Quick actions — one tidy 2×2 grid, so the path stays close to the top.
+          {/* Quick actions — one tidy 2×2 grid.
               (The Shop lives in the header; all five games live in the Arcade.) */}
           <div className="grid grid-cols-2 gap-3">
             <QuickAction
@@ -203,11 +179,85 @@ export function LearnDashboard() {
               tint="from-primary-tint to-accent-tint"
             />
           </div>
+
+          {/* The other two tracks — compact, with a sequence hint for beginners
+              (kana first: both tracks display their Japanese in kana). */}
+          <div className="grid grid-cols-2 gap-3">
+            <TrackCard
+              href="/learn/vocab"
+              emoji="📚"
+              label="Vocabulary"
+              due={vocabDue}
+              desc={
+                vocabLearned > 0
+                  ? `${vocabLearned}/${VOCAB.length} words`
+                  : kanaBeginner
+                    ? "Best after some hiragana"
+                    : `${VOCAB.length} JLPT N5 words`
+              }
+            />
+            <TrackCard
+              href="/learn/grammar"
+              emoji="🧩"
+              label="Grammar"
+              due={grammarDue}
+              desc={
+                grammarChaptersDone > 0
+                  ? `${grammarChaptersDone}/${GRAMMAR_CHAPTERS.length} chapters`
+                  : kanaBeginner
+                    ? "Best after some hiragana"
+                    : `${GRAMMAR_CHAPTERS.length} beginner chapters`
+              }
+            />
+          </div>
+
+          {/* Secondary destinations, discoverable without digging into Profile. */}
+          <div className="flex items-center justify-center gap-4 text-sm font-semibold text-muted">
+            <Link href="/journey" className="transition hover:text-ink">
+              📈 Your journey
+            </Link>
+            <span aria-hidden>·</span>
+            <Link href="/settings" className="transition hover:text-ink">
+              ⚙️ Settings
+            </Link>
+          </div>
         </div>
 
         <PathView track={activeTrack} />
       </main>
     </>
+  );
+}
+
+function TrackCard({
+  href,
+  emoji,
+  label,
+  desc,
+  due,
+}: {
+  href: string;
+  emoji: string;
+  label: string;
+  desc: string;
+  due: number;
+}) {
+  return (
+    <Link
+      href={href}
+      className="relative flex flex-col gap-1 rounded-blob-lg border border-border bg-surface px-4 py-3.5 transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-[var(--shadow-lift)]"
+    >
+      {due > 0 ? (
+        <span className="absolute right-2 top-2 rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-white">
+          {due} due
+        </span>
+      ) : null}
+      <span aria-hidden className="text-2xl">
+        {emoji}
+      </span>
+      <span className="font-display text-sm font-bold text-ink">{label}</span>
+      <span className="text-xs text-muted">{desc}</span>
+    </Link>
   );
 }
 

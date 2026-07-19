@@ -8,6 +8,7 @@ import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
+import { sameReading } from "@/features/lessons/build-queue";
 import { sfx } from "@/lib/audio";
 import { learnedKana } from "@/lib/learned";
 import { useMounted } from "@/lib/use-mounted";
@@ -39,10 +40,11 @@ function makeRound(pool: Kana[]): Round {
 
   const seen = new Set([answer]);
   const options = [answer];
-  // Distractors share the answer's track and never its reading, so no option is
+  // Distractors share the answer's track and never its reading — including
+  // altRomaji (ヴ reads "vu"/"bu", so ブ must be excluded), so no option is
   // secretly also correct and no cross-script character sneaks in.
   for (const k of shuffle(pool)) {
-    if (k.romaji === kana.romaji) continue;
+    if (sameReading(k, kana)) continue;
     const v = value(k);
     if (!seen.has(v)) {
       seen.add(v);

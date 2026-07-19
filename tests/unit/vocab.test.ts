@@ -38,6 +38,17 @@ describe("vocab dataset (JLPT N5)", () => {
     expect(withKanji).toBeLessThan(VOCAB.length); // kanji is reference, not mandatory
   });
 
+  it("teaches わたし/わたくし as 'I' (regression: parser dropped 1-letter meanings)", () => {
+    const watashi = VOCAB.find((w) => w.id === "v-753")!;
+    expect(watashi.reading).toBe("わたし");
+    expect(watashi.meaning).toBe("I");
+    expect(watashi.kanji).toBe("私");
+    expect(watashi.example?.en).toBe("I'm studying Japanese.");
+    const watakushi = VOCAB.find((w) => w.id === "v-752")!;
+    expect(watakushi.meaning).toBe("I");
+    expect(watakushi.example?.jp).toContain("さとう");
+  });
+
   it("produces a clean, speakable reading for variant/particle forms", () => {
     // "くらい/ぐらい" → first variant; "あと(で)" → drop the optional particle
     const kurai = VOCAB.find((w) => w.reading.includes("/"));

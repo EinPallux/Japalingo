@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { GRAMMAR_CHAPTERS, GRAMMAR_PATTERNS } from "@/data/grammar";
-import { GRAMMAR_TABLES, tablesForChapter } from "@/data/grammar-tables";
+import { GRAMMAR_TABLES, tablesForPoint } from "@/data/grammar-tables";
 import {
   ALL_GRAMMAR_EXAMPLES,
   getGrammarChapter,
@@ -80,9 +80,23 @@ describe("grammar path", () => {
   });
 });
 
-describe("conjugation reference tables", () => {
+describe("reviewable points (empty-review-screen regression)", () => {
+  it("marks exactly the points with examples as reviewable", async () => {
+    const { REVIEWABLE_POINT_IDS } = await import("@/lib/grammar");
+    for (const c of GRAMMAR_CHAPTERS) {
+      for (const p of c.points) {
+        expect(REVIEWABLE_POINT_IDS.has(p.id)).toBe(p.examples.length > 0);
+      }
+    }
+    // the known example-less rules are excluded (they'd make empty queues)
+    expect(REVIEWABLE_POINT_IDS.has("g1-4")).toBe(false);
+    expect(REVIEWABLE_POINT_IDS.has("g1-1")).toBe(true);
+  });
+});
+
+describe("reference tables (Appendix A + restored in-chapter tables)", () => {
   it("every table is rectangular — each row matches its column count", () => {
-    expect(GRAMMAR_TABLES.length).toBeGreaterThanOrEqual(8);
+    expect(GRAMMAR_TABLES.length).toBeGreaterThanOrEqual(29);
     for (const t of GRAMMAR_TABLES) {
       expect(t.columns.length).toBeGreaterThan(1);
       expect(t.rows.length).toBeGreaterThan(0);
@@ -91,11 +105,45 @@ describe("conjugation reference tables", () => {
     }
   });
 
-  it("covers the verb, adjective, and て-form chapters", () => {
-    expect(tablesForChapter("g5").length).toBeGreaterThan(0); // adjectives
-    expect(tablesForChapter("g6").map((t) => t.id)).toContain("verb-plain"); // verbs
-    expect(tablesForChapter("g12").map((t) => t.id)).toContain("te-form"); // て-form
-    // a plain grammar chapter with no conjugation gets none
-    expect(tablesForChapter("g1")).toHaveLength(0);
+  it("resolves every pointId a table is attached to", () => {
+    const pointIds = new Set(GRAMMAR_CHAPTERS.flatMap((c) => c.points.map((p) => p.id)));
+    for (const t of GRAMMAR_TABLES) {
+      for (const pid of t.pointIds ?? []) {
+        expect(pointIds.has(pid), `table ${t.id} → unknown point ${pid}`).toBe(true);
+      }
+    }
+  });
+
+  it("restores the previously-lost chapter tables at their points", () => {
+    // the 11 formerly-blank teaching cards each carry a table now
+    for (const pid of ["g2-5", "g5-3", "g6-2", "g6-4", "g7-2", "g7-5", "g10-4", "g19-5", "g21-6", "g22-3", "g23-6"]) {
+      expect(tablesForPoint(pid).length, `point ${pid} still blank`).toBeGreaterThan(0);
+    }
+    // the big content restorations
+    expect(tablesForPoint("g22-1").map((t) => t.id)).toContain("numbers");
+    expect(tablesForPoint("g22-2").map((t) => t.id)).toContain("counters");
+    expect(tablesForPoint("g23-1").map((t) => t.id)).toContain("contractions");
+    expect(tablesForPoint("g24-4").map((t) => t.id)).toContain("keigo");
+  });
+});
+
+describe("mini checks, particles, and pollution regressions", () => {
+  it("gives every chapter exactly 3 objectives and 3 Mini Check questions", () => {
+    for (const c of GRAMMAR_CHAPTERS) {
+      expect(c.objectives, c.id).toHaveLength(3);
+      expect(c.miniCheck, c.id).toHaveLength(3);
+      // regression: g24's miniCheck once swallowed the whole appendix text
+      for (const q of c.miniCheck ?? []) {
+        expect(q).not.toMatch(/A\s*P\s*P\s*E\s*N\s*D\s*I\s*X|P\s*A\s*R\s*T/);
+        expect(q.length).toBeLessThan(200);
+      }
+    }
+  });
+
+  it("carries the Appendix B particle reference (20 particles)", async () => {
+    const { GRAMMAR_PARTICLES } = await import("@/data/grammar-particles");
+    expect(GRAMMAR_PARTICLES).toHaveLength(20);
+    expect(GRAMMAR_PARTICLES[0]).toMatchObject({ particle: "は" });
+    expect(GRAMMAR_PARTICLES.every((p) => p.function && p.example)).toBe(true);
   });
 });

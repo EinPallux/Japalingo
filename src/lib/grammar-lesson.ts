@@ -15,7 +15,9 @@ export type GrammarExercise =
   | { kind: "table"; table: GrammarTable }
   | { kind: "translate"; item: TaggedExample; options: string[] }
   | { kind: "reverse"; item: TaggedExample; options: string[] }
-  | { kind: "build"; item: TaggedExample; tiles: string[]; answer: string[] };
+  | { kind: "build"; item: TaggedExample; tiles: string[]; answer: string[] }
+  /** The chapter's closing reflection: its common-mistake warning + Mini Check. */
+  | { kind: "wrapup"; chapter: GrammarChapter };
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -55,9 +57,11 @@ function makeChoice(
 function makeBuild(item: TaggedExample): GrammarExercise | null {
   const answer = readingChunks(item.ex.kana);
   if (answer.length < 2) return null; // single-phrase sentences aren't worth building
-  // shuffle the tiles; reshuffle once if it lands already-solved
+  // Shuffle the tiles, retrying while the deal lands already-solved (a 2-chunk
+  // sentence is pre-solved 50% of the time on a single shuffle). Only a sentence
+  // whose chunks are all identical can survive the retries — accept that.
   let tiles = shuffle(answer);
-  if (tiles.join(" ") === answer.join(" ")) tiles = shuffle(answer);
+  for (let i = 0; i < 6 && tiles.join(" ") === answer.join(" "); i++) tiles = shuffle(answer);
   return { kind: "build", item, tiles, answer };
 }
 
@@ -81,7 +85,12 @@ export function buildGrammarQueue(chapter: GrammarChapter): GrammarExercise[] {
     practice.push(build ?? makeChoice("reverse", item, pool));
   }
 
-  return [...intro, ...tables, ...shuffle(practice)];
+  // Close with the book's own reflection step — the "Common mistake" warning
+  // and the chapter's three Mini Check self-test questions.
+  const wrapup: GrammarExercise[] =
+    chapter.commonMistake || chapter.miniCheck?.length ? [{ kind: "wrapup", chapter }] : [];
+
+  return [...intro, ...tables, ...shuffle(practice), ...wrapup];
 }
 
 /** A pure-review queue over a set of already-seen sentences (no teaching). */

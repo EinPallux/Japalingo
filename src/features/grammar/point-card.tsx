@@ -1,8 +1,10 @@
 "use client";
 
 import { ListenButton } from "@/components/app/listen-button";
+import { tablesForPoint } from "@/data/grammar-tables";
 import { cn } from "@/lib/utils";
 import type { GrammarExample, GrammarPoint } from "@/types";
+import { GrammarTableCard } from "./table-card";
 
 export function ExampleRow({ ex }: { ex: GrammarExample }) {
   return (
@@ -22,8 +24,9 @@ export function ExampleRow({ ex }: { ex: GrammarExample }) {
 }
 
 /** The teaching card for one grammar point: heading, explanation, the formation
- *  pattern(s), and the book's example sentences with audio. */
+ *  pattern(s), the book's in-chapter tables, and example sentences with audio. */
 export function PointCard({ point, className }: { point: GrammarPoint; className?: string }) {
+  const tables = tablesForPoint(point.id);
   return (
     <div className={cn("flex w-full max-w-lg flex-col gap-4", className)}>
       <div className="flex flex-col gap-3 rounded-blob-xl border border-border bg-surface p-5">
@@ -41,6 +44,10 @@ export function PointCard({ point, className }: { point: GrammarPoint; className
         ))}
         {point.explain ? <p lang="ja" className="text-ink">{point.explain}</p> : null}
       </div>
+
+      {tables.map((t) => (
+        <GrammarTableCard key={t.id} table={t} hideTitle />
+      ))}
 
       {point.examples.length > 0 ? (
         <div className="flex flex-col gap-2">

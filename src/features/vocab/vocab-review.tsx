@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { HoshiCoach, type CoachMood } from "@/components/mascot/hoshi-coach";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,11 @@ export function VocabReview({ words, onExit }: { words: VocabWord[]; onExit: () 
       return { mood, streak, nonce: c.nonce + 1 };
     });
 
+  // double-tap guard: one grade per exercise, even mid exit-animation
+  const steppedRef = useRef(-1);
   const advance = () => {
+    if (steppedRef.current === index) return;
+    steppedRef.current = index;
     if (index + 1 >= queue.length) {
       sfx.complete();
       setEarnedXp(useProgress.getState().xp - xpBefore);
@@ -104,6 +108,7 @@ export function VocabReview({ words, onExit }: { words: VocabWord[]; onExit: () 
                 kind={ex.kind}
                 options={ex.options}
                 onAnswer={(correct) => {
+                  if (steppedRef.current === index) return; // double-tap guard
                   answerVocab(ex.word.id, correct);
                   react(correct);
                   advance();

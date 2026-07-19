@@ -9,7 +9,7 @@ import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
-import { WORDS } from "@/data/words";
+import { BUILDER_WORDS } from "@/data/words";
 import { sfx } from "@/lib/audio";
 import { learnedKana } from "@/lib/learned";
 import { useMounted } from "@/lib/use-mounted";
@@ -30,9 +30,15 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+/** Marks taught by concept/combination lessons rather than as standalone kana —
+ *  they never block a word whose base characters are all met. */
+const FREE_CHARS = new Set([..."ーっッゃゅょャュョぁぃぅぇぉァィゥェォ"]);
+
 /** Words the learner can actually decode — every character already met. */
 function decodableWords(learnedChars: Set<string>): ExampleWord[] {
-  return WORDS.filter((w) => [...w.kana].every((ch) => learnedChars.has(ch)));
+  return BUILDER_WORDS.filter((w) =>
+    [...w.kana].every((ch) => learnedChars.has(ch) || FREE_CHARS.has(ch)),
+  );
 }
 
 function buildRounds(words: ExampleWord[]): { word: ExampleWord; options: string[] }[] {
@@ -49,10 +55,13 @@ function buildRounds(words: ExampleWord[]): { word: ExampleWord; options: string
 export function WordBuilder() {
   const mounted = useMounted();
   const kanaProgress = useProgress((s) => s.kana);
-  // Word Builder is hiragana-only for now (the /database words are all hiragana);
-  // katakana words are content-gated until the owner adds them.
+  // Cross-track: the pool holds both books' practice words, so hiragana AND
+  // katakana learners get words they can actually decode.
   const words = useMemo(() => {
-    const learnedChars = new Set(learnedKana("hiragana", kanaProgress).map((k) => k.char));
+    const learnedChars = new Set([
+      ...learnedKana("hiragana", kanaProgress).map((k) => k.char),
+      ...learnedKana("katakana", kanaProgress).map((k) => k.char),
+    ]);
     return decodableWords(learnedChars);
   }, [kanaProgress]);
 

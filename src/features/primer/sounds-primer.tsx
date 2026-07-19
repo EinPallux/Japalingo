@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
+import { CloseIcon } from "@/components/ui/icons";
 import { getKana, getTrackLessons } from "@/data/curriculum";
 import { speakJa } from "@/lib/audio";
 import { useSpeechStatus } from "@/lib/use-speech";
+import { useProgress } from "@/stores/progress";
 import type { Kana } from "@/types";
 
 const VOWEL_IDS = ["hira-a", "hira-i", "hira-u", "hira-e", "hira-o"];
@@ -34,12 +36,24 @@ export function SoundsPrimer() {
   const kRow = kanaList(K_ROW_IDS);
 
   const canHear = speech === "ready";
-  // Hand straight off to the first lesson so the primer flows into learning,
-  // rather than bouncing the learner back to the dashboard to find it.
-  const finish = () => router.push(FIRST_LESSON ? `/learn/lesson/${FIRST_LESSON.id}` : "/learn");
+  const completedLessons = useProgress((s) => s.completedLessons);
+  // Hand straight off to the first lesson so the primer flows into learning —
+  // unless the learner already finished it (a returning reader), in which case
+  // send them back to the path instead of forcing a replay of lesson 1.
+  const firstLessonDone = FIRST_LESSON ? completedLessons.includes(FIRST_LESSON.id) : true;
+  const finish = () =>
+    router.push(FIRST_LESSON && !firstLessonDone ? `/learn/lesson/${FIRST_LESSON.id}` : "/learn");
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-bg">
+      <button
+        type="button"
+        aria-label="Close the primer"
+        onClick={() => router.push("/learn")}
+        className="absolute right-4 top-4 z-10 grid size-11 place-items-center rounded-full text-muted transition hover:bg-surface-2"
+      >
+        <CloseIcon className="size-6" />
+      </button>
       <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 px-5 py-10">
         <AnimatePresence mode="wait">
           {step === 0 ? (
@@ -125,7 +139,7 @@ export function SoundsPrimer() {
                 </p>
               </div>
               <Button onClick={finish} size="lg" className="w-full">
-                Start learning 🚀
+                {firstLessonDone ? "Back to the path 🚀" : "Start learning 🚀"}
               </Button>
               <button
                 type="button"

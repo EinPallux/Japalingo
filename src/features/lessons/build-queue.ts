@@ -15,8 +15,9 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/** True if two kana read the same (homophones must never both be options). */
-function sameReading(a: Kana, b: Kana): boolean {
+/** True if two kana read the same (homophones must never both be options).
+ *  Shared with the games so their pools/distractors follow the same rule. */
+export function sameReading(a: Kana, b: Kana): boolean {
   return (
     a.romaji === b.romaji ||
     Boolean(a.altRomaji?.includes(b.romaji)) ||

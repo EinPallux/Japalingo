@@ -30,9 +30,14 @@ export interface ProgressSnapshot {
   bestStreak?: number;
   completedLessons: string[];
   kana: Record<string, KanaProgress>;
+  /** Optional (newer tracks) — absent in old snapshots/tests, treated as empty. */
+  vocab?: Record<string, KanaProgress>;
+  completedGrammarChapters?: string[];
 }
 
 const DAKUTEN_ROWS = new Set(["g", "z", "d", "b", "p"]);
+/** The ten gojūon rows — the "basic 46" a track badge is actually about. */
+const BASIC_ROWS = new Set(["a", "k", "s", "t", "n", "h", "m", "y", "r", "w"]);
 /** Total dakuten/han-dakuten kana across both tracks (for the completionist badge). */
 export const DAKUTEN_TOTAL = ALL_KANA.filter((k) => DAKUTEN_ROWS.has(k.row)).length;
 /** Total combination kana (yōon) across both tracks. */
@@ -42,6 +47,13 @@ export const EXT_TOTAL = ALL_KANA.filter((k) => k.row === "ext").length;
 
 export function trackSeen(kana: Record<string, KanaProgress>, track: Track): number {
   return ALL_KANA.filter((k) => k.track === track && (kana[k.id]?.seen ?? 0) > 0).length;
+}
+/** Basic-46 kana met in a track — dakuten/yōon/extended kana don't count, so the
+ *  "meet all 46 basics" badges can't be earned by drilling variation rows. */
+export function basicSeen(kana: Record<string, KanaProgress>, track: Track): number {
+  return ALL_KANA.filter(
+    (k) => k.track === track && BASIC_ROWS.has(k.row) && (kana[k.id]?.seen ?? 0) > 0,
+  ).length;
 }
 function rowsSeen(kana: Record<string, KanaProgress>, match: (row: string) => boolean): number {
   return ALL_KANA.filter((k) => match(k.row) && (kana[k.id]?.seen ?? 0) > 0).length;
@@ -57,16 +69,23 @@ export function badgesFor(s: ProgressSnapshot): Badge[] {
   // Streak badges reward the *peak* streak ever reached, so a broken streak
   // never revokes a badge the learner already earned.
   const peakStreak = Math.max(s.bestStreak ?? 0, s.streakCount);
+  const wordsLearned = Object.values(s.vocab ?? {}).filter((p) => p.seen > 0).length;
+  const chaptersDone = s.completedGrammarChapters?.length ?? 0;
   return [
     { id: "first", name: "First Steps", desc: "Finish your first lesson", emoji: "👣", earned: s.completedLessons.length >= 1 },
     { id: "onfire", name: "On Fire", desc: "Reach a 3-day streak", emoji: "🔥", earned: peakStreak >= 3 },
     { id: "week", name: "Week Warrior", desc: "Reach a 7-day streak", emoji: "📅", earned: peakStreak >= 7 },
     { id: "rising", name: "Rising Star", desc: "Earn 500 XP", emoji: "⭐", earned: s.xp >= 500 },
-    { id: "hira", name: "Hiragana Hero", desc: "Meet all 46 basic hiragana", emoji: "あ", earned: trackSeen(s.kana, "hiragana") >= 46 },
-    { id: "kata", name: "Katakana Champ", desc: "Meet all 46 basic katakana", emoji: "ア", earned: trackSeen(s.kana, "katakana") >= 46 },
+    { id: "hira", name: "Hiragana Hero", desc: "Meet all 46 basic hiragana", emoji: "あ", earned: basicSeen(s.kana, "hiragana") >= 46 },
+    { id: "kata", name: "Katakana Champ", desc: "Meet all 46 basic katakana", emoji: "ア", earned: basicSeen(s.kana, "katakana") >= 46 },
     { id: "dakuten", name: "Dakuten Master", desc: "Meet every dakuten & han-dakuten kana", emoji: "゛", earned: rowsSeen(s.kana, (r) => DAKUTEN_ROWS.has(r)) >= DAKUTEN_TOTAL },
     { id: "yoon", name: "Combo Master", desc: "Meet every combination kana (yōon)", emoji: "ゃ", earned: rowsSeen(s.kana, (r) => r === "yoon") >= YOON_TOTAL },
     { id: "ext", name: "Loanword Pro", desc: "Meet every extended katakana (ファ, ティ…)", emoji: "ヴ", earned: rowsSeen(s.kana, (r) => r === "ext") >= EXT_TOTAL },
     { id: "master", name: "Kana Master", desc: "Fully master 25 kana", emoji: "👑", earned: totalMastered(s.kana) >= 25 },
+    // Vocabulary & grammar — the other two tracks earn lasting recognition too.
+    { id: "words25", name: "First Words", desc: "Learn 25 vocabulary words", emoji: "📖", earned: wordsLearned >= 25 },
+    { id: "words200", name: "Word Collector", desc: "Learn 200 vocabulary words", emoji: "📚", earned: wordsLearned >= 200 },
+    { id: "grammar1", name: "Sentence Starter", desc: "Finish your first grammar chapter", emoji: "🧩", earned: chaptersDone >= 1 },
+    { id: "grammar24", name: "Grammar Graduate", desc: "Finish all 24 grammar chapters", emoji: "🎓", earned: chaptersDone >= 24 },
   ];
 }

@@ -7,8 +7,15 @@ import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { LockIcon } from "@/components/ui/icons";
 import { GRAMMAR_CHAPTERS, GRAMMAR_PATTERNS } from "@/data/grammar";
-import { GRAMMAR_TABLES } from "@/data/grammar-tables";
-import { ALL_GRAMMAR_EXAMPLES, grammarSections, isChapterUnlocked, type TaggedExample } from "@/lib/grammar";
+import { GRAMMAR_PARTICLES, PARTICLE_COMBINATIONS_NOTE } from "@/data/grammar-particles";
+import { REFERENCE_TABLES } from "@/data/grammar-tables";
+import {
+  ALL_GRAMMAR_EXAMPLES,
+  grammarSections,
+  isChapterUnlocked,
+  REVIEWABLE_POINT_IDS,
+  type TaggedExample,
+} from "@/lib/grammar";
 import { isDue } from "@/lib/srs";
 import { useMounted } from "@/lib/use-mounted";
 import { useNow } from "@/lib/use-now";
@@ -33,18 +40,22 @@ export function GrammarHub() {
     () => ALL_POINTS.filter((p) => (grammar[p.id]?.mastery ?? 0) >= 3).length,
     [grammar],
   );
+  // Only points WITH example sentences can be quizzed — example-less points
+  // (pure rules/tables) must not feed the due-count or the review session, or
+  // the badge could never be cleared and the queue could come up empty.
+  const reviewable = useMemo(() => learned.filter((p) => REVIEWABLE_POINT_IDS.has(p.id)), [learned]);
   const duePoints = useMemo(
-    () => learned.filter((p) => isDue(grammar[p.id], now)),
-    [learned, grammar, now],
+    () => reviewable.filter((p) => isDue(grammar[p.id], now)),
+    [reviewable, grammar, now],
   );
   const reviewSet = useMemo(() => {
-    const source = (duePoints.length ? duePoints : learned)
+    const source = (duePoints.length ? duePoints : reviewable)
       .slice()
       .sort((a, b) => (grammar[a.id]?.mastery ?? 0) - (grammar[b.id]?.mastery ?? 0))
       .slice(0, REVIEW_POINTS);
     const ids = new Set(source.map((p) => p.id));
     return ALL_GRAMMAR_EXAMPLES.filter((t) => ids.has(t.pointId));
-  }, [duePoints, learned, grammar]);
+  }, [duePoints, reviewable, grammar]);
 
   const sections = useMemo(() => grammarSections(), []);
 
@@ -86,7 +97,7 @@ export function GrammarHub() {
             <Stat value={duePoints.length} label="due now" tone={duePoints.length ? "secondary" : "muted"} />
           </div>
 
-          {learned.length > 0 ? (
+          {reviewable.length > 0 ? (
             <Button
               onClick={() => setReviewItems(reviewSet)}
               size="lg"
@@ -118,6 +129,7 @@ export function GrammarHub() {
           ))}
 
           <ConjugationReference />
+          <ParticleReference />
           <PatternsReference />
         </div>
       </main>
@@ -146,9 +158,54 @@ function ConjugationReference() {
       </button>
       {open ? (
         <div className="flex flex-col gap-5 border-t border-border px-4 py-4">
-          {GRAMMAR_TABLES.map((t) => (
+          {REFERENCE_TABLES.map((t) => (
             <GrammarTableCard key={t.id} table={t} className="max-w-none" />
           ))}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+/** The book's Appendix B — every particle's core function at a glance. */
+function ParticleReference() {
+  const [open, setOpen] = useState(false);
+  return (
+    <section className="mt-2 rounded-blob-lg border border-border bg-surface">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
+      >
+        <span>
+          <span className="block font-display font-bold text-ink">Particle quick reference</span>
+          <span className="text-sm text-muted">は・が・を・に・で… every particle&apos;s core job</span>
+        </span>
+        <span aria-hidden className={cn("text-muted transition", open && "rotate-90")}>
+          ▸
+        </span>
+      </button>
+      {open ? (
+        <div className="border-t border-border px-4 py-3">
+          <ul className="flex flex-col gap-1.5">
+            {GRAMMAR_PARTICLES.map((p) => (
+              <li key={p.particle} className="flex items-baseline gap-2 text-sm">
+                <span lang="ja" className="w-16 shrink-0 font-jp font-bold text-primary">
+                  {p.particle}
+                </span>
+                <span className="min-w-0">
+                  <span className="text-ink">{p.function}</span>{" "}
+                  <span lang="ja" className="font-jp text-muted">
+                    — {p.example}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p lang="ja" className="mt-3 border-t border-border pt-2 text-xs text-muted">
+            {PARTICLE_COMBINATIONS_NOTE}
+          </p>
         </div>
       ) : null}
     </section>
@@ -226,8 +283,22 @@ function ChapterRow({
 
   if (!unlocked) {
     return (
-      <div className="flex cursor-not-allowed items-center gap-3 rounded-blob-lg border border-border bg-surface px-4 py-3 opacity-70">
-        {inner}
+      <div
+        aria-label={`Chapter ${chapter.num}: ${chapter.title} — locked. Finish chapter ${chapter.num - 1} to unlock.`}
+        className="flex cursor-not-allowed items-center gap-3 rounded-blob-lg border border-border bg-surface px-4 py-3 opacity-70"
+      >
+        <span
+          aria-hidden
+          className="grid size-11 shrink-0 place-items-center rounded-blob-lg bg-surface-2 text-muted"
+        >
+          <LockIcon className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="truncate font-display font-bold text-muted">{chapter.title}</span>
+          <span className="block truncate text-sm text-muted">
+            Finish chapter {chapter.num - 1} to unlock
+          </span>
+        </span>
       </div>
     );
   }

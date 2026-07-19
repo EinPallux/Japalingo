@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { HoshiCoach, type CoachMood } from "@/components/mascot/hoshi-coach";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,11 @@ export function GrammarReview({ items, onExit }: { items: TaggedExample[]; onExi
 
   const answerGrammar = useProgress((s) => s.answerGrammar);
 
+  // double-tap guard: one grade per exercise, even mid exit-animation
+  const steppedRef = useRef(-1);
   const grade = (pointId: string, correct: boolean) => {
+    if (steppedRef.current === index) return;
+    steppedRef.current = index;
     answerGrammar(pointId, correct);
     setCoach((c) => {
       const streak = correct ? c.streak + 1 : 0;
@@ -43,7 +47,9 @@ export function GrammarReview({ items, onExit }: { items: TaggedExample[]; onExi
     }
   };
 
-  if (done) {
+  // Defensive: an empty queue (nothing quizzable) must never strand the user
+  // on a blank screen — treat it as an already-finished session.
+  if (done || queue.length === 0) {
     return (
       <main id="main" className="grid min-h-dvh place-items-center px-5 py-10">
         <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">

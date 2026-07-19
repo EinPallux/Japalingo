@@ -35,6 +35,25 @@ export function SpeedReview({ unit }: { unit: Unit }) {
     );
   }
 
+  // Concept units (small っ, long ー) hold no kana — a Speed Review over them
+  // would be a 0-question, unwinnable run. Bounce direct URLs back to the path.
+  if (unit.kanaIds.length === 0) {
+    return (
+      <main id="main" className="grid min-h-dvh place-items-center px-5 text-center">
+        <div className="flex max-w-sm flex-col items-center gap-4">
+          <HoshiStatic className="size-28" />
+          <h1 className="font-display text-2xl font-bold text-ink">Nothing to review here!</h1>
+          <p className="text-ink">
+            <strong>{unit.title}</strong> teaches a reading rule, not kana — it has no Speed Review.
+          </p>
+          <Button onClick={() => router.push("/learn")} size="lg">
+            Back to the path
+          </Button>
+        </div>
+      </main>
+    );
+  }
+
   if (!isUnitComplete(unit.id, completed)) {
     return (
       <main id="main" className="grid min-h-dvh place-items-center px-5 text-center">
@@ -74,10 +93,12 @@ function SpeedReviewGame({ unit }: { unit: Unit }) {
   const deadlineRef = useRef(0);
   const advanceRef = useRef<number | null>(null);
   const correctRef = useRef(0);
+  const finishedRef = useRef(false);
 
   const restart = () => {
     if (advanceRef.current) window.clearTimeout(advanceRef.current);
     correctRef.current = 0;
+    finishedRef.current = false;
     setQuiz(buildSpeedQuiz(getKanaList(unit.kanaIds)));
     setIndex(0);
     setPicked(null);
@@ -88,7 +109,16 @@ function SpeedReviewGame({ unit }: { unit: Unit }) {
   };
 
   // Finish the run: decide crown vs. retry, and crown the unit on a win.
+  // Idempotent — the clock and the last-question advance timeout can race
+  // (deadline landing inside the post-answer delay); whichever fires first
+  // decides the outcome, and the loser is ignored + its timer cleared.
   const finish = (finalCorrect: number, timedOut: boolean) => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    if (advanceRef.current) {
+      window.clearTimeout(advanceRef.current);
+      advanceRef.current = null;
+    }
     if (isCrownWin(finalCorrect, total, timedOut)) {
       const { alreadyCrowned } = useProgress.getState().crownUnit(unit.id);
       setGemsEarned(alreadyCrowned ? 0 : GEM_CROWN_REWARD);

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LearnDashboard } from "@/features/dashboard/learn-dashboard";
 
 export const metadata: Metadata = {
-  title: "Learn Hiragana — Japalingo",
+  title: "Learn Japanese — Japalingo",
 };
 
 export default function LearnPage() {
