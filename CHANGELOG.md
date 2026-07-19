@@ -21,7 +21,7 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 ### Added / Changed
 
 - **A new layered SFX engine** — filtered, enveloped, pitch-bent notes with bell-like shimmer partials, glued by a master compressor (replaces the thin two-oscillator blips).
-- **Combo-climbing correct sound** — each consecutive right answer plays a step higher up a pentatonic scale (reset by a miss or ~8s pause): the "you're on a roll" feel.
+- **A bright, steady correct sound** — the same satisfying "du-DING" on every right answer.
 - **A soft, non-punishing wrong "bonk"** (muted triangle with a downward bend) instead of the old harsh square-wave buzz.
 - **New sounds:** a bubbly **pop** (build-the-sentence tiles, every "Got it" teach card), a **coin sparkle** (quest claims, shop purchases), a gentle **deny** (failed purchases — you didn't make a mistake, so no error buzz), and a richer **completion fanfare** (arpeggio into a shimmering chord) + level-up jingle.
 - Wired sound into previously-silent moments: sentence-tile placement/removal, all teach-card continues (kana, vocab, grammar, tables, chapter wrap-ups).

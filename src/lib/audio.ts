@@ -90,30 +90,14 @@ function playNote(n: Note): void {
   }
 }
 
-/**
- * Consecutive-correct combo — each right answer in a row plays a step higher
- * up a pentatonic scale (the Duolingo "you're on a roll" feel). A wrong answer
- * or ~8s of silence resets to the root.
- */
-const PENTATONIC = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
-let combo = 0;
-let lastCorrectAt = 0;
-
 export const sfx = {
-  /** Bright rising "du-DING" that climbs the scale on streaks. */
+  /** Bright, steady "du-DING" — the same satisfying sound on every correct. */
   correct: () => {
-    const now = Date.now();
-    if (now - lastCorrectAt > 8000) combo = 0;
-    lastCorrectAt = now;
-    const semi = PENTATONIC[Math.min(combo, PENTATONIC.length - 1)]!;
-    combo += 1;
-    const base = 523.25 * 2 ** (semi / 12); // C5 root, climbing pentatonically
-    playNote({ f: base, dur: 0.09, gain: 0.13 });
-    playNote({ f: base * 1.5, at: 0.07, dur: 0.28, gain: 0.17, shimmer: 0.5 });
+    playNote({ f: 523.25, dur: 0.09, gain: 0.13 }); // C5
+    playNote({ f: 783.99, at: 0.07, dur: 0.28, gain: 0.17, shimmer: 0.5 }); // G5
   },
   /** Soft, muted "bonk" — clearly wrong, never punishing. */
   wrong: () => {
-    combo = 0;
     playNote({ f: 220, slideTo: 150, dur: 0.22, type: "triangle", gain: 0.15, cutoff: 500 });
     playNote({ f: 110, slideTo: 82, dur: 0.26, gain: 0.12, cutoff: 300 });
   },
@@ -136,7 +120,6 @@ export const sfx = {
   deny: () => playNote({ f: 196, dur: 0.11, type: "triangle", gain: 0.09, cutoff: 600 }),
   /** End-of-session fanfare: arpeggio into a shimmering final chord. */
   complete: () => {
-    combo = 0;
     [523.25, 659.25, 783.99].forEach((f, i) =>
       playNote({ f, at: i * 0.1, dur: 0.18, type: "triangle", gain: 0.11, cutoff: 4500 }),
     );
