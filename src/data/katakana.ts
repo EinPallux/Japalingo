@@ -1,13 +1,18 @@
 import type { Kana } from "@/types";
+import { KATAKANA_EXT } from "./katakana-ext";
+import { buildYoon } from "./yoon";
 
 /**
- * The 46 basic katakana, transcribed from
- * `database/learn-katakana-book-by-tofugu.pdf`. Each katakana has the SAME sound
- * as its hiragana counterpart (the book assumes hiragana is known), so the
- * pronunciation notes reference that; mnemonics are condensed from the book's
- * "HOW TO REMEMBER" sections. Source of truth: /database.
+ * Katakana, transcribed from `database/learn-katakana-book-by-tofugu.pdf`: the 46
+ * basic kana, then the 25 dakuten (゛) / han-dakuten (゜) variation kana from the
+ * book's "LEARN VARIATION KATAKANA" page ("they work with katakana too"). Each
+ * katakana has the SAME sound as its hiragana counterpart (the book assumes
+ * hiragana is known), so the pronunciation notes reference that; mnemonics are
+ * condensed from the book's "HOW TO REMEMBER" sections. Source of truth:
+ * /database. The combination kana (yōon, キ→キャ) are generated from the same
+ * composition rule — see ./yoon.ts — and ヴ (vu, dakuten ウ) is appended below.
  */
-export const KATAKANA: Kana[] = [
+const BASE_KATAKANA: Kana[] = [
   { id: "kata-a", char: "ア", romaji: "a", track: "katakana", row: "a", vowel: "a",
     pronunciation: "“ah!” — same sound as あ.",
     mnemonic: "ア has a deformed capital letter A in it — turn your head sideways and connect the lines." },
@@ -155,4 +160,107 @@ export const KATAKANA: Kana[] = [
   { id: "kata-n", char: "ン", romaji: "n", track: "katakana", row: "w", vowel: null,
     pronunciation: "the lone “n” — same sound as ん.",
     mnemonic: "A man with only one eye (vs シ, the weird-faced lady)." },
+
+  // ─── Variation katakana (dakuten ゛ & han-dakuten ゜) ───
+  // Same rules as hiragana (the book: "they work with katakana too"): dakuten
+  // voices K→G, S→Z, T→D, H→B; han-dakuten turns H→P. (The niche ヴ "vu" belongs
+  // with combination katakana and isn't part of this basic set.)
+
+  // dakuten g (K → G)
+  { id: "kata-ga", char: "ガ", romaji: "ga", track: "katakana", row: "g", vowel: "a",
+    pronunciation: "“ga” — voiced カ. Dakuten turns K into G.",
+    mnemonic: "カ + ゛(dakuten) → ガ. K→G: the car (カ) hits the guard (ガ) rail." },
+  { id: "kata-gi", char: "ギ", romaji: "gi", track: "katakana", row: "g", vowel: "i",
+    pronunciation: "“gi” (hard g) — voiced キ.",
+    mnemonic: "キ + ゛ → ギ. K→G with dakuten." },
+  { id: "kata-gu", char: "グ", romaji: "gu", track: "katakana", row: "g", vowel: "u",
+    pronunciation: "“goo” — voiced ク.",
+    mnemonic: "ク + ゛ → グ. K→G with dakuten." },
+  { id: "kata-ge", char: "ゲ", romaji: "ge", track: "katakana", row: "g", vowel: "e",
+    pronunciation: "“ge” (hard g) — voiced ケ.",
+    mnemonic: "ケ + ゛ → ゲ. K→G with dakuten." },
+  { id: "kata-go", char: "ゴ", romaji: "go", track: "katakana", row: "g", vowel: "o",
+    pronunciation: "“go” — voiced コ.",
+    mnemonic: "コ + ゛ → ゴ. K→G with dakuten." },
+
+  // dakuten z (S → Z)
+  { id: "kata-za", char: "ザ", romaji: "za", track: "katakana", row: "z", vowel: "a",
+    pronunciation: "“za” — voiced サ. Dakuten turns S into Z.",
+    mnemonic: "サ + ゛ → ザ. S→Z: my saw (サ) just zapped (ザ) me!" },
+  { id: "kata-ji", char: "ジ", romaji: "ji", track: "katakana", row: "z", vowel: "i",
+    pronunciation: "“jee” — voiced シ. It's ji, never zi.",
+    mnemonic: "シ + ゛ → ジ. S→Z, but シ becomes ji (not zi)." },
+  { id: "kata-zu", char: "ズ", romaji: "zu", track: "katakana", row: "z", vowel: "u",
+    pronunciation: "“zu” — voiced ス.",
+    mnemonic: "ス + ゛ → ズ. S→Z with dakuten." },
+  { id: "kata-ze", char: "ゼ", romaji: "ze", track: "katakana", row: "z", vowel: "e",
+    pronunciation: "“ze” — voiced セ.",
+    mnemonic: "セ + ゛ → ゼ. S→Z with dakuten." },
+  { id: "kata-zo", char: "ゾ", romaji: "zo", track: "katakana", row: "z", vowel: "o",
+    pronunciation: "“zo” — voiced ソ.",
+    mnemonic: "ソ + ゛ → ゾ. S→Z with dakuten." },
+
+  // dakuten d (T → D)
+  { id: "kata-da", char: "ダ", romaji: "da", track: "katakana", row: "d", vowel: "a",
+    pronunciation: "“da” — voiced タ. Dakuten turns T into D.",
+    mnemonic: "タ + ゛ → ダ. T→D: “TADA!” (タ & ダ)." },
+  { id: "kata-di", char: "ヂ", romaji: "ji", altRomaji: ["di"], track: "katakana", row: "d", vowel: "i",
+    pronunciation: "“jee” — voiced チ. Same sound as ジ; type “di”.",
+    mnemonic: "チ + ゛ → ヂ. T→D; sounds like ジ (ji) but is typed “di”." },
+  { id: "kata-du", char: "ヅ", romaji: "zu", altRomaji: ["du"], track: "katakana", row: "d", vowel: "u",
+    pronunciation: "“zu” — voiced ツ. Same sound as ズ; type “du”.",
+    mnemonic: "ツ + ゛ → ヅ. T→D; sounds like ズ (zu) but is typed “du”." },
+  { id: "kata-de", char: "デ", romaji: "de", track: "katakana", row: "d", vowel: "e",
+    pronunciation: "“de” — voiced テ.",
+    mnemonic: "テ + ゛ → デ. T→D with dakuten." },
+  { id: "kata-do", char: "ド", romaji: "do", track: "katakana", row: "d", vowel: "o",
+    pronunciation: "“do” — voiced ト.",
+    mnemonic: "ト + ゛ → ド. T→D with dakuten." },
+
+  // dakuten b (H → B)
+  { id: "kata-ba", char: "バ", romaji: "ba", track: "katakana", row: "b", vowel: "a",
+    pronunciation: "“ba” — voiced ハ. Dakuten turns H into B.",
+    mnemonic: "ハ + ゛ → バ. H→B: you laugh “hahaha (ハ)” at the bar (バ)!" },
+  { id: "kata-bi", char: "ビ", romaji: "bi", track: "katakana", row: "b", vowel: "i",
+    pronunciation: "“bee” — voiced ヒ.",
+    mnemonic: "ヒ + ゛ → ビ. H→B with dakuten." },
+  { id: "kata-bu", char: "ブ", romaji: "bu", track: "katakana", row: "b", vowel: "u",
+    pronunciation: "“boo” — voiced フ.",
+    mnemonic: "フ + ゛ → ブ. H→B with dakuten." },
+  { id: "kata-be", char: "ベ", romaji: "be", track: "katakana", row: "b", vowel: "e",
+    pronunciation: "“be” — voiced ヘ.",
+    mnemonic: "ヘ + ゛ → ベ. H→B with dakuten." },
+  { id: "kata-bo", char: "ボ", romaji: "bo", track: "katakana", row: "b", vowel: "o",
+    pronunciation: "“bo” — voiced ホ.",
+    mnemonic: "ホ + ゛ → ボ. H→B with dakuten." },
+
+  // han-dakuten p (H → P)
+  { id: "kata-pa", char: "パ", romaji: "pa", track: "katakana", row: "p", vowel: "a",
+    pronunciation: "“pa” — ハ with han-dakuten ゜. H becomes P.",
+    mnemonic: "ハ + ゜(han-dakuten) → パ. H→P: laugh so much you get punched (パ)!" },
+  { id: "kata-pi", char: "ピ", romaji: "pi", track: "katakana", row: "p", vowel: "i",
+    pronunciation: "“pee” — ヒ with han-dakuten ゜.",
+    mnemonic: "ヒ + ゜ → ピ. H→P with han-dakuten." },
+  { id: "kata-pu", char: "プ", romaji: "pu", track: "katakana", row: "p", vowel: "u",
+    pronunciation: "“poo” — フ with han-dakuten ゜.",
+    mnemonic: "フ + ゜ → プ. H→P with han-dakuten." },
+  { id: "kata-pe", char: "ペ", romaji: "pe", track: "katakana", row: "p", vowel: "e",
+    pronunciation: "“pe” — ヘ with han-dakuten ゜.",
+    mnemonic: "ヘ + ゜ → ペ. H→P with han-dakuten." },
+  { id: "kata-po", char: "ポ", romaji: "po", track: "katakana", row: "p", vowel: "o",
+    pronunciation: "“po” — ホ with han-dakuten ゜.",
+    mnemonic: "ホ + ゜ → ポ. H→P with han-dakuten." },
+
+  // ヴ — the one dakuten vowel (dakuten ウ), for transcribing v-sounds. From the
+  // book's variation page: "you can dakuten ウ, turning it into ヴ" (vu).
+  { id: "kata-vu", char: "ヴ", romaji: "vu", altRomaji: ["bu"], track: "katakana", row: "v", vowel: "u",
+    pronunciation: "“vu” — ウ + dakuten ゛. Used for foreign v-sounds; often said like “bu”.",
+    mnemonic: "ウ + ゛(dakuten) → ヴ. The only vowel that takes dakuten — it makes the “vu” sound for loanwords (ヴァイオリン = violin)." },
+];
+
+/** Basic + dakuten + ヴ + the 33 generated yōon + the 22 extended combinations. */
+export const KATAKANA: Kana[] = [
+  ...BASE_KATAKANA,
+  ...buildYoon("katakana", "kata"),
+  ...KATAKANA_EXT,
 ];

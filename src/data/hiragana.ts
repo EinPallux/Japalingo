@@ -1,13 +1,17 @@
 import type { Kana } from "@/types";
+import { buildYoon } from "./yoon";
 
 /**
- * The 46 basic hiragana (gojūon), transcribed from
- * `database/tofugu-learn-hiragana-book.pdf`. Pronunciation anchors and mnemonics
- * are condensed from that book's "HOW TO PRONOUNCE" / "HOW TO REMEMBER" sections;
- * example words come from its "LET'S PRACTICE READING!" pages. Source of truth:
- * /database — do not add kana facts from elsewhere.
+ * Hiragana, transcribed from `database/tofugu-learn-hiragana-book.pdf`: the 46
+ * basic (gojūon) kana, then the 25 "variation" kana — dakuten (゛) and han-dakuten
+ * (゜) — from the book's "LEARN VARIATION HIRAGANA" pages. Pronunciation anchors
+ * and mnemonics are condensed from that book's "HOW TO PRONOUNCE" / "HOW TO
+ * REMEMBER" (and per-row dakuten hints) sections; example words come from its
+ * "LET'S PRACTICE READING!" pages. Source of truth: /database — do not add kana
+ * facts from elsewhere. The combination kana (yōon, き→きゃ) are generated from
+ * the same book's composition rule — see ./yoon.ts.
  */
-export const HIRAGANA: Kana[] = [
+const BASE_HIRAGANA: Kana[] = [
   // vowels
   { id: "hira-a", char: "あ", romaji: "a", track: "hiragana", row: "a", vowel: "a",
     pronunciation: "“ah!” — like the a in “father.”",
@@ -174,4 +178,97 @@ export const HIRAGANA: Kana[] = [
   { id: "hira-n", char: "ん", romaji: "n", track: "hiragana", row: "w", vowel: null,
     pronunciation: "the n at the end of “pen” — a lone consonant.",
     mnemonic: "Looks just like a lowercase English n — and it's the same sound. Handy!" },
+
+  // ─── Variation hiragana (dakuten ゛ & han-dakuten ゜) ───
+  // From the book's "LEARN VARIATION HIRAGANA" pages: dakuten voices a consonant
+  // (K→G, S→Z, T→D, H→B) and han-dakuten turns H→P. Mnemonics are the book's own
+  // per-row memory hints. No attested example words on these pages, so none here.
+
+  // dakuten g (K → G)
+  { id: "hira-ga", char: "が", romaji: "ga", track: "hiragana", row: "g", vowel: "a",
+    pronunciation: "“ga” — voiced か. Dakuten turns K into G.",
+    mnemonic: "か + ゛(dakuten) → が. K→G: the car (か) runs into the guard (が) rail." },
+  { id: "hira-gi", char: "ぎ", romaji: "gi", track: "hiragana", row: "g", vowel: "i",
+    pronunciation: "“gi” (hard g, like “geese”) — voiced き.",
+    mnemonic: "き + ゛ → ぎ. K→G (the car か hits the guard が rail)." },
+  { id: "hira-gu", char: "ぐ", romaji: "gu", track: "hiragana", row: "g", vowel: "u",
+    pronunciation: "“goo” — voiced く.",
+    mnemonic: "く + ゛ → ぐ. K→G with dakuten." },
+  { id: "hira-ge", char: "げ", romaji: "ge", track: "hiragana", row: "g", vowel: "e",
+    pronunciation: "“ge” (hard g, like “get”) — voiced け.",
+    mnemonic: "け + ゛ → げ. K→G with dakuten." },
+  { id: "hira-go", char: "ご", romaji: "go", track: "hiragana", row: "g", vowel: "o",
+    pronunciation: "“go” — voiced こ.",
+    mnemonic: "こ + ゛ → ご. K→G with dakuten." },
+
+  // dakuten z (S → Z)
+  { id: "hira-za", char: "ざ", romaji: "za", track: "hiragana", row: "z", vowel: "a",
+    pronunciation: "“za” — voiced さ. Dakuten turns S into Z.",
+    mnemonic: "さ + ゛ → ざ. S→Z: my saw (さ) just zapped (ざ) me!" },
+  { id: "hira-ji", char: "じ", romaji: "ji", track: "hiragana", row: "z", vowel: "i",
+    pronunciation: "“jee” — voiced し. It's ji, never zi.",
+    mnemonic: "し + ゛ → じ. S→Z, but し becomes ji (not zi)." },
+  { id: "hira-zu", char: "ず", romaji: "zu", track: "hiragana", row: "z", vowel: "u",
+    pronunciation: "“zu” — voiced す.",
+    mnemonic: "す + ゛ → ず. S→Z with dakuten." },
+  { id: "hira-ze", char: "ぜ", romaji: "ze", track: "hiragana", row: "z", vowel: "e",
+    pronunciation: "“ze” — voiced せ.",
+    mnemonic: "せ + ゛ → ぜ. S→Z with dakuten." },
+  { id: "hira-zo", char: "ぞ", romaji: "zo", track: "hiragana", row: "z", vowel: "o",
+    pronunciation: "“zo” — voiced そ.",
+    mnemonic: "そ + ゛ → ぞ. S→Z with dakuten." },
+
+  // dakuten d (T → D)
+  { id: "hira-da", char: "だ", romaji: "da", track: "hiragana", row: "d", vowel: "a",
+    pronunciation: "“da” — voiced た. Dakuten turns T into D.",
+    mnemonic: "た + ゛ → だ. T→D: “TADA!” (た & だ)." },
+  { id: "hira-di", char: "ぢ", romaji: "ji", altRomaji: ["di"], track: "hiragana", row: "d", vowel: "i",
+    pronunciation: "“jee” — voiced ち. Same sound as じ; type “di”.",
+    mnemonic: "ち + ゛ → ぢ. T→D; it sounds like じ (ji) but is typed “di”." },
+  { id: "hira-du", char: "づ", romaji: "zu", altRomaji: ["du"], track: "hiragana", row: "d", vowel: "u",
+    pronunciation: "“zu” — voiced つ. Same sound as ず; type “du”.",
+    mnemonic: "つ + ゛ → づ. T→D; it sounds like ず (zu) but is typed “du”." },
+  { id: "hira-de", char: "で", romaji: "de", track: "hiragana", row: "d", vowel: "e",
+    pronunciation: "“de” — voiced て.",
+    mnemonic: "て + ゛ → で. T→D with dakuten." },
+  { id: "hira-do", char: "ど", romaji: "do", track: "hiragana", row: "d", vowel: "o",
+    pronunciation: "“do” — voiced と.",
+    mnemonic: "と + ゛ → ど. T→D with dakuten." },
+
+  // dakuten b (H → B)
+  { id: "hira-ba", char: "ば", romaji: "ba", track: "hiragana", row: "b", vowel: "a",
+    pronunciation: "“ba” — voiced は. Dakuten turns H into B.",
+    mnemonic: "は + ゛ → ば. H→B: you laugh “hahaha (は)” at the bar (ば) — too much to drink!" },
+  { id: "hira-bi", char: "び", romaji: "bi", track: "hiragana", row: "b", vowel: "i",
+    pronunciation: "“bee” — voiced ひ.",
+    mnemonic: "ひ + ゛ → び. H→B with dakuten." },
+  { id: "hira-bu", char: "ぶ", romaji: "bu", track: "hiragana", row: "b", vowel: "u",
+    pronunciation: "“boo” — voiced ふ.",
+    mnemonic: "ふ + ゛ → ぶ. H→B with dakuten." },
+  { id: "hira-be", char: "べ", romaji: "be", track: "hiragana", row: "b", vowel: "e",
+    pronunciation: "“be” — voiced へ.",
+    mnemonic: "へ + ゛ → べ. H→B with dakuten." },
+  { id: "hira-bo", char: "ぼ", romaji: "bo", track: "hiragana", row: "b", vowel: "o",
+    pronunciation: "“bo” — voiced ほ.",
+    mnemonic: "ほ + ゛ → ぼ. H→B with dakuten." },
+
+  // han-dakuten p (H → P)
+  { id: "hira-pa", char: "ぱ", romaji: "pa", track: "hiragana", row: "p", vowel: "a",
+    pronunciation: "“pa” — は with han-dakuten ゜. H becomes P.",
+    mnemonic: "は + ゜(han-dakuten) → ぱ. H→P: you laugh at the bar so much somebody punches (ぱ) you!" },
+  { id: "hira-pi", char: "ぴ", romaji: "pi", track: "hiragana", row: "p", vowel: "i",
+    pronunciation: "“pee” — ひ with han-dakuten ゜.",
+    mnemonic: "ひ + ゜ → ぴ. H→P with han-dakuten." },
+  { id: "hira-pu", char: "ぷ", romaji: "pu", track: "hiragana", row: "p", vowel: "u",
+    pronunciation: "“poo” — ふ with han-dakuten ゜.",
+    mnemonic: "ふ + ゜ → ぷ. H→P with han-dakuten." },
+  { id: "hira-pe", char: "ぺ", romaji: "pe", track: "hiragana", row: "p", vowel: "e",
+    pronunciation: "“pe” — へ with han-dakuten ゜.",
+    mnemonic: "へ + ゜ → ぺ. H→P with han-dakuten." },
+  { id: "hira-po", char: "ぽ", romaji: "po", track: "hiragana", row: "p", vowel: "o",
+    pronunciation: "“po” — ほ with han-dakuten ゜.",
+    mnemonic: "ほ + ゜ → ぽ. H→P with han-dakuten." },
 ];
+
+/** Basic + dakuten + the 33 generated yōon combination kana. */
+export const HIRAGANA: Kana[] = [...BASE_HIRAGANA, ...buildYoon("hiragana", "hira")];

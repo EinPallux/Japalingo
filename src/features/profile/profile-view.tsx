@@ -5,7 +5,7 @@ import { AppHeader } from "@/components/app/app-header";
 import { HoshiAvatar } from "@/components/mascot/hoshi-avatar";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
-import { trackKana } from "@/data/curriculum";
+import { ALL_KANA, trackKana } from "@/data/curriculum";
 import {
   badgesFor,
   rankFor,
@@ -96,7 +96,7 @@ export function ProfileView() {
           <Stat value={`🪙 ${state.coins}`} label="Coins" />
           <Stat value={`💎 ${state.gems}`} label="Gems" />
           <Stat value={`❄️ ${state.streakFreezes}`} label="Freezes" />
-          <Stat value={`${seen}/92`} label="Kana met" />
+          <Stat value={`${seen}/${ALL_KANA.length}`} label="Kana met" />
           <Stat value={mastered} label="Mastered" />
           <Stat value={state.completedLessons.length} label="Lessons" />
         </div>

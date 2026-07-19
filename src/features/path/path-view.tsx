@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { CheckIcon, LockIcon, StarIcon } from "@/components/ui/icons";
-import { getTrackLessons, getUnit, isUnitComplete } from "@/data/curriculum";
+import { getTrackLessons, getUnit, isUnitComplete, trackKana } from "@/data/curriculum";
 import { cn } from "@/lib/utils";
 import { useProgress } from "@/stores/progress";
 import type { Track } from "@/types";
@@ -33,7 +33,9 @@ export function PathView({ track }: { track: Track }) {
         <p className="font-display text-xl font-bold text-ink">
           {track === "hiragana" ? "Hiragana" : "Katakana"}
         </p>
-        <p className="text-sm text-muted">Learn to read all 46 basic characters.</p>
+        <p className="text-sm text-muted">
+          Read all {trackKana(track).length} kana — 46 basics, then dakuten &amp; han-dakuten.
+        </p>
       </div>
 
       {lessons.map((lesson, i) => {
@@ -55,7 +57,9 @@ export function PathView({ track }: { track: Track }) {
                     {unit.subtitle}
                   </p>
                 </div>
-                <UnitCrown unitId={unit.id} complete={unitComplete} crowned={unitCrowned} />
+                {unit.kanaIds.length > 0 ? (
+                  <UnitCrown unitId={unit.id} complete={unitComplete} crowned={unitCrowned} />
+                ) : null}
               </div>
             ) : null}
 

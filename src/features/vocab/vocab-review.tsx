@@ -1,43 +1,31 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { HoshiCoach, type CoachMood } from "@/components/mascot/hoshi-coach";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
+import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
 import { sfx } from "@/lib/audio";
-import { useMounted } from "@/lib/use-mounted";
+import { buildVocabReviewQueue } from "@/lib/vocab-queue";
 import { useProgress } from "@/stores/progress";
-import type { Lesson } from "@/types";
-import { buildQueue } from "./build-queue";
-import { KanaDrill } from "./modes/kana-drill";
-import { MnemonicStory } from "./modes/mnemonic-story";
-import { QuickMatch } from "./modes/quick-match";
-import { ConceptLesson } from "./concept-lesson";
-import { LessonResults } from "./results";
+import type { VocabWord } from "@/types";
+import { VocabChoice } from "./vocab-choice";
 
-export function LessonPlayer({ lesson }: { lesson: Lesson }) {
-  const router = useRouter();
-  const mounted = useMounted();
-  const queue = useMemo(() => buildQueue(lesson), [lesson]);
+export function VocabReview({ words, onExit }: { words: VocabWord[]; onExit: () => void }) {
+  const queue = useMemo(() => buildVocabReviewQueue(words), [words]);
   const [index, setIndex] = useState(0);
   const [done, setDone] = useState(false);
   const [earnedXp, setEarnedXp] = useState(0);
   const [xpBefore] = useState(() => useProgress.getState().xp);
-  // Hoshi coach: a running correct-streak drives its cheer/encourage reactions.
   const [coach, setCoach] = useState<{ mood: CoachMood; nonce: number; streak: number }>({
     mood: "idle",
     nonce: 0,
     streak: 0,
   });
 
-  const answer = useProgress((s) => s.answer);
-  const rate = useProgress((s) => s.rate);
-  const markSeen = useProgress((s) => s.markSeen);
-  const completeLesson = useProgress((s) => s.completeLesson);
+  const answerVocab = useProgress((s) => s.answerVocab);
 
-  // React to an answer: bump the streak (or reset it) and pick Hoshi's mood.
   const react = (correct: boolean) =>
     setCoach((c) => {
       const streak = correct ? c.streak + 1 : 0;
@@ -45,11 +33,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       return { mood, streak, nonce: c.nonce + 1 };
     });
 
-  const exit = () => router.push("/learn");
-
   const advance = () => {
     if (index + 1 >= queue.length) {
-      completeLesson(lesson.id);
       sfx.complete();
       setEarnedXp(useProgress.getState().xp - xpBefore);
       setDone(true);
@@ -58,23 +43,21 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }
   };
 
-  // Gate randomized exercises (review lessons shuffle their first item) behind
-  // mount so the server render never mismatches the client's first render.
-  if (!mounted) {
+  if (done) {
     return (
-      <main id="main" className="grid min-h-dvh place-items-center">
-        <HoshiStatic className="size-24 opacity-70" />
+      <main id="main" className="grid min-h-dvh place-items-center px-5 py-10">
+        <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
+          <HoshiStatic className="size-32" />
+          <h1 className="font-display text-3xl font-bold text-ink">Review done! 💪</h1>
+          <p className="text-muted">
+            +{earnedXp} XP · {words.length} words refreshed
+          </p>
+          <Button onClick={onExit} size="lg" className="w-full max-w-xs">
+            Done
+          </Button>
+        </div>
       </main>
     );
-  }
-
-  // The small っ and long-vowel ー are writing rules, not kana — self-contained.
-  if (lesson.kind === "sokuon" || lesson.kind === "chouon") {
-    return <ConceptLesson lesson={lesson} onExit={exit} />;
-  }
-
-  if (done) {
-    return <LessonResults lesson={lesson} xpEarned={earnedXp} onContinue={exit} />;
   }
 
   const ex = queue[index];
@@ -85,8 +68,8 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       <div className="mb-8 flex items-center gap-4">
         <button
           type="button"
-          aria-label="Exit lesson"
-          onClick={exit}
+          aria-label="Exit review"
+          onClick={onExit}
           className="grid size-11 shrink-0 place-items-center rounded-full text-muted transition hover:bg-surface-2"
         >
           <CloseIcon className="size-6" />
@@ -106,8 +89,6 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
       </div>
 
       <div className="flex flex-1 items-center justify-center overflow-x-clip py-4">
-        {/* Each exercise slides in from the right and out to the left —
-            the Duolingo-style forward momentum between steps. */}
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={index}
@@ -117,33 +98,14 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
             transition={{ type: "spring", stiffness: 380, damping: 32 }}
             className="flex w-full items-center justify-center"
           >
-            {ex?.kind === "mnemonic" && (
-              <MnemonicStory
-                kana={ex.kana}
-                onContinue={() => {
-                  markSeen(ex.kana.id);
-                  advance();
-                }}
-              />
-            )}
-            {ex?.kind === "choice" && (
-              <QuickMatch
-                kana={ex.kana}
-                direction={ex.direction}
+            {ex && ex.kind !== "learn" && (
+              <VocabChoice
+                word={ex.word}
+                kind={ex.kind}
                 options={ex.options}
                 onAnswer={(correct) => {
-                  answer(ex.kana.id, correct);
+                  answerVocab(ex.word.id, correct);
                   react(correct);
-                  advance();
-                }}
-              />
-            )}
-            {ex?.kind === "drill" && (
-              <KanaDrill
-                kana={ex.kana}
-                onRate={(grade) => {
-                  rate(ex.kana.id, grade);
-                  react(grade !== "again");
                   advance();
                 }}
               />

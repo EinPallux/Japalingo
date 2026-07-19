@@ -8,10 +8,12 @@ import {
 } from "@/data/curriculum";
 
 describe("curriculum data integrity", () => {
-  it("has 46 basic kana per track (92 total)", () => {
-    expect(trackKana("hiragana")).toHaveLength(46);
-    expect(trackKana("katakana")).toHaveLength(46);
-    expect(ALL_KANA).toHaveLength(92);
+  it("has the full kana set — basics, dakuten, yōon + katakana extensions", () => {
+    // hiragana: 46 basic + 25 dakuten + 33 yōon = 104.
+    expect(trackKana("hiragana")).toHaveLength(104);
+    // katakana adds ヴ (1) + 22 extended combos = 127.
+    expect(trackKana("katakana")).toHaveLength(127);
+    expect(ALL_KANA).toHaveLength(231);
   });
 
   it("has a lesson path for each track starting at the vowels", () => {
@@ -28,9 +30,12 @@ describe("curriculum data integrity", () => {
         for (const id of [...lesson.newKanaIds, ...lesson.reviewKanaIds]) {
           expect(getKana(id), `missing kana ${id} in ${lesson.id}`).toBeDefined();
         }
-        // learn lessons introduce kana; reviews reinforce them
+        // learn lessons introduce kana; reviews reinforce them. Concept lessons
+        // (sokuon っ, chouon ー) teach a writing rule, so have no kana.
         if (lesson.kind === "lesson") expect(lesson.newKanaIds.length).toBeGreaterThan(0);
-        expect(lessonKana(lesson).length).toBeGreaterThan(0);
+        if (lesson.kind === "lesson" || lesson.kind === "review") {
+          expect(lessonKana(lesson).length).toBeGreaterThan(0);
+        }
       }
     }
   });

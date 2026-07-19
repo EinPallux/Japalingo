@@ -68,7 +68,11 @@ export interface ProgressState {
   sfxEnabled: boolean;
   speechRate: number;
   kana: Record<string, KanaProgress>;
+  /** Per-word SRS state for vocabulary (same Leitner shape as kana). */
+  vocab: Record<string, KanaProgress>;
   completedLessons: string[];
+  /** Vocab deck ids the learner has finished at least once (unlocks the next). */
+  completedVocabDecks: string[];
   /** Unit ids that earned a gold crown by beating their Speed Review. */
   crownedUnits: string[];
   /** Personal-best scores per game, keyed `${gameId}:${track}`. */
@@ -84,9 +88,15 @@ export interface ProgressState {
   answer(kanaId: string, correct: boolean): void;
   rate(kanaId: string, grade: Grade): void;
   markSeen(kanaId: string): void;
+  /** Graded vocab answer: bumps the word's SRS box + XP/coins/daily like `answer`. */
+  answerVocab(wordId: string, correct: boolean): void;
+  /** Passive "met this word" view in a vocab lesson (+2 XP, sets its due date). */
+  markVocabSeen(wordId: string): void;
   /** Word Builder solve: XP + coins + daily-correct, no per-kana SRS change. */
   rewardCorrect(): void;
   completeLesson(lessonId: string): { alreadyDone: boolean };
+  /** Mark a vocab deck cleared (idempotent; grants gems + lesson XP once). */
+  completeVocabDeck(deckId: string): { alreadyDone: boolean };
   /** Crown a unit gold after a won Speed Review (idempotent; grants gems once). */
   crownUnit(unitId: string): { alreadyCrowned: boolean };
   /** Record a game score; returns the best so far and whether it beat it. */
@@ -97,6 +107,7 @@ export interface ProgressState {
   /** Toggle a cosmetic on/off in its slot (must be owned). */
   equip(id: string): void;
   progressFor(kanaId: string): KanaProgress;
+  progressForVocab(wordId: string): KanaProgress;
   reset(): void;
 }
 
@@ -126,7 +137,9 @@ const initial = {
   sfxEnabled: true,
   speechRate: 0.9,
   kana: {} as Record<string, KanaProgress>,
+  vocab: {} as Record<string, KanaProgress>,
   completedLessons: [] as string[],
+  completedVocabDecks: [] as string[],
   crownedUnits: [] as string[],
   bestScores: {} as Record<string, number>,
   activeTrack: "hiragana" as Track,
@@ -230,6 +243,28 @@ export const useProgress = create<ProgressState>()(
           };
         }),
 
+      answerVocab: (wordId, correct) =>
+        set((s) => {
+          const cur = s.vocab[wordId] ?? emptyProgress();
+          const next = applyAnswer(cur, correct);
+          return {
+            vocab: { ...s.vocab, [wordId]: { ...next, due: nextDue(next.mastery, Date.now()) } },
+            ...applyDaily(s, correct ? { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT } : {}),
+          };
+        }),
+
+      markVocabSeen: (wordId) =>
+        set((s) => {
+          const cur = s.vocab[wordId] ?? emptyProgress();
+          return {
+            vocab: {
+              ...s.vocab,
+              [wordId]: { ...cur, seen: cur.seen + 1, due: nextDue(cur.mastery, Date.now()) },
+            },
+            ...applyDaily(s, { xp: 2 }),
+          };
+        }),
+
       rewardCorrect: () =>
         set((s) => applyDaily(s, { xp: XP_PER_CORRECT, correct: 1, coins: COIN_PER_CORRECT })),
 
@@ -238,6 +273,18 @@ export const useProgress = create<ProgressState>()(
         if (!alreadyDone) {
           set((s) => ({
             completedLessons: [...s.completedLessons, lessonId],
+            gems: s.gems + 5,
+            ...applyDaily(s, { xp: XP_LESSON_COMPLETE }),
+          }));
+        }
+        return { alreadyDone };
+      },
+
+      completeVocabDeck: (deckId) => {
+        const alreadyDone = get().completedVocabDecks.includes(deckId);
+        if (!alreadyDone) {
+          set((s) => ({
+            completedVocabDecks: [...s.completedVocabDecks, deckId],
             gems: s.gems + 5,
             ...applyDaily(s, { xp: XP_LESSON_COMPLETE }),
           }));
@@ -310,6 +357,7 @@ export const useProgress = create<ProgressState>()(
         }),
 
       progressFor: (kanaId) => get().kana[kanaId] ?? emptyProgress(),
+      progressForVocab: (wordId) => get().vocab[wordId] ?? emptyProgress(),
 
       reset: () => set({ ...initial }),
     }),

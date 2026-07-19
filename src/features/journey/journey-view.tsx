@@ -79,9 +79,11 @@ export function JourneyView() {
         <h1 className="text-center font-display text-3xl font-bold text-ink">Your Journey</h1>
 
         <section className="flex flex-col gap-4 rounded-blob-lg border border-border bg-surface p-5">
-          <Bar label="Hiragana" sample="あ" value={stats.hira.seen} max={46} />
-          <Bar label="Katakana" sample="ア" value={stats.kata.seen} max={46} />
-          <p className="text-center text-xs text-muted">Characters met, out of 46 in each script.</p>
+          <Bar label="Hiragana" sample="あ" value={stats.hira.seen} max={trackKana("hiragana").length} />
+          <Bar label="Katakana" sample="ア" value={stats.kata.seen} max={trackKana("katakana").length} />
+          <p className="text-center text-xs text-muted">
+            Characters met — basics, dakuten &amp; combination kana.
+          </p>
         </section>
 
         <div className="grid grid-cols-3 gap-3">

@@ -143,6 +143,40 @@ describe("progress store", () => {
     expect(s().gems).toBe(before + 10); // no second reward
   });
 
+  it("scores a vocab answer into its own SRS map (XP + mastery + daily)", () => {
+    s().answerVocab("v-1", true);
+    expect(s().xp).toBe(10);
+    expect(s().coins).toBe(COIN_PER_CORRECT);
+    expect(s().vocab["v-1"]?.mastery).toBe(1);
+    expect(selectDaily(s()).correct).toBe(1);
+    // vocab progress is separate from kana progress
+    expect(s().kana["v-1"]).toBeUndefined();
+
+    s().answerVocab("v-1", false);
+    expect(s().vocab["v-1"]?.mastery).toBe(0);
+    expect(s().vocab["v-1"]?.attempts).toBe(2);
+  });
+
+  it("marks a vocab word seen without counting it as a graded attempt", () => {
+    s().markVocabSeen("v-2");
+    const p = s().vocab["v-2"]!;
+    expect(p.seen).toBe(1);
+    expect(p.attempts).toBe(0);
+    expect(p.due).toBeGreaterThan(0);
+    expect(s().xp).toBe(2);
+  });
+
+  it("completes a vocab deck once, granting XP + gems idempotently", () => {
+    expect(s().completeVocabDeck("vd-greet-1").alreadyDone).toBe(false);
+    expect(s().completedVocabDecks).toContain("vd-greet-1");
+    expect(s().gems).toBe(5);
+    expect(s().xp).toBe(20);
+
+    expect(s().completeVocabDeck("vd-greet-1").alreadyDone).toBe(true);
+    expect(s().completedVocabDecks).toHaveLength(1);
+    expect(s().gems).toBe(5); // no second reward
+  });
+
   it("records a game score only when it beats the previous best", () => {
     expect(s().recordScore("kana-rain:hiragana", 120)).toEqual({ best: 120, isRecord: true });
     expect(s().bestScores["kana-rain:hiragana"]).toBe(120);

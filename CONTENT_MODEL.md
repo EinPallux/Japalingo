@@ -8,14 +8,17 @@ Related docs: `ARCHITECTURE.md` (data layer + repository), `GAME_MODES.md` (how 
 
 ## 1. Source & Governance
 
-### 1.1 The two books
+### 1.1 The source books
 
-All content in Phase 2 derives from exactly two source PDFs living in `/database`:
+All content in Phase 2 derives from source PDFs living in `/database`:
 
 | File | Title | Pages | Covers |
 | --- | --- | --- | --- |
 | `database/tofugu-learn-hiragana-book.pdf` | Tofugu — Learn Hiragana | 71 | Hiragana gojūon, dakuten/handakuten, yōon, sokuon |
 | `database/learn-katakana-book-by-tofugu.pdf` | Tofugu — Learn Katakana | 69 | Katakana gojūon, dakuten/handakuten, yōon, **extended** foreign combos, long-vowel mark ー |
+| `database/Vocabulary_of_JLPT_N5.pdf` | Vocabulary of JLPT N5 (MLC Meguro Language Center) | 75 | 802 JLPT N5 words — kana reading, meaning, optional kanji, example sentence, workbook frequency |
+
+> The vocabulary book is taught **kana-first**: `reading` is the learned/quizzed form; `kanji` is optional reference and never required to answer. See §7.1 for the `VocabWord` schema.
 
 ### 1.2 The governance rule (non-negotiable)
 
@@ -329,6 +332,14 @@ Mirrors hiragana, plus the two katakana-specific units the book adds.
 | 16 | `kata-long-vowel` | Long Vowel ー | ー (chōonpu) |
 | 17 | `kata-review` | Track Review | (checkpoint — no new kana) |
 
+> **As shipped (Phase 2).** Basics (units 1–10) plus **dakuten & han-dakuten** ship today.
+> The dakuten set is split into five per-consonant-row units — **`{prefix}-g` / `-z` / `-d` /
+> `-b`** (dakuten ゛) and **`-p`** (han-dakuten ゜) — rather than the two combined units above,
+> so each matches the 5-kana cadence of the basic rows. Reviews after the basics
+> (`{prefix}-w-review` "all basics"), mid-dakuten (`{prefix}-d-review`), and a comprehensive
+> `{prefix}-p-review` "Final review" over all 71 kana. Combos (yōon), small っ/ッ, extended
+> katakana, ヴ, and the long-vowel ー remain content-gated for a future pack.
+
 ---
 
 ## 6. Five Fully-Worked Example `Kana` Entries
@@ -449,13 +460,35 @@ Real data from `/database`. `strokeCount`/`strokeOrder` shown as `null` because 
 
 ---
 
-## 7. Extensibility — Future Content Packs
+## 7. Extensibility — Content Packs
 
-The model is deliberately kana-shaped today because `/database` only holds the two kana books. New capabilities unlock **only when the owner adds the corresponding source to `/database`** (the content-gating rule from §1.2). When that happens, the same three-layer pattern — **typed dataset → units/lessons → game modes** — extends cleanly:
+New capabilities unlock **only when the owner adds the corresponding source to `/database`** (the content-gating rule from §1.2). When that happens, the same three-layer pattern — **typed dataset → decks/lessons → game modes** — extends cleanly. **Vocabulary (JLPT N5) is now shipped** (§7.1); kanji, grammar, and listening remain gated on their sources.
+
+### 7.1 Vocabulary (SHIPPED — v0.18.0)
+
+Backed by `database/Vocabulary_of_JLPT_N5.pdf`. Transcribed into `src/data/vocab.ts` (`VOCAB: VocabWord[]`, 802 words) and grouped into gated decks by `src/data/vocab-decks.ts`.
+
+```ts
+interface VocabWord {
+  id: string;          // "v-<n>" (source entry number)
+  reading: string;     // kana reading — the LEARNED/QUIZZED form (kanji not required)
+  meaning: string;     // English gloss
+  display?: string;    // original form w/ ～ marker or punctuation, when it differs
+  kanji?: string;      // OPTIONAL reference only — never an answer or a prompt
+  pos?: "i-adj" | "na-adj" | "noun" | "adv";
+  example?: { jp: string; en?: string };
+  freq?: number;       // times seen in the official N5 workbook (higher = more common)
+  note?: string;       // a short usage note from the book
+  tags?: string[];     // "suffix" | "prefix" | "greeting"
+}
+```
+
+Key rules: **kana-first** (every exercise uses `reading`; `kanji` shows only as a small reference chip), **frequency-ordered decks** (highest-`freq` words first — the biggest reading-efficiency lever), and **SRS reuse** (each word gets a `KanaProgress` box in the store's separate `vocab` map, so it schedules exactly like a kana without polluting kana stats).
+
+### 7.2 Still gated on their sources
 
 | Future pack | New source in `/database` | New typed record(s) | How it reuses this model |
 | --- | --- | --- | --- |
-| **Vocabulary** | A vocab book/list | `Vocab { id, kana, romaji, meaning, kanaIds[], partOfSpeech }` | `kanaIds[]` links each word back to `Kana`; `Unit`/`Lesson` gain a `track: "vocab"`; Word Builder scales up. |
 | **Kanji** | A kanji source | `Kanji { id, char, onyomi[], kunyomi[], meanings[], radicals[], strokeOrder, exampleWords }` | Mirrors `Kana` (mnemonic, stroke, examples); new `Track = "kanji"`; SRS/`KanaProgress` generalizes to a `SrsItem`. |
 | **Grammar** | A grammar source | `GrammarPoint { id, title, explanation, patterns[], exampleSentences[] }` | New `GameMode`s (e.g. sentence-build) added to the union; lessons reference `grammarIds[]`. |
 | **Sentences / Listening** | Dialogue + audio source | `Sentence { id, text, reading, translation, audioRef }` | Feeds Ear Training and future listening modes; recorded audio swaps in behind the existing `AudioService`. |
@@ -469,4 +502,4 @@ Design principles that keep this open:
 
 ---
 
-*Content sources: `database/tofugu-learn-hiragana-book.pdf`, `database/learn-katakana-book-by-tofugu.pdf`. All kana facts, mnemonics, and example words above are transcribed from these two books per the `/database` governance rule.*
+*Content sources: `database/tofugu-learn-hiragana-book.pdf`, `database/learn-katakana-book-by-tofugu.pdf`, `database/Vocabulary_of_JLPT_N5.pdf`. All kana facts, mnemonics, example words, and vocabulary above are transcribed from these books per the `/database` governance rule.*

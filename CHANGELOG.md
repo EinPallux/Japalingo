@@ -14,6 +14,67 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.18.0] - 2026-07-19
+
+**Phase 2 — Vocabulary (JLPT N5).** A whole new learning track: read and understand real Japanese words, not just kana. Content-gated to the newly-added `database/Vocabulary_of_JLPT_N5.pdf` (MLC Meguro Language Center).
+
+### Added
+
+- **802 JLPT N5 words**, transcribed from the source PDF into a typed dataset (`src/data/vocab.ts`): 756 core words + 46 greetings & set phrases, each with its kana reading, English meaning, optional kanji, part of speech where the book tags one, an example sentence (JP + EN), and the word's official-workbook frequency.
+- **Kana-first by design.** Every exercise quizzes the **kana reading** — kanji is shown only as a small, optional reference chip and is _never_ required to answer. You can learn all 800 words without reading a single kanji.
+- **A frequency-ordered vocabulary path** at **`/learn/vocab`.** Words are batched into decks of 12, ordered so the **most common words come first** (the biggest efficiency lever for reading real Japanese). Greetings lead the path as a motivating opener, then the core vocabulary. Decks gate the next one open as you clear them — a second progression layer, like the kana path.
+- **A gamified deck lesson player** — teach each word (kana, meaning, audio, example, optional kanji), then drill it three ways: **meaning → word**, **word → meaning**, and **listen → meaning**. Clean distractors (never sharing the answer's reading or meaning), the same pop/shake answer feedback, the in-lesson Hoshi coach, confetti results, and XP/coins/gems/streak all reused from the kana engine.
+- **SRS-backed vocab review.** Every word learned enters its own spaced-repetition pool (per-word Leitner box, due dates); the hub surfaces "N due" and a one-tap review session that brings words back just before you'd forget.
+- **Dashboard entry point** — a prominent **Vocabulary** card (with a due-count badge and words-learned progress) sits alongside the kana path. The hub shows learned / mastered / due at a glance.
+
+> New store slice: a separate `vocab` progress map + `completedVocabDecks`, kept apart from kana so counts never cross-contaminate. Old saves shallow-merge the new fields in — no reset needed.
+
+---
+
+## [0.17.0] - 2026-07-19
+
+**Phase 2 — Extended katakana & the long vowel ー.** The last of the katakana book's content, completing the full katakana system.
+
+### Added
+
+- **Extended combination katakana** — 22 foreign-sound combos from the book's "Combination Katakana" pages: **ファ/フィ/フェ/フォ** (f), **ヴァ/ヴィ/ヴェ/ヴォ** (v), **ウィ/ウェ/ウォ** (w), **ツァ/ツィ/ツェ/ツォ** (ts), plus **ティ・ディ・トゥ・ドゥ・シェ・ジェ・チェ**. Each uses the standard transliteration you read, with the book's pronunciation notes and its own example words (ファン = fan, ヴァイオリン = violin, ウィンドウ = window, モッツァレラ = mozzarella…). Taught in three new katakana units after ヴ.
+- **The long vowel ー (chōonpu)** — a concept lesson (like the small っ) teaching that the dash stretches the preceding vowel, with the book's minimal pair チーズ ("chiizu", cheese) vs チズ ("chizu", map).
+- **Kana Chart** gains an **Extended Katakana (foreign sounds)** section; **Free Drill** gains a "Foreign ァィゥェォ" row; new **Loanword Pro** badge. Lessons, games, SRS, Speed Review, and mastery all pick them up automatically. That completes the katakana book — the full set is now **127 katakana** (104 hiragana), 231 kana total.
+
+> The two concept lessons (small っ, long vowel ー) now share one `ConceptLesson` component.
+
+---
+
+## [0.16.0] - 2026-07-19
+
+**Phase 2 — Combination kana, ヴ & the small っ.** The rest of the books' "variation" content, all from `/database`.
+
+### Added
+
+- **Combination kana (yōon)** — 33 per script (66 total): きゃ/きゅ/きょ, しゃ/しゅ/しょ, … ぴゃ/ぴゅ/ぴょ, generated from the books' composition rule (an I-row kana + a small ゃ/ゅ/ょ, dropping the "i" — kya, not ki-ya). Uses Hepburn readings (sha/cha/ja) and skips the archaic ぢゃ, as every teacher does. Taught in **five new units** after the dakuten section, with a mid-checkpoint and the Final review sampling across everything.
+- **ヴ (vu)** — the one dakuten vowel (dakuten ウ), katakana-only, in its own small **"Extended: ヴ"** unit; used for foreign v-sounds (ヴァイオリン = violin).
+- **The small っ / ッ** — a dedicated **concept lesson** (the doubling rule) that teaches the pause and then has you read the book's own example words (いっか → ikka, りったい → rittai …). It sits at the end of the hiragana path; ッ works identically.
+- **Kana Chart** gains a full **Combination kana (yōon)** grid (clusters × ゃゅょ) and the ヴ chip. **Free Drill** gains a "Combos ゃゅょ" row (and a "ヴ" row on katakana). New **Combo Master** badge. Everything else — lessons, games, SRS, Speed Review crowns, mastery — picks up all of it automatically.
+
+> Still content-gated for a future pack (present in the katakana book): the extended combination katakana (ファ, ティ, ディ, トゥ, シェ/ジェ/チェ, ツァ, ウィ…) and the long-vowel dash ー.
+
+---
+
+## [0.15.0] - 2026-07-19
+
+**Phase 2 — Dakuten & han-dakuten.** The first content expansion beyond the basic 46: the "variation" kana, transcribed straight from the Tofugu books' variation pages.
+
+### Added
+
+- **50 new kana** (25 per script), all sourced from `/database` — the dakuten (゛) rows **G / Z / D / B** (voiced: か→が, さ→ざ, た→だ, は→ば) and the han-dakuten (゜) **P** row (は→ぱ), for both hiragana and katakana. Each carries the book's own conversion mnemonic (e.g. "the car か runs into the guard が rail"), including the tricky homophones — じ/ぢ (both *ji*, ぢ typed *di*) and ず/づ (both *zu*, づ typed *du*).
+- **Path placement after the basics.** Following the Tofugu books and the standard teaching order (master all 46 basics first), five new units — **G row ゛, Z row ゛, D row ゛, B row ゛, P row ゜** — sit at the end of each track, gated behind the basic path. A **"Review: all basics"** checkpoint now closes the basic section, a **"Review: dakuten G–D"** checkpoint lands mid-way, and the **Final review** now covers all 71 kana. Every existing system picks these up for free: lessons, the SRS practice pool, all five games, Free Drill (new G/Z/D/B/P rows), Speed Review crowns, and mastery tracking.
+- **Kana Chart** gains a **Dakuten ゛ & Han-dakuten ゜** section below the gojūon grid, tap-to-hear like the rest.
+- **Dakuten Master** badge for meeting every variation kana; per-track counts now read **out of 71** (46 basic + 25).
+
+> Scoped out for a future content pack (also present in the books): the niche katakana **ヴ (vu)**, the **combination kana (yōon)** きゃ/しゃ/…, and the **small っ**. The JLPT N5 vocabulary PDF is untouched per request.
+
+---
+
 ## [0.14.0] - 2026-07-18
 
 **Phase 2 — Progression & personality.** Three additions that deepen the loop: a second path progression layer, arcade high scores, and an in-lesson mascot coach.
