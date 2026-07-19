@@ -14,6 +14,24 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.20.1] - 2026-07-19
+
+**Phase 2 — Re-audit follow-up: grammar restoration wave 2 + last fixes.** A full re-audit confirmed all previous fixes; this release closes what it surfaced.
+
+### Added (content restored from `/database`)
+
+- **21 more in-chapter grammar tables** — the second (and final) wave, covering chapters 4, 8, 12–18, and 20: question-words + も, ある/いる, **position words** (上/下/中/前/後ろ…), time with/without に, くて/で connections, ている's three readings, **transitive/intransitive pairs** (開く/開ける…), the obligation register ladder, **potential formation**, volitional/つもり/予定, から/ので, the **four conditionals** + ば-formation, んです formation, こと vs の, the three giving verbs, favor patterns, the **request politeness ladder** (てくれる？→ていただけますか), そう formation (incl. よさそう/なさそう), ようだ/みたいだ, and かもしれない/でしょう/はず. The grammar book's table content is now fully transcribed — 50 tables total.
+- **Restored dropped lines**: とても/あまり, ませんか/たらどうですか, ことにする/ようになる, やすい/にくい, だけど/なのに, 見える/聞こえる, ch1's "don't insert pronouns" and ch2's "avoid romaji dependence" callouts, ch3's では-form alternatives, and the ち12 て/た learning shortcut.
+
+### Fixed
+
+- Word Builder could deal two identical answer buttons (cross-script meaning twins like あ/ア "ah!") — distractors now dedupe by meaning.
+- The Godan-endings grid now appears in chapter 12's lesson too (tables embedded in one chapter's card can be standalone steps in another).
+- Cleaned three garbled explains (g6-1, g18-1/2) and the 学生で す line-break artifact; grammar review says "sentences refreshed"; double-tap advance guards added to Ear Training and Word Builder.
+- Accessibility & polish: icon-only listen buttons have accessible names; deck/chapter progress bars expose `role="progressbar"`; Profile gained **Words learned** and **Grammar chapters** stat tiles; duplicate Settings section renamed; stale path subtitle updated; dead locked-row code removed.
+
+---
+
 ## [0.20.0] - 2026-07-19
 
 **Phase 2 — Full-app audit: bug fixes, content restoration & UX pass.** Three parallel audits (bugs/logic, UX, database coverage) drove this release.

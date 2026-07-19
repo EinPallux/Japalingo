@@ -77,6 +77,8 @@ export function ProfileView() {
   const badges = badgesFor(state);
   const seen = totalSeen(state.kana);
   const mastered = totalMastered(state.kana);
+  const wordsLearned = Object.values(state.vocab).filter((p) => p.seen > 0).length;
+  const chaptersDone = state.completedGrammarChapters.length;
 
   return (
     <>
@@ -99,6 +101,8 @@ export function ProfileView() {
           <Stat value={`${seen}/${ALL_KANA.length}`} label="Kana met" />
           <Stat value={mastered} label="Mastered" />
           <Stat value={state.completedLessons.length} label="Lessons" />
+          <Stat value={`📚 ${wordsLearned}`} label="Words learned" />
+          <Stat value={`🧩 ${chaptersDone}/24`} label="Grammar chapters" />
         </div>
 
         <section className="flex flex-col gap-3">

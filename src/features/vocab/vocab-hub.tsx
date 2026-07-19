@@ -157,16 +157,11 @@ function DeckRow({
   const learned = words.filter((w) => (vocab[w.id]?.seen ?? 0) > 0).length;
   const pct = Math.round((learned / Math.max(words.length, 1)) * 100);
 
+  // Rendered only for unlocked decks (the locked branch has its own layout).
   const inner = (
     <>
-      <span
-        aria-hidden
-        className={cn(
-          "grid size-12 shrink-0 place-items-center rounded-blob-lg text-2xl",
-          unlocked ? "bg-surface-2" : "bg-surface-2 opacity-50",
-        )}
-      >
-        {unlocked ? deck.emoji : <LockIcon className="size-5 text-muted" />}
+      <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-blob-lg bg-surface-2 text-2xl">
+        {deck.emoji}
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
@@ -180,9 +175,16 @@ function DeckRow({
         <span lang="ja" className="block truncate font-jp text-sm text-muted">
           {deck.subtitle}
         </span>
-        {unlocked && learned > 0 ? (
+        {learned > 0 ? (
           <span className="mt-1.5 block h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
-            <span className="block h-full rounded-full bg-success" style={{ width: `${pct}%` }} />
+            <span
+              role="progressbar"
+              aria-valuenow={pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              className="block h-full rounded-full bg-success"
+              style={{ width: `${pct}%` }}
+            />
           </span>
         ) : null}
       </span>

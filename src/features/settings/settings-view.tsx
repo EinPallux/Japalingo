@@ -123,7 +123,7 @@ export function SettingsView() {
           </p>
         </Section>
 
-        <Section title="Learning">
+        <Section title="Guides">
           <Link
             href="/learn/sounds"
             className="flex items-center justify-between gap-2 rounded-blob-lg border border-border bg-surface-2 px-4 py-3 transition hover:border-primary/40"

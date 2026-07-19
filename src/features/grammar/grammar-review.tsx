@@ -56,7 +56,7 @@ export function GrammarReview({ items, onExit }: { items: TaggedExample[]; onExi
           <HoshiStatic className="size-32" />
           <h1 className="font-display text-3xl font-bold text-ink">Review done! 💪</h1>
           <p className="text-muted">
-            +{earnedXp} XP · {items.length} points refreshed
+            +{earnedXp} XP · {items.length} sentences refreshed
           </p>
           <Button onClick={onExit} size="lg" className="w-full max-w-xs">
             Done

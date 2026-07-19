@@ -251,16 +251,14 @@ function ChapterRow({
   const learned = chapter.points.filter((p) => (grammar[p.id]?.seen ?? 0) > 0).length;
   const pct = Math.round((learned / Math.max(chapter.points.length, 1)) * 100);
 
+  // Rendered only for unlocked chapters (the locked branch has its own layout).
   const inner = (
     <>
       <span
         aria-hidden
-        className={cn(
-          "grid size-11 shrink-0 place-items-center rounded-blob-lg font-display text-lg font-bold",
-          unlocked ? "bg-primary-tint text-primary" : "bg-surface-2 text-muted",
-        )}
+        className="grid size-11 shrink-0 place-items-center rounded-blob-lg bg-primary-tint font-display text-lg font-bold text-primary"
       >
-        {unlocked ? chapter.num : <LockIcon className="size-5" />}
+        {chapter.num}
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
@@ -272,9 +270,16 @@ function ChapterRow({
           ) : null}
         </span>
         <span className="block truncate text-sm text-muted">{chapter.subtitle}</span>
-        {unlocked && learned > 0 ? (
+        {learned > 0 ? (
           <span className="mt-1.5 block h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
-            <span className="block h-full rounded-full bg-success" style={{ width: `${pct}%` }} />
+            <span
+              role="progressbar"
+              aria-valuenow={pct}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              className="block h-full rounded-full bg-success"
+              style={{ width: `${pct}%` }}
+            />
           </span>
         ) : null}
       </span>
