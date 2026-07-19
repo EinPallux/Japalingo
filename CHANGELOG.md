@@ -14,6 +14,23 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.18.0] - 2026-07-19
+
+**Phase 2 — Vocabulary (JLPT N5).** A whole new learning track: read and understand real Japanese words, not just kana. Content-gated to the newly-added `database/Vocabulary_of_JLPT_N5.pdf` (MLC Meguro Language Center).
+
+### Added
+
+- **802 JLPT N5 words**, transcribed from the source PDF into a typed dataset (`src/data/vocab.ts`): 756 core words + 46 greetings & set phrases, each with its kana reading, English meaning, optional kanji, part of speech where the book tags one, an example sentence (JP + EN), and the word's official-workbook frequency.
+- **Kana-first by design.** Every exercise quizzes the **kana reading** — kanji is shown only as a small, optional reference chip and is _never_ required to answer. You can learn all 800 words without reading a single kanji.
+- **A frequency-ordered vocabulary path** at **`/learn/vocab`.** Words are batched into decks of 12, ordered so the **most common words come first** (the biggest efficiency lever for reading real Japanese). Greetings lead the path as a motivating opener, then the core vocabulary. Decks gate the next one open as you clear them — a second progression layer, like the kana path.
+- **A gamified deck lesson player** — teach each word (kana, meaning, audio, example, optional kanji), then drill it three ways: **meaning → word**, **word → meaning**, and **listen → meaning**. Clean distractors (never sharing the answer's reading or meaning), the same pop/shake answer feedback, the in-lesson Hoshi coach, confetti results, and XP/coins/gems/streak all reused from the kana engine.
+- **SRS-backed vocab review.** Every word learned enters its own spaced-repetition pool (per-word Leitner box, due dates); the hub surfaces "N due" and a one-tap review session that brings words back just before you'd forget.
+- **Dashboard entry point** — a prominent **Vocabulary** card (with a due-count badge and words-learned progress) sits alongside the kana path. The hub shows learned / mastered / due at a glance.
+
+> New store slice: a separate `vocab` progress map + `completedVocabDecks`, kept apart from kana so counts never cross-contaminate. Old saves shallow-merge the new fields in — no reset needed.
+
+---
+
 ## [0.17.0] - 2026-07-19
 
 **Phase 2 — Extended katakana & the long vowel ー.** The last of the katakana book's content, completing the full katakana system.

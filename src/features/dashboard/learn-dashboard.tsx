@@ -9,6 +9,7 @@ import { Onboarding } from "@/features/onboarding/onboarding";
 import { PathView } from "@/features/path/path-view";
 import { DailyQuests } from "@/features/quests/daily-quests";
 import { ALL_KANA } from "@/data/curriculum";
+import { VOCAB } from "@/data/vocab";
 import { totalSeen } from "@/lib/achievements";
 import { isDue } from "@/lib/srs";
 import { useMounted } from "@/lib/use-mounted";
@@ -28,12 +29,21 @@ export function LearnDashboard() {
   const activeTrack = useProgress((s) => s.activeTrack);
   const setActiveTrack = useProgress((s) => s.setActiveTrack);
   const kanaProgress = useProgress((s) => s.kana);
+  const vocabProgress = useProgress((s) => s.vocab);
   const now = useNow();
   const dueCount = useMemo(
     () => ALL_KANA.filter((k) => isDue(kanaProgress[k.id], now)).length,
     [kanaProgress, now],
   );
   const seenCount = useMemo(() => totalSeen(kanaProgress), [kanaProgress]);
+  const vocabDue = useMemo(
+    () => VOCAB.filter((w) => isDue(vocabProgress[w.id], now)).length,
+    [vocabProgress, now],
+  );
+  const vocabLearned = useMemo(
+    () => VOCAB.filter((w) => (vocabProgress[w.id]?.seen ?? 0) > 0).length,
+    [vocabProgress],
+  );
 
   if (!mounted) {
     return (
@@ -94,6 +104,34 @@ export function LearnDashboard() {
           ) : null}
 
           <DailyQuests />
+
+          {/* Vocabulary — a top-level learning track alongside the kana path. */}
+          <Link
+            href="/learn/vocab"
+            className="relative flex items-center justify-between gap-3 rounded-blob-lg border border-secondary/30 bg-gradient-to-r from-secondary-tint to-accent-tint px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
+          >
+            {vocabDue > 0 ? (
+              <span className="absolute right-3 top-3 rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-white">
+                {vocabDue} due
+              </span>
+            ) : null}
+            <span className="flex items-center gap-3">
+              <span aria-hidden className="text-2xl">
+                📚
+              </span>
+              <span>
+                <span className="block font-display font-bold text-ink">Vocabulary</span>
+                <span className="text-sm text-muted">
+                  {vocabLearned > 0
+                    ? `${vocabLearned} of ${VOCAB.length} words learned`
+                    : `Learn ${VOCAB.length} JLPT N5 words — kana only`}
+                </span>
+              </span>
+            </span>
+            <span aria-hidden className="font-display text-xl text-secondary-strong">
+              ▸
+            </span>
+          </Link>
 
           {/* Quick actions — one tidy 2×2 grid, so the path stays close to the top.
               (The Shop lives in the header; all five games live in the Arcade.) */}

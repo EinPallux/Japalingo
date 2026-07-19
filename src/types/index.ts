@@ -66,6 +66,44 @@ export interface Lesson {
   kind: "lesson" | "review" | "sokuon" | "chouon";
 }
 
+/** Part of speech, where the source book tags one. */
+export type VocabPos = "i-adj" | "na-adj" | "noun" | "adv";
+
+/** An example sentence: Japanese + its English translation (when the book gives one). */
+export interface VocabExample {
+  jp: string;
+  en?: string;
+}
+
+/**
+ * One JLPT N5 vocabulary word, transcribed from `database/Vocabulary_of_JLPT_N5.pdf`.
+ * Kana-FIRST: `reading` is the form learners are quizzed on; `kanji` is optional
+ * reference and never required to answer.
+ */
+export interface VocabWord {
+  id: string; // stable slug, e.g. "v-1"
+  reading: string; // kana reading (the quizzed form), ～ marker stripped
+  meaning: string; // English gloss
+  display?: string; // original form with ～ / punctuation, when it differs from reading
+  kanji?: string; // optional kanji form (reference only)
+  pos?: VocabPos;
+  example?: VocabExample;
+  freq?: number; // times seen in the official N5 workbook (higher = more common)
+  note?: string; // a short usage note from the book
+  tags?: string[]; // "suffix" | "prefix" | "greeting"
+}
+
+/** An ordered, gated batch of vocab words — the vocabulary path's progression node. */
+export interface VocabDeck {
+  id: string;
+  title: string;
+  subtitle: string; // a peek at the words inside
+  emoji: string;
+  section: string; // grouping header, e.g. "Greetings"
+  wordIds: string[];
+  order: number;
+}
+
 /** Per-kana mastery state for the local user (SRS-lite Leitner box 0–5). */
 export interface KanaProgress {
   mastery: number; // 0..5 crowns
