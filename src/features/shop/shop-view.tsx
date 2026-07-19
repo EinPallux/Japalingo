@@ -49,8 +49,10 @@ export function ShopView() {
 
   const buy = (id: string) => {
     const res = buyItem(id);
-    if (res.ok) sfx.levelUp();
-    else sfx.wrong();
+    // coin sparkle on a purchase; a soft "can't do that" (not the harsh wrong
+    // bonk — the player didn't make a mistake) when it's denied
+    if (res.ok) sfx.coin();
+    else sfx.deny();
   };
 
   return (

@@ -144,6 +144,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 kana={ex.kana}
                 onContinue={() => {
                   if (steppedRef.current === index) return; // double-tap guard
+                  sfx.pop();
                   markSeen(ex.kana.id);
                   advance();
                 }}

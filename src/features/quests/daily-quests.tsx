@@ -89,7 +89,7 @@ export function DailyQuests() {
                   type="button"
                   onClick={() => {
                     claim(q.id, q.reward, q.metric, q.target);
-                    sfx.levelUp();
+                    sfx.coin();
                   }}
                   className="anim-claim shrink-0 rounded-full bg-accent px-3 py-1.5 font-display text-sm font-bold text-ink shadow-[0_3px_0_0_var(--jl-accent-strong)] transition hover:brightness-105 active:translate-y-0.5"
                 >

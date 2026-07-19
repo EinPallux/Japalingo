@@ -12,6 +12,7 @@ export function configureAudio(prefs: Partial<typeof audioPrefs>): void {
 }
 
 let audioCtx: AudioContext | null = null;
+let masterOut: DynamicsCompressorNode | null = null;
 
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -22,34 +23,128 @@ function getCtx(): AudioContext | null {
   return audioCtx;
 }
 
-/** Play a short sequence of tones with a gentle envelope. */
-function tones(freqs: number[], type: OscillatorType, step = 0.09, dur = 0.14) {
+/** A gentle compressor on the master bus glues layered notes together and
+ *  stops stacked oscillators from ever clipping. */
+function getOut(ac: AudioContext): AudioNode {
+  if (!masterOut) {
+    masterOut = ac.createDynamicsCompressor();
+    masterOut.threshold.value = -18;
+    masterOut.ratio.value = 6;
+    masterOut.connect(ac.destination);
+  }
+  return masterOut;
+}
+
+interface Note {
+  f: number; // frequency (Hz)
+  at?: number; // start offset (s)
+  dur?: number; // decay length (s)
+  type?: OscillatorType;
+  gain?: number;
+  slideTo?: number; // pitch-bend target — bends make sounds feel alive
+  cutoff?: number; // lowpass cutoff — low values = soft/muted, high = bright
+  shimmer?: number; // 0..1 — adds a fast-decaying octave partial (bell-like)
+}
+
+/** One layered, filtered, enveloped note — the building block of every sound. */
+function playNote(n: Note): void {
   if (!audioPrefs.sfxEnabled) return;
   const ac = getCtx();
   if (!ac) return;
   if (ac.state === "suspended") void ac.resume();
-  const now = ac.currentTime;
-  freqs.forEach((f, i) => {
-    const osc = ac.createOscillator();
-    const gain = ac.createGain();
-    const start = now + i * step;
-    osc.type = type;
-    osc.frequency.setValueAtTime(f, start);
-    gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.18, start + 0.012);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-    osc.connect(gain).connect(ac.destination);
-    osc.start(start);
-    osc.stop(start + dur + 0.02);
-  });
+  const out = getOut(ac);
+  const { f, at = 0, dur = 0.15, type = "sine", gain = 0.16, slideTo, cutoff = 6000, shimmer = 0 } = n;
+  const t = ac.currentTime + at;
+
+  const filter = ac.createBiquadFilter();
+  filter.type = "lowpass";
+  filter.frequency.value = cutoff;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(gain, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  filter.connect(g);
+  g.connect(out);
+
+  const osc = ac.createOscillator();
+  osc.type = type;
+  osc.frequency.setValueAtTime(f, t);
+  if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur * 0.7);
+  osc.connect(filter);
+  osc.start(t);
+  osc.stop(t + dur + 0.05);
+
+  if (shimmer > 0) {
+    // a quiet, quickly-fading octave partial on top — the "ding" sparkle
+    const g2 = ac.createGain();
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.exponentialRampToValueAtTime(gain * shimmer, t + 0.008);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + dur * 0.6);
+    g2.connect(out);
+    const osc2 = ac.createOscillator();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(f * 2, t);
+    osc2.connect(g2);
+    osc2.start(t);
+    osc2.stop(t + dur);
+  }
 }
 
+/**
+ * Consecutive-correct combo — each right answer in a row plays a step higher
+ * up a pentatonic scale (the Duolingo "you're on a roll" feel). A wrong answer
+ * or ~8s of silence resets to the root.
+ */
+const PENTATONIC = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
+let combo = 0;
+let lastCorrectAt = 0;
+
 export const sfx = {
-  correct: () => tones([660, 880], "sine"),
-  wrong: () => tones([200, 150], "square", 0.12, 0.2),
-  levelUp: () => tones([523, 659, 784, 1047], "triangle", 0.1, 0.16),
-  tap: () => tones([440], "sine", 0.05, 0.06),
-  complete: () => tones([523, 659, 784, 1047, 1319], "triangle", 0.11, 0.18),
+  /** Bright rising "du-DING" that climbs the scale on streaks. */
+  correct: () => {
+    const now = Date.now();
+    if (now - lastCorrectAt > 8000) combo = 0;
+    lastCorrectAt = now;
+    const semi = PENTATONIC[Math.min(combo, PENTATONIC.length - 1)]!;
+    combo += 1;
+    const base = 523.25 * 2 ** (semi / 12); // C5 root, climbing pentatonically
+    playNote({ f: base, dur: 0.09, gain: 0.13 });
+    playNote({ f: base * 1.5, at: 0.07, dur: 0.28, gain: 0.17, shimmer: 0.5 });
+  },
+  /** Soft, muted "bonk" — clearly wrong, never punishing. */
+  wrong: () => {
+    combo = 0;
+    playNote({ f: 220, slideTo: 150, dur: 0.22, type: "triangle", gain: 0.15, cutoff: 500 });
+    playNote({ f: 110, slideTo: 82, dur: 0.26, gain: 0.12, cutoff: 300 });
+  },
+  /** Reward jingle for crowns, records, and purchases. */
+  levelUp: () => {
+    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) =>
+      playNote({ f, at: i * 0.09, dur: 0.2, type: "triangle", gain: 0.12, cutoff: 4000, shimmer: i === 3 ? 0.6 : 0 }),
+    );
+  },
+  /** Subtle UI tick. */
+  tap: () => playNote({ f: 440, dur: 0.05, gain: 0.06 }),
+  /** Bubbly pop — tiles, cards, and "got it" moments. */
+  pop: () => playNote({ f: 330, slideTo: 660, dur: 0.08, gain: 0.11 }),
+  /** Two-note coin sparkle for gems, coins, and quest claims. */
+  coin: () => {
+    playNote({ f: 987.77, dur: 0.07, gain: 0.11 });
+    playNote({ f: 1318.51, at: 0.06, dur: 0.24, gain: 0.14, shimmer: 0.6 });
+  },
+  /** Quiet "can't do that" — softer than wrong, for denied actions. */
+  deny: () => playNote({ f: 196, dur: 0.11, type: "triangle", gain: 0.09, cutoff: 600 }),
+  /** End-of-session fanfare: arpeggio into a shimmering final chord. */
+  complete: () => {
+    combo = 0;
+    [523.25, 659.25, 783.99].forEach((f, i) =>
+      playNote({ f, at: i * 0.1, dur: 0.18, type: "triangle", gain: 0.11, cutoff: 4500 }),
+    );
+    // final chord with sparkle
+    [1046.5, 1318.51, 1567.98].forEach((f, i) =>
+      playNote({ f, at: 0.32, dur: 0.5, gain: 0.09 + (i === 0 ? 0.04 : 0), shimmer: 0.5 }),
+    );
+  },
 };
 
 /** Whether the Speech Synthesis API even exists. Note: this being true does NOT

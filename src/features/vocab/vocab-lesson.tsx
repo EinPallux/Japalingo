@@ -125,6 +125,7 @@ export function VocabLesson({ deck }: { deck: VocabDeck }) {
                 <Button
                   onClick={() => {
                     if (steppedRef.current === index) return; // double-tap guard
+                    sfx.pop();
                     markVocabSeen(ex.word.id);
                     advance();
                   }}

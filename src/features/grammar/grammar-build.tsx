@@ -29,11 +29,13 @@ export function GrammarBuild({
 
   const place = (i: number) => {
     if (checked !== null) return;
+    sfx.pop();
     setBank((b) => b.filter((x) => x !== i));
     setPlaced((p) => [...p, i]);
   };
   const unplace = (i: number) => {
     if (checked !== null) return;
+    sfx.tap();
     setPlaced((p) => p.filter((x) => x !== i));
     setBank((b) => [...b, i]);
   };
