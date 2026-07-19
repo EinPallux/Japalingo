@@ -7,6 +7,7 @@ import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { NotEnoughKana } from "@/components/game/not-enough-kana";
 import { Button } from "@/components/ui/button";
 import { CloseIcon, SpeakerIcon } from "@/components/ui/icons";
+import { sameReading } from "@/features/lessons/build-queue";
 import { sfx, speakJa } from "@/lib/audio";
 import { learnedKana } from "@/lib/learned";
 import { useMounted } from "@/lib/use-mounted";
@@ -31,10 +32,11 @@ function shuffle<T>(arr: T[]): T[] {
 function pickRound(pool: Kana[]): { target: Kana; options: Kana[] } {
   const target = pool[Math.floor(Math.random() * pool.length)]!;
   const options: Kana[] = [target];
-  // Only offer options that read differently from the target (and each other),
-  // so a wrong pick is never actually a correct reading of the sound played.
+  // Only offer options that read differently from the target (and each other) —
+  // including altRomaji (ヴ audibly reads "bu", so ブ must be excluded) — so a
+  // wrong pick is never actually a correct reading of the sound played.
   for (const k of shuffle(pool)) {
-    if (options.some((o) => o.romaji === k.romaji)) continue;
+    if (options.some((o) => sameReading(o, k))) continue;
     options.push(k);
     if (options.length === 4) break;
   }

@@ -2,10 +2,11 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HoshiCoach, type CoachMood } from "@/components/mascot/hoshi-coach";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { CloseIcon } from "@/components/ui/icons";
+import { getTrackLessons, getUnit } from "@/data/curriculum";
 import { sfx } from "@/lib/audio";
 import { useMounted } from "@/lib/use-mounted";
 import { useProgress } from "@/stores/progress";
@@ -36,6 +37,22 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const rate = useProgress((s) => s.rate);
   const markSeen = useProgress((s) => s.markSeen);
   const completeLesson = useProgress((s) => s.completeLesson);
+  const completedLessons = useProgress((s) => s.completedLessons);
+
+  // Enforce the path gate at the route level: a lesson is playable once it's
+  // already completed, is the track's first, or its predecessor is completed —
+  // the same rule the path UI uses. Locked URLs bounce back to the path.
+  const unlocked = useMemo(() => {
+    if (completedLessons.includes(lesson.id)) return true;
+    const track = getUnit(lesson.unitId)?.track ?? "hiragana";
+    const lessons = getTrackLessons(track);
+    const i = lessons.findIndex((l) => l.id === lesson.id);
+    const prev = lessons[i - 1];
+    return i <= 0 || (prev ? completedLessons.includes(prev.id) : false);
+  }, [lesson, completedLessons]);
+  useEffect(() => {
+    if (mounted && !unlocked) router.replace("/learn");
+  }, [mounted, unlocked, router]);
 
   // React to an answer: bump the streak (or reset it) and pick Hoshi's mood.
   const react = (correct: boolean) =>
@@ -47,7 +64,12 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   const exit = () => router.push("/learn");
 
+  // One step may only be answered once — a double-tap on Continue during the
+  // exit animation must not grade twice or silently skip the next exercise.
+  const steppedRef = useRef(-1);
   const advance = () => {
+    if (steppedRef.current === index) return;
+    steppedRef.current = index;
     if (index + 1 >= queue.length) {
       completeLesson(lesson.id);
       sfx.complete();
@@ -60,7 +82,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
   // Gate randomized exercises (review lessons shuffle their first item) behind
   // mount so the server render never mismatches the client's first render.
-  if (!mounted) {
+  if (!mounted || !unlocked) {
     return (
       <main id="main" className="grid min-h-dvh place-items-center">
         <HoshiStatic className="size-24 opacity-70" />
@@ -121,6 +143,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <MnemonicStory
                 kana={ex.kana}
                 onContinue={() => {
+                  if (steppedRef.current === index) return; // double-tap guard
                   markSeen(ex.kana.id);
                   advance();
                 }}
@@ -132,6 +155,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 direction={ex.direction}
                 options={ex.options}
                 onAnswer={(correct) => {
+                  if (steppedRef.current === index) return; // double-tap guard
                   answer(ex.kana.id, correct);
                   react(correct);
                   advance();
@@ -142,6 +166,7 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
               <KanaDrill
                 kana={ex.kana}
                 onRate={(grade) => {
+                  if (steppedRef.current === index) return; // double-tap guard
                   rate(ex.kana.id, grade);
                   react(grade !== "again");
                   advance();

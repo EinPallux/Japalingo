@@ -31,6 +31,14 @@ export function chapterExamples(chapter: GrammarChapter): TaggedExample[] {
 /** Every example across the whole book — the distractor + review pool. */
 export const ALL_GRAMMAR_EXAMPLES: TaggedExample[] = GRAMMAR_CHAPTERS.flatMap(chapterExamples);
 
+/**
+ * Points that CAN be reviewed — those with at least one example sentence to
+ * quiz on. Example-less points (pure tables/rules) are learned by reading, so
+ * they must never be counted as "due" or fed to a review session: they'd sit
+ * at mastery 0 forever and produce an uncleatable due-badge and empty queues.
+ */
+export const REVIEWABLE_POINT_IDS: Set<string> = new Set(ALL_GRAMMAR_EXAMPLES.map((t) => t.pointId));
+
 const POINT_BY_ID = new Map<string, GrammarPoint>(
   GRAMMAR_CHAPTERS.flatMap((c) => c.points.map((p) => [p.id, p] as const)),
 );

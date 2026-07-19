@@ -2,12 +2,13 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HoshiCoach, type CoachMood } from "@/components/mascot/hoshi-coach";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
 import { sfx } from "@/lib/audio";
+import { isChapterUnlocked } from "@/lib/grammar";
 import { buildGrammarQueue } from "@/lib/grammar-lesson";
 import { useMounted } from "@/lib/use-mounted";
 import { useProgress } from "@/stores/progress";
@@ -35,6 +36,14 @@ export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
   const answerGrammar = useProgress((s) => s.answerGrammar);
   const markGrammarSeen = useProgress((s) => s.markGrammarSeen);
   const completeGrammarChapter = useProgress((s) => s.completeGrammarChapter);
+  const completedChapters = useProgress((s) => s.completedGrammarChapters);
+
+  // Enforce the chapter gate at the route level — a direct URL to a locked
+  // chapter bounces back to the hub instead of playing (and completing) it.
+  const unlocked = isChapterUnlocked(chapter, completedChapters);
+  useEffect(() => {
+    if (mounted && !unlocked) router.replace("/learn/grammar");
+  }, [mounted, unlocked, router]);
 
   const react = (correct: boolean) =>
     setCoach((c) => {
@@ -45,7 +54,12 @@ export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
 
   const exit = () => router.push("/learn/grammar");
 
+  // One step may only be answered once — a double-tap on Continue during the
+  // exit animation must not grade twice or silently skip the next exercise.
+  const steppedRef = useRef(-1);
   const advance = () => {
+    if (steppedRef.current === index) return;
+    steppedRef.current = index;
     if (index + 1 >= queue.length) {
       completeGrammarChapter(chapter.id);
       sfx.complete();
@@ -57,12 +71,13 @@ export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
   };
 
   const grade = (pointId: string, correct: boolean) => {
+    if (steppedRef.current === index) return;
     answerGrammar(pointId, correct);
     react(correct);
     advance();
   };
 
-  if (!mounted) {
+  if (!mounted || !unlocked) {
     return (
       <main id="main" className="grid min-h-dvh place-items-center">
         <HoshiStatic className="size-24 opacity-70" />
@@ -117,6 +132,7 @@ export function GrammarLesson({ chapter }: { chapter: GrammarChapter }) {
                 <PointCard point={ex.point} />
                 <Button
                   onClick={() => {
+                    if (steppedRef.current === index) return; // double-tap guard
                     markGrammarSeen(ex.point.id);
                     advance();
                   }}

@@ -8,7 +8,13 @@ import { Button } from "@/components/ui/button";
 import { LockIcon } from "@/components/ui/icons";
 import { GRAMMAR_CHAPTERS, GRAMMAR_PATTERNS } from "@/data/grammar";
 import { GRAMMAR_TABLES } from "@/data/grammar-tables";
-import { ALL_GRAMMAR_EXAMPLES, grammarSections, isChapterUnlocked, type TaggedExample } from "@/lib/grammar";
+import {
+  ALL_GRAMMAR_EXAMPLES,
+  grammarSections,
+  isChapterUnlocked,
+  REVIEWABLE_POINT_IDS,
+  type TaggedExample,
+} from "@/lib/grammar";
 import { isDue } from "@/lib/srs";
 import { useMounted } from "@/lib/use-mounted";
 import { useNow } from "@/lib/use-now";
@@ -33,18 +39,22 @@ export function GrammarHub() {
     () => ALL_POINTS.filter((p) => (grammar[p.id]?.mastery ?? 0) >= 3).length,
     [grammar],
   );
+  // Only points WITH example sentences can be quizzed — example-less points
+  // (pure rules/tables) must not feed the due-count or the review session, or
+  // the badge could never be cleared and the queue could come up empty.
+  const reviewable = useMemo(() => learned.filter((p) => REVIEWABLE_POINT_IDS.has(p.id)), [learned]);
   const duePoints = useMemo(
-    () => learned.filter((p) => isDue(grammar[p.id], now)),
-    [learned, grammar, now],
+    () => reviewable.filter((p) => isDue(grammar[p.id], now)),
+    [reviewable, grammar, now],
   );
   const reviewSet = useMemo(() => {
-    const source = (duePoints.length ? duePoints : learned)
+    const source = (duePoints.length ? duePoints : reviewable)
       .slice()
       .sort((a, b) => (grammar[a.id]?.mastery ?? 0) - (grammar[b.id]?.mastery ?? 0))
       .slice(0, REVIEW_POINTS);
     const ids = new Set(source.map((p) => p.id));
     return ALL_GRAMMAR_EXAMPLES.filter((t) => ids.has(t.pointId));
-  }, [duePoints, learned, grammar]);
+  }, [duePoints, reviewable, grammar]);
 
   const sections = useMemo(() => grammarSections(), []);
 
@@ -86,7 +96,7 @@ export function GrammarHub() {
             <Stat value={duePoints.length} label="due now" tone={duePoints.length ? "secondary" : "muted"} />
           </div>
 
-          {learned.length > 0 ? (
+          {reviewable.length > 0 ? (
             <Button
               onClick={() => setReviewItems(reviewSet)}
               size="lg"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
@@ -21,7 +21,11 @@ export function PracticeSession({ kana, onExit }: { kana: Kana[]; onExit: () => 
   const answer = useProgress((s) => s.answer);
   const rate = useProgress((s) => s.rate);
 
+  // double-tap guard: one grade per exercise, even mid transition
+  const steppedRef = useRef(-1);
   const advance = () => {
+    if (steppedRef.current === index) return;
+    steppedRef.current = index;
     if (index + 1 >= queue.length) {
       sfx.complete();
       setEarnedXp(useProgress.getState().xp - xpBefore);
@@ -84,6 +88,7 @@ export function PracticeSession({ kana, onExit }: { kana: Kana[]; onExit: () => 
             direction={ex.direction}
             options={ex.options}
             onAnswer={(correct) => {
+              if (steppedRef.current === index) return; // double-tap guard
               answer(ex.kana.id, correct);
               advance();
             }}
@@ -94,6 +99,7 @@ export function PracticeSession({ kana, onExit }: { kana: Kana[]; onExit: () => 
             key={index}
             kana={ex.kana}
             onRate={(grade) => {
+              if (steppedRef.current === index) return; // double-tap guard
               rate(ex.kana.id, grade);
               advance();
             }}

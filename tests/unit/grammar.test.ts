@@ -80,6 +80,20 @@ describe("grammar path", () => {
   });
 });
 
+describe("reviewable points (empty-review-screen regression)", () => {
+  it("marks exactly the points with examples as reviewable", async () => {
+    const { REVIEWABLE_POINT_IDS } = await import("@/lib/grammar");
+    for (const c of GRAMMAR_CHAPTERS) {
+      for (const p of c.points) {
+        expect(REVIEWABLE_POINT_IDS.has(p.id)).toBe(p.examples.length > 0);
+      }
+    }
+    // the known example-less rules are excluded (they'd make empty queues)
+    expect(REVIEWABLE_POINT_IDS.has("g1-4")).toBe(false);
+    expect(REVIEWABLE_POINT_IDS.has("g1-1")).toBe(true);
+  });
+});
+
 describe("conjugation reference tables", () => {
   it("every table is rectangular — each row matches its column count", () => {
     expect(GRAMMAR_TABLES.length).toBeGreaterThanOrEqual(8);

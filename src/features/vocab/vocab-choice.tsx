@@ -8,6 +8,7 @@ import { SpeakerIcon } from "@/components/ui/icons";
 import { speakableReading } from "@/data/vocab-decks";
 import { sfx, speakJa } from "@/lib/audio";
 import { XP_PER_CORRECT } from "@/lib/srs";
+import { useSpeechStatus } from "@/lib/use-speech";
 import { cn } from "@/lib/utils";
 import type { VocabWord } from "@/types";
 import { KanjiChip } from "./word-card";
@@ -36,6 +37,10 @@ export function VocabChoice({
   const optionsAreKana = kind === "m2w";
   const [picked, setPicked] = useState<string | null>(null);
   const correct = picked === answer;
+  // With no Japanese voice installed, a listening prompt would be pure silence —
+  // degrade it to a readable word prompt instead of forcing a blind guess.
+  const speech = useSpeechStatus();
+  const effectiveKind: Kind = kind === "listen" && speech === "unavailable" ? "w2m" : kind;
 
   // Listening exercises play the word once when they appear.
   useEffect(() => {
@@ -52,7 +57,7 @@ export function VocabChoice({
 
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-      <p className="text-sm font-bold uppercase tracking-wide text-muted">{PROMPT[kind]}</p>
+      <p className="text-sm font-bold uppercase tracking-wide text-muted">{PROMPT[effectiveKind]}</p>
 
       {/* Prompt */}
       <motion.div
@@ -64,7 +69,7 @@ export function VocabChoice({
           picked && !correct && "anim-shake",
         )}
       >
-        {kind === "listen" ? (
+        {effectiveKind === "listen" ? (
           <button
             type="button"
             aria-label="Play the word again"
@@ -73,7 +78,7 @@ export function VocabChoice({
           >
             <SpeakerIcon className="size-9" />
           </button>
-        ) : kind === "w2m" ? (
+        ) : effectiveKind === "w2m" ? (
           <>
             <span lang="ja" className="font-jp text-5xl font-bold text-ink">
               {word.reading}

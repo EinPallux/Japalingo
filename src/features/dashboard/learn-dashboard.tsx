@@ -11,6 +11,7 @@ import { DailyQuests } from "@/features/quests/daily-quests";
 import { ALL_KANA } from "@/data/curriculum";
 import { VOCAB } from "@/data/vocab";
 import { GRAMMAR_CHAPTERS } from "@/data/grammar";
+import { REVIEWABLE_POINT_IDS } from "@/lib/grammar";
 import { totalSeen } from "@/lib/achievements";
 import { isDue } from "@/lib/srs";
 import { useMounted } from "@/lib/use-mounted";
@@ -50,7 +51,11 @@ export function LearnDashboard() {
   const grammarChaptersDone = completedGrammar.length;
   const grammarDue = useMemo(
     () =>
-      GRAMMAR_CHAPTERS.flatMap((c) => c.points).filter((p) => isDue(grammarProgress[p.id], now)).length,
+      GRAMMAR_CHAPTERS.flatMap((c) => c.points).filter(
+        // only quizzable points count as due — example-less rules can't be
+        // reviewed, so counting them would show a badge that never clears
+        (p) => REVIEWABLE_POINT_IDS.has(p.id) && isDue(grammarProgress[p.id], now),
+      ).length,
     [grammarProgress, now],
   );
 

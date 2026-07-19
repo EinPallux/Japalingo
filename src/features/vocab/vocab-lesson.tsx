@@ -2,12 +2,12 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HoshiCoach, type CoachMood } from "@/components/mascot/hoshi-coach";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { Button } from "@/components/ui/button";
 import { CloseIcon } from "@/components/ui/icons";
-import { deckWords } from "@/data/vocab-decks";
+import { deckWords, isVocabDeckUnlocked } from "@/data/vocab-decks";
 import { sfx } from "@/lib/audio";
 import { useMounted } from "@/lib/use-mounted";
 import { buildVocabQueue } from "@/lib/vocab-queue";
@@ -35,6 +35,14 @@ export function VocabLesson({ deck }: { deck: VocabDeck }) {
   const answerVocab = useProgress((s) => s.answerVocab);
   const markVocabSeen = useProgress((s) => s.markVocabSeen);
   const completeVocabDeck = useProgress((s) => s.completeVocabDeck);
+  const completedDecks = useProgress((s) => s.completedVocabDecks);
+
+  // Enforce the deck gate at the route level too — a direct URL to a locked
+  // deck must bounce back to the hub, not play (and complete) the deck.
+  const unlocked = isVocabDeckUnlocked(deck, completedDecks);
+  useEffect(() => {
+    if (mounted && !unlocked) router.replace("/learn/vocab");
+  }, [mounted, unlocked, router]);
 
   const react = (correct: boolean) =>
     setCoach((c) => {
@@ -45,7 +53,12 @@ export function VocabLesson({ deck }: { deck: VocabDeck }) {
 
   const exit = () => router.push("/learn/vocab");
 
+  // One step may only be answered once — a double-tap on Continue during the
+  // exit animation must not grade twice or silently skip the next exercise.
+  const steppedRef = useRef(-1);
   const advance = () => {
+    if (steppedRef.current === index) return;
+    steppedRef.current = index;
     if (index + 1 >= queue.length) {
       completeVocabDeck(deck.id);
       sfx.complete();
@@ -56,7 +69,7 @@ export function VocabLesson({ deck }: { deck: VocabDeck }) {
     }
   };
 
-  if (!mounted) {
+  if (!mounted || !unlocked) {
     return (
       <main id="main" className="grid min-h-dvh place-items-center">
         <HoshiStatic className="size-24 opacity-70" />
@@ -111,6 +124,7 @@ export function VocabLesson({ deck }: { deck: VocabDeck }) {
                 <WordCard word={ex.word} />
                 <Button
                   onClick={() => {
+                    if (steppedRef.current === index) return; // double-tap guard
                     markVocabSeen(ex.word.id);
                     advance();
                   }}
@@ -127,6 +141,7 @@ export function VocabLesson({ deck }: { deck: VocabDeck }) {
                 kind={ex.kind}
                 options={ex.options}
                 onAnswer={(correct) => {
+                  if (steppedRef.current === index) return; // double-tap guard
                   answerVocab(ex.word.id, correct);
                   react(correct);
                   advance();

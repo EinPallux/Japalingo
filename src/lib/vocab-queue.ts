@@ -24,9 +24,24 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/** Distinct enough to be a fair distractor: neither the same reading nor gloss. */
+/**
+ * All spoken/written variants of a word's reading, normalized: a handful of
+ * entries list variants ("はし/おはし") or optional particles ("あと(で)").
+ * Comparing variant SETS (not raw strings) is what keeps はし (bridge) from
+ * offering はし/おはし (chopsticks) as a distractor — same kana, both correct.
+ */
+function readingVariants(w: VocabWord): string[] {
+  return w.reading
+    .split("/")
+    .map((v) => v.replace(/[（(][^)）]*[)）]/g, "").replace(/[。？！…\s]/g, "").trim())
+    .filter(Boolean);
+}
+
+/** Distinct enough to be a fair distractor: no shared reading variant, different gloss. */
 function distinct(a: VocabWord, b: VocabWord): boolean {
-  return a.reading !== b.reading && a.meaning !== b.meaning;
+  if (a.meaning === b.meaning) return false;
+  const bVariants = new Set(readingVariants(b));
+  return !readingVariants(a).some((v) => bVariants.has(v));
 }
 
 /**
