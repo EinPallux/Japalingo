@@ -6,7 +6,10 @@
 import { trackKana } from "@/data/curriculum";
 import type { Kana, KanaProgress, KanaRow, Track } from "@/types";
 
-const ROW_ORDER: KanaRow[] = ["a", "k", "s", "t", "n", "h", "m", "y", "r", "w", "g", "z", "d", "b", "p"];
+const ROW_ORDER: KanaRow[] = [
+  "a", "k", "s", "t", "n", "h", "m", "y", "r", "w",
+  "g", "z", "d", "b", "p", "yoon", "v",
+];
 
 const ROW_TITLE: Record<KanaRow, string> = {
   a: "Vowels",
@@ -24,6 +27,8 @@ const ROW_TITLE: Record<KanaRow, string> = {
   d: "D row ゛",
   b: "B row ゛",
   p: "P row ゜",
+  yoon: "Combos ゃゅょ",
+  v: "ヴ (vu)",
 };
 
 /** Cap a single drill session so a big selection stays focused. */
@@ -44,10 +49,11 @@ function mastery(progress: Record<string, KanaProgress>, id: string): number {
   return progress[id]?.mastery ?? 0;
 }
 
-/** The track's kana grouped into rows, each with a mastery summary. */
+/** The track's kana grouped into rows, each with a mastery summary. Rows with no
+ *  kana for this track (e.g. ヴ in hiragana) are skipped. */
 export function trackRows(track: Track, progress: Record<string, KanaProgress>): RowInfo[] {
   const kana = trackKana(track);
-  return ROW_ORDER.map((row) => {
+  return ROW_ORDER.filter((row) => kana.some((k) => k.row === row)).map((row) => {
     const rowKana = kana.filter((k) => k.row === row);
     const total = rowKana.reduce((sum, k) => sum + mastery(progress, k.id), 0);
     return {

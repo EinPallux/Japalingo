@@ -1,4 +1,5 @@
 import type { Kana } from "@/types";
+import { buildYoon } from "./yoon";
 
 /**
  * Hiragana, transcribed from `database/tofugu-learn-hiragana-book.pdf`: the 46
@@ -7,9 +8,10 @@ import type { Kana } from "@/types";
  * and mnemonics are condensed from that book's "HOW TO PRONOUNCE" / "HOW TO
  * REMEMBER" (and per-row dakuten hints) sections; example words come from its
  * "LET'S PRACTICE READING!" pages. Source of truth: /database — do not add kana
- * facts from elsewhere.
+ * facts from elsewhere. The combination kana (yōon, き→きゃ) are generated from
+ * the same book's composition rule — see ./yoon.ts.
  */
-export const HIRAGANA: Kana[] = [
+const BASE_HIRAGANA: Kana[] = [
   // vowels
   { id: "hira-a", char: "あ", romaji: "a", track: "hiragana", row: "a", vowel: "a",
     pronunciation: "“ah!” — like the a in “father.”",
@@ -267,3 +269,6 @@ export const HIRAGANA: Kana[] = [
     pronunciation: "“po” — ほ with han-dakuten ゜.",
     mnemonic: "ほ + ゜ → ぽ. H→P with han-dakuten." },
 ];
+
+/** Basic + dakuten + the 33 generated yōon combination kana. */
+export const HIRAGANA: Kana[] = [...BASE_HIRAGANA, ...buildYoon("hiragana", "hira")];

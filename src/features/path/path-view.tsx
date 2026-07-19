@@ -57,7 +57,9 @@ export function PathView({ track }: { track: Track }) {
                     {unit.subtitle}
                   </p>
                 </div>
-                <UnitCrown unitId={unit.id} complete={unitComplete} crowned={unitCrowned} />
+                {unit.kanaIds.length > 0 ? (
+                  <UnitCrown unitId={unit.id} complete={unitComplete} crowned={unitCrowned} />
+                ) : null}
               </div>
             ) : null}
 

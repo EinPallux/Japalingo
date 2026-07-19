@@ -1,4 +1,5 @@
 import type { Kana } from "@/types";
+import { buildYoon } from "./yoon";
 
 /**
  * Katakana, transcribed from `database/learn-katakana-book-by-tofugu.pdf`: the 46
@@ -7,9 +8,10 @@ import type { Kana } from "@/types";
  * katakana has the SAME sound as its hiragana counterpart (the book assumes
  * hiragana is known), so the pronunciation notes reference that; mnemonics are
  * condensed from the book's "HOW TO REMEMBER" sections. Source of truth:
- * /database. (The niche ヴ "vu" belongs with combination katakana — not included.)
+ * /database. The combination kana (yōon, キ→キャ) are generated from the same
+ * composition rule — see ./yoon.ts — and ヴ (vu, dakuten ウ) is appended below.
  */
-export const KATAKANA: Kana[] = [
+const BASE_KATAKANA: Kana[] = [
   { id: "kata-a", char: "ア", romaji: "a", track: "katakana", row: "a", vowel: "a",
     pronunciation: "“ah!” — same sound as あ.",
     mnemonic: "ア has a deformed capital letter A in it — turn your head sideways and connect the lines." },
@@ -247,4 +249,13 @@ export const KATAKANA: Kana[] = [
   { id: "kata-po", char: "ポ", romaji: "po", track: "katakana", row: "p", vowel: "o",
     pronunciation: "“po” — ホ with han-dakuten ゜.",
     mnemonic: "ホ + ゜ → ポ. H→P with han-dakuten." },
+
+  // ヴ — the one dakuten vowel (dakuten ウ), for transcribing v-sounds. From the
+  // book's variation page: "you can dakuten ウ, turning it into ヴ" (vu).
+  { id: "kata-vu", char: "ヴ", romaji: "vu", altRomaji: ["bu"], track: "katakana", row: "v", vowel: "u",
+    pronunciation: "“vu” — ウ + dakuten ゛. Used for foreign v-sounds; often said like “bu”.",
+    mnemonic: "ウ + ゛(dakuten) → ヴ. The only vowel that takes dakuten — it makes the “vu” sound for loanwords (ヴァイオリン = violin)." },
 ];
+
+/** Basic + dakuten + the 33 generated yōon + the ヴ (vu) extended kana. */
+export const KATAKANA: Kana[] = [...BASE_KATAKANA, ...buildYoon("katakana", "kata")];

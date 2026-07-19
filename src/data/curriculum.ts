@@ -37,6 +37,12 @@ const GROUPS = [
   { id: "d", title: "D row ゛", learnTitle: "Dakuten: D row (た→だ)", suffixes: ["da", "di", "du", "de", "do"] },
   { id: "b", title: "B row ゛", learnTitle: "Dakuten: B row (は→ば)", suffixes: ["ba", "bi", "bu", "be", "bo"] },
   { id: "p", title: "P row ゜", learnTitle: "Han-dakuten: P row (は→ぱ)", suffixes: ["pa", "pi", "pu", "pe", "po"] },
+  // Combination kana (yōon) — an I-row kana + a small ゃ/ゅ/ょ.
+  { id: "yks", title: "Combos: K・S", learnTitle: "Combos: きゃ・しゃ", suffixes: ["kya", "kyu", "kyo", "sha", "shu", "sho"] },
+  { id: "ytn", title: "Combos: T・N", learnTitle: "Combos: ちゃ・にゃ", suffixes: ["cha", "chu", "cho", "nya", "nyu", "nyo"] },
+  { id: "yhm", title: "Combos: H・M", learnTitle: "Combos: ひゃ・みゃ", suffixes: ["hya", "hyu", "hyo", "mya", "myu", "myo"] },
+  { id: "yrg", title: "Combos: R・G", learnTitle: "Combos: りゃ・ぎゃ", suffixes: ["rya", "ryu", "ryo", "gya", "gyu", "gyo"] },
+  { id: "yjbp", title: "Combos: J・B・P", learnTitle: "Combos: じゃ・びゃ・ぴゃ", suffixes: ["ja", "ju", "jo", "bya", "byu", "byo", "pya", "pyu", "pyo"] },
 ] as const;
 
 const BASIC_GROUP_IDS = ["vowels", "k", "s", "t", "n", "h", "m", "y", "r", "w"];
@@ -48,7 +54,9 @@ const REVIEW_AFTER: Record<string, { title: string; groups: string[] | "sample" 
   r: { title: "Review: M–R", groups: ["m", "y", "r"] },
   w: { title: "Review: all basics", groups: BASIC_GROUP_IDS },
   d: { title: "Review: dakuten G–D", groups: ["g", "z", "d"] },
-  p: { title: "Final review", groups: "sample" },
+  p: { title: "Review: all dakuten", groups: ["g", "z", "d", "b", "p"] },
+  yhm: { title: "Review: combos so far", groups: ["yks", "ytn", "yhm"] },
+  yjbp: { title: "Final review", groups: "sample" },
 };
 
 function suffixesForGroups(groupIds: string[]): string[] {
@@ -86,11 +94,12 @@ function buildTrack(track: Track, prefix: string): { units: Unit[]; lessons: Les
 
     const rev = REVIEW_AFTER[g.id];
     if (rev) {
-      // The final checkpoint reviews the whole script; sectional reviews cover
+      // The final checkpoint samples across the whole script (one per group +
+      // the trickier kana) to stay a digestible length; sectional reviews cover
       // just the groups since the previous checkpoint.
       const suffixes =
         rev.groups === "sample"
-          ? GROUPS.flatMap((gg) => gg.suffixes)
+          ? [...GROUPS.map((gg) => gg.suffixes[0]!), "shi", "tsu", "fu", "ji", "kya", "sha", "cha"]
           : suffixesForGroups(rev.groups);
       lessons.push({
         id: `${unitId}-review`,
@@ -103,6 +112,43 @@ function buildTrack(track: Track, prefix: string): { units: Unit[]; lessons: Les
       });
     }
   });
+
+  // Track-specific extras, taught last:
+  //  • katakana adds ヴ (vu) — the one dakuten vowel, for foreign v-sounds.
+  //  • hiragana adds the small っ concept lesson (the doubling rule).
+  if (track === "katakana") {
+    const unitId = `${prefix}-v`;
+    units.push({
+      id: unitId,
+      track,
+      title: "Extended: ヴ",
+      subtitle: getKana(`${prefix}-vu`)?.char ?? "",
+      kanaIds: [`${prefix}-vu`],
+      order: units.length + 1,
+    });
+    lessons.push({
+      id: `${unitId}-learn`,
+      unitId,
+      title: "The ヴ (vu) sound",
+      newKanaIds: [`${prefix}-vu`],
+      reviewKanaIds: [`${prefix}-po`, `${prefix}-bu`],
+      order: (order += 1),
+      kind: "lesson",
+    });
+  }
+  if (track === "hiragana") {
+    const unitId = `${prefix}-sokuon`;
+    units.push({ id: unitId, track, title: "Small っ", subtitle: "っ", kanaIds: [], order: units.length + 1 });
+    lessons.push({
+      id: `${unitId}-learn`,
+      unitId,
+      title: "The small っ (double it!)",
+      newKanaIds: [],
+      reviewKanaIds: [],
+      order: (order += 1),
+      kind: "sokuon",
+    });
+  }
 
   return { units, lessons };
 }

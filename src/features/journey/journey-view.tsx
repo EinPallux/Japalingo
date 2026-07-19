@@ -82,7 +82,7 @@ export function JourneyView() {
           <Bar label="Hiragana" sample="あ" value={stats.hira.seen} max={trackKana("hiragana").length} />
           <Bar label="Katakana" sample="ア" value={stats.kata.seen} max={trackKana("katakana").length} />
           <p className="text-center text-xs text-muted">
-            Characters met, out of {trackKana("hiragana").length} in each script (46 basic + dakuten).
+            Characters met — basics, dakuten &amp; combination kana.
           </p>
         </section>
 

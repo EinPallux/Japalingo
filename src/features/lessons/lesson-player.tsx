@@ -15,6 +15,7 @@ import { KanaDrill } from "./modes/kana-drill";
 import { MnemonicStory } from "./modes/mnemonic-story";
 import { QuickMatch } from "./modes/quick-match";
 import { LessonResults } from "./results";
+import { SokuonLesson } from "./sokuon-lesson";
 
 export function LessonPlayer({ lesson }: { lesson: Lesson }) {
   const router = useRouter();
@@ -65,6 +66,11 @@ export function LessonPlayer({ lesson }: { lesson: Lesson }) {
         <HoshiStatic className="size-24 opacity-70" />
       </main>
     );
+  }
+
+  // The small っ is a concept, not a kana — it has its own self-contained lesson.
+  if (lesson.kind === "sokuon") {
+    return <SokuonLesson lesson={lesson} onExit={exit} />;
   }
 
   if (done) {

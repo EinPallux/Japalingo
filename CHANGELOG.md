@@ -14,6 +14,21 @@ Continuing **Phase 2**: full app-UI i18n (EN/DE) and the Dexie/IndexedDB persist
 
 ---
 
+## [0.16.0] - 2026-07-19
+
+**Phase 2 — Combination kana, ヴ & the small っ.** The rest of the books' "variation" content, all from `/database`.
+
+### Added
+
+- **Combination kana (yōon)** — 33 per script (66 total): きゃ/きゅ/きょ, しゃ/しゅ/しょ, … ぴゃ/ぴゅ/ぴょ, generated from the books' composition rule (an I-row kana + a small ゃ/ゅ/ょ, dropping the "i" — kya, not ki-ya). Uses Hepburn readings (sha/cha/ja) and skips the archaic ぢゃ, as every teacher does. Taught in **five new units** after the dakuten section, with a mid-checkpoint and the Final review sampling across everything.
+- **ヴ (vu)** — the one dakuten vowel (dakuten ウ), katakana-only, in its own small **"Extended: ヴ"** unit; used for foreign v-sounds (ヴァイオリン = violin).
+- **The small っ / ッ** — a dedicated **concept lesson** (the doubling rule) that teaches the pause and then has you read the book's own example words (いっか → ikka, りったい → rittai …). It sits at the end of the hiragana path; ッ works identically.
+- **Kana Chart** gains a full **Combination kana (yōon)** grid (clusters × ゃゅょ) and the ヴ chip. **Free Drill** gains a "Combos ゃゅょ" row (and a "ヴ" row on katakana). New **Combo Master** badge. Everything else — lessons, games, SRS, Speed Review crowns, mastery — picks up all of it automatically.
+
+> Still content-gated for a future pack (present in the katakana book): the extended combination katakana (ファ, ティ, ディ, トゥ, シェ/ジェ/チェ, ツァ, ウィ…) and the long-vowel dash ー.
+
+---
+
 ## [0.15.0] - 2026-07-19
 
 **Phase 2 — Dakuten & han-dakuten.** The first content expansion beyond the basic 46: the "variation" kana, transcribed straight from the Tofugu books' variation pages.

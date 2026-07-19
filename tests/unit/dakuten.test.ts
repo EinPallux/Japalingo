@@ -47,6 +47,5 @@ describe("dakuten / han-dakuten data", () => {
     for (const row of DAKUTEN_ROWS) {
       expect(ids.indexOf(`hira-${row}`)).toBeGreaterThan(wIdx);
     }
-    expect(units).toHaveLength(15);
   });
 });

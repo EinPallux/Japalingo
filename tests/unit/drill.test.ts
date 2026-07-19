@@ -4,14 +4,20 @@ import { emptyProgress } from "@/lib/srs";
 import type { KanaProgress } from "@/types";
 
 describe("free drill", () => {
-  it("groups a track into 15 rows covering all 71 kana (basic + dakuten)", () => {
-    const rows = trackRows("hiragana", {});
-    expect(rows).toHaveLength(15);
-    expect(rows.reduce((n, r) => n + r.kana.length, 0)).toBe(71);
-    expect(rows[0]!.title).toBe("Vowels");
-    expect(rows[0]!.kana.every((k) => k.track === "hiragana")).toBe(true);
-    // the last three rows are the dakuten/han-dakuten rows
-    expect(rows.map((r) => r.row).slice(-5)).toEqual(["g", "z", "d", "b", "p"]);
+  it("groups a track into its rows, covering every kana with no empty rows", () => {
+    const hira = trackRows("hiragana", {});
+    // basics(10) + dakuten(5) + yoon(1) = 16; hiragana has no ヴ row.
+    expect(hira).toHaveLength(16);
+    expect(hira.reduce((n, r) => n + r.kana.length, 0)).toBe(104);
+    expect(hira[0]!.title).toBe("Vowels");
+    expect(hira.map((r) => r.row)).toContain("yoon");
+    expect(hira.map((r) => r.row)).not.toContain("v"); // ヴ is katakana-only
+
+    const kata = trackRows("katakana", {});
+    expect(kata.reduce((n, r) => n + r.kana.length, 0)).toBe(105);
+    expect(kata.map((r) => r.row)).toContain("v"); // ヴ row present here
+    // no row is ever empty for the track it's shown in
+    expect(kata.every((r) => r.kana.length > 0)).toBe(true);
   });
 
   it("selects kana for the chosen rows only", () => {

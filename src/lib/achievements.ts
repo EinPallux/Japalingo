@@ -35,12 +35,14 @@ export interface ProgressSnapshot {
 const DAKUTEN_ROWS = new Set(["g", "z", "d", "b", "p"]);
 /** Total dakuten/han-dakuten kana across both tracks (for the completionist badge). */
 export const DAKUTEN_TOTAL = ALL_KANA.filter((k) => DAKUTEN_ROWS.has(k.row)).length;
+/** Total combination kana (yōon) across both tracks. */
+export const YOON_TOTAL = ALL_KANA.filter((k) => k.row === "yoon").length;
 
 export function trackSeen(kana: Record<string, KanaProgress>, track: Track): number {
   return ALL_KANA.filter((k) => k.track === track && (kana[k.id]?.seen ?? 0) > 0).length;
 }
-function dakutenSeen(kana: Record<string, KanaProgress>): number {
-  return ALL_KANA.filter((k) => DAKUTEN_ROWS.has(k.row) && (kana[k.id]?.seen ?? 0) > 0).length;
+function rowsSeen(kana: Record<string, KanaProgress>, match: (row: string) => boolean): number {
+  return ALL_KANA.filter((k) => match(k.row) && (kana[k.id]?.seen ?? 0) > 0).length;
 }
 export function totalSeen(kana: Record<string, KanaProgress>): number {
   return ALL_KANA.filter((k) => (kana[k.id]?.seen ?? 0) > 0).length;
@@ -60,7 +62,8 @@ export function badgesFor(s: ProgressSnapshot): Badge[] {
     { id: "rising", name: "Rising Star", desc: "Earn 500 XP", emoji: "⭐", earned: s.xp >= 500 },
     { id: "hira", name: "Hiragana Hero", desc: "Meet all 46 basic hiragana", emoji: "あ", earned: trackSeen(s.kana, "hiragana") >= 46 },
     { id: "kata", name: "Katakana Champ", desc: "Meet all 46 basic katakana", emoji: "ア", earned: trackSeen(s.kana, "katakana") >= 46 },
-    { id: "dakuten", name: "Dakuten Master", desc: "Meet every dakuten & han-dakuten kana", emoji: "゛", earned: dakutenSeen(s.kana) >= DAKUTEN_TOTAL },
+    { id: "dakuten", name: "Dakuten Master", desc: "Meet every dakuten & han-dakuten kana", emoji: "゛", earned: rowsSeen(s.kana, (r) => DAKUTEN_ROWS.has(r)) >= DAKUTEN_TOTAL },
+    { id: "yoon", name: "Combo Master", desc: "Meet every combination kana (yōon)", emoji: "ゃ", earned: rowsSeen(s.kana, (r) => r === "yoon") >= YOON_TOTAL },
     { id: "master", name: "Kana Master", desc: "Fully master 25 kana", emoji: "👑", earned: totalMastered(s.kana) >= 25 },
   ];
 }

@@ -1,6 +1,9 @@
 export type Track = "hiragana" | "katakana";
 export type Vowel = "a" | "i" | "u" | "e" | "o" | null;
-/** Gojūon consonant rows, plus the dakuten (g/z/d/b) and han-dakuten (p) rows. */
+/**
+ * Gojūon consonant rows, the dakuten (g/z/d/b) and han-dakuten (p) rows, plus
+ * "yoon" (combination kana like きゃ) and "v" (the katakana ヴ).
+ */
 export type KanaRow =
   | "a"
   | "k"
@@ -16,7 +19,9 @@ export type KanaRow =
   | "z"
   | "d"
   | "b"
-  | "p";
+  | "p"
+  | "yoon"
+  | "v";
 
 export interface ExampleWord {
   kana: string;
@@ -56,7 +61,8 @@ export interface Lesson {
   newKanaIds: string[];
   reviewKanaIds: string[];
   order: number;
-  kind: "lesson" | "review";
+  /** "sokuon" is a self-contained concept lesson (the small っ doubling rule). */
+  kind: "lesson" | "review" | "sokuon";
 }
 
 /** Per-kana mastery state for the local user (SRS-lite Leitner box 0–5). */

@@ -31,7 +31,17 @@ const ROW_LABEL: Record<KanaRow, string> = {
   d: "d",
   b: "b",
   p: "p",
+  yoon: "yō",
+  v: "v",
 };
+
+// Yōon are a separate grid: consonant clusters × the three small-y columns.
+const YOON_CLUSTERS = ["ky", "sh", "ch", "ny", "hy", "my", "ry", "gy", "j", "by", "py"];
+const YOON_COLS: { vowel: Exclude<Vowel, null>; head: string }[] = [
+  { vowel: "a", head: "ゃ" },
+  { vowel: "u", head: "ゅ" },
+  { vowel: "o", head: "ょ" },
+];
 
 const TRACKS: { id: Track; label: string; sample: string }[] = [
   { id: "hiragana", label: "Hiragana", sample: "あ" },
@@ -43,6 +53,63 @@ function tint(mastery: number): string {
   if (mastery >= 3) return "border-primary bg-primary text-white";
   if (mastery >= 1) return "border-primary/30 bg-primary-tint text-primary";
   return "border-border bg-surface text-ink";
+}
+
+function Divider({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mt-1 flex items-center gap-2">
+      <span className="h-px flex-1 bg-border" />
+      <span className="text-center text-xs font-bold uppercase tracking-wide text-muted">{children}</span>
+      <span className="h-px flex-1 bg-border" />
+    </div>
+  );
+}
+
+/** The yōon grid: consonant clusters (rows) × small ゃ/ゅ/ょ (columns). */
+function YoonGrid({
+  get,
+  masteryOf,
+  onSelect,
+}: {
+  get: (cluster: string, v: Exclude<Vowel, null>) => Kana | undefined;
+  masteryOf: (k: Kana) => number;
+  onSelect: (k: Kana) => void;
+}) {
+  return (
+    <div className="grid grid-cols-[1.4rem_repeat(3,1fr)] gap-1.5">
+      <span aria-hidden />
+      {YOON_COLS.map((c) => (
+        <span key={c.vowel} lang="ja" className="text-center font-jp text-xs font-bold text-muted">
+          {c.head}
+        </span>
+      ))}
+      {YOON_CLUSTERS.map((cluster) => (
+        <Fragment key={cluster}>
+          <span className="grid place-items-center text-[10px] font-bold text-muted">{cluster}</span>
+          {YOON_COLS.map((c) => {
+            const k = get(cluster, c.vowel);
+            if (!k) return <span key={c.vowel} aria-hidden className="aspect-square rounded-blob-sm bg-surface-2/30" />;
+            return (
+              <button
+                key={c.vowel}
+                type="button"
+                onClick={() => onSelect(k)}
+                aria-label={`${k.romaji}, mastery ${masteryOf(k)} of 5`}
+                className={cn(
+                  "grid aspect-square place-items-center rounded-blob-sm border font-jp text-base font-bold transition hover:brightness-105",
+                  tint(masteryOf(k)),
+                )}
+              >
+                <span lang="ja" aria-hidden>
+                  {k.char}
+                </span>
+              </button>
+            );
+          })}
+        </Fragment>
+      ))}
+    </div>
+  );
 }
 
 /** One 5-column gojūon grid section (rows × vowels), tinted by mastery. */
@@ -107,7 +174,16 @@ export function ChartView() {
     trackKana(track).forEach((k) => m.set(`${k.row}-${k.vowel}`, k));
     return m;
   }, [track]);
+  // Yōon key off their consonant cluster (romaji minus the trailing vowel).
+  const yoonLookup = useMemo(() => {
+    const m = new Map<string, Kana>();
+    trackKana(track)
+      .filter((k) => k.row === "yoon")
+      .forEach((k) => m.set(`${k.romaji.slice(0, -1)}-${k.vowel}`, k));
+    return m;
+  }, [track]);
   const nKana = useMemo(() => trackKana(track).find((k) => k.vowel === null), [track]);
+  const vuKana = useMemo(() => trackKana(track).find((k) => k.row === "v"), [track]);
 
   if (!mounted) {
     return (
@@ -150,14 +226,35 @@ export function ChartView() {
 
         <KanaGrid rows={BASIC_ROWS} get={(row, v) => lookup.get(`${row}-${v}`)} masteryOf={masteryOf} onSelect={setSelected} />
 
-        <div className="mt-1 flex items-center gap-2">
-          <span className="h-px flex-1 bg-border" />
-          <span className="text-xs font-bold uppercase tracking-wide text-muted">
-            Dakuten ゛ &amp; Han-dakuten ゜
-          </span>
-          <span className="h-px flex-1 bg-border" />
-        </div>
+        <Divider>Dakuten ゛ &amp; Han-dakuten ゜</Divider>
         <KanaGrid rows={DAKUTEN_ROWS} get={(row, v) => lookup.get(`${row}-${v}`)} masteryOf={masteryOf} onSelect={setSelected} />
+
+        <Divider>Combination kana (yōon)</Divider>
+        <YoonGrid
+          get={(cluster, v) => yoonLookup.get(`${cluster}-${v}`)}
+          masteryOf={masteryOf}
+          onSelect={setSelected}
+        />
+
+        {vuKana ? (
+          <div className="flex items-center justify-center gap-2">
+            <span className="text-xs font-semibold text-muted">Also:</span>
+            <button
+              type="button"
+              onClick={() => setSelected(vuKana)}
+              aria-label={`vu, mastery ${masteryOf(vuKana)} of 5`}
+              className={cn(
+                "grid size-11 place-items-center rounded-blob-sm border font-jp text-lg font-bold transition hover:brightness-105",
+                tint(masteryOf(vuKana)),
+              )}
+            >
+              <span lang="ja" aria-hidden>
+                {vuKana.char}
+              </span>
+            </button>
+            <span className="text-xs text-muted">ヴ (vu) — for foreign v-sounds</span>
+          </div>
+        ) : null}
 
         {nKana ? (
           <button

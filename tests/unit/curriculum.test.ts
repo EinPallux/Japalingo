@@ -8,10 +8,11 @@ import {
 } from "@/data/curriculum";
 
 describe("curriculum data integrity", () => {
-  it("has 71 kana per track — 46 basic + 25 dakuten/han-dakuten (142 total)", () => {
-    expect(trackKana("hiragana")).toHaveLength(71);
-    expect(trackKana("katakana")).toHaveLength(71);
-    expect(ALL_KANA).toHaveLength(142);
+  it("has the full kana set — basics + dakuten + yōon (+ ヴ for katakana)", () => {
+    // 46 basic + 25 dakuten + 33 yōon = 104; katakana adds ヴ = 105.
+    expect(trackKana("hiragana")).toHaveLength(104);
+    expect(trackKana("katakana")).toHaveLength(105);
+    expect(ALL_KANA).toHaveLength(209);
   });
 
   it("has a lesson path for each track starting at the vowels", () => {
@@ -28,9 +29,10 @@ describe("curriculum data integrity", () => {
         for (const id of [...lesson.newKanaIds, ...lesson.reviewKanaIds]) {
           expect(getKana(id), `missing kana ${id} in ${lesson.id}`).toBeDefined();
         }
-        // learn lessons introduce kana; reviews reinforce them
+        // learn lessons introduce kana; reviews reinforce them. The sokuon
+        // concept lesson is the one that teaches no kana (the っ doubling rule).
         if (lesson.kind === "lesson") expect(lesson.newKanaIds.length).toBeGreaterThan(0);
-        expect(lessonKana(lesson).length).toBeGreaterThan(0);
+        if (lesson.kind !== "sokuon") expect(lessonKana(lesson).length).toBeGreaterThan(0);
       }
     }
   });
