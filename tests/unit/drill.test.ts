@@ -4,12 +4,14 @@ import { emptyProgress } from "@/lib/srs";
 import type { KanaProgress } from "@/types";
 
 describe("free drill", () => {
-  it("groups a track into 10 rows covering all 46 kana", () => {
+  it("groups a track into 15 rows covering all 71 kana (basic + dakuten)", () => {
     const rows = trackRows("hiragana", {});
-    expect(rows).toHaveLength(10);
-    expect(rows.reduce((n, r) => n + r.kana.length, 0)).toBe(46);
+    expect(rows).toHaveLength(15);
+    expect(rows.reduce((n, r) => n + r.kana.length, 0)).toBe(71);
     expect(rows[0]!.title).toBe("Vowels");
     expect(rows[0]!.kana.every((k) => k.track === "hiragana")).toBe(true);
+    // the last three rows are the dakuten/han-dakuten rows
+    expect(rows.map((r) => r.row).slice(-5)).toEqual(["g", "z", "d", "b", "p"]);
   });
 
   it("selects kana for the chosen rows only", () => {

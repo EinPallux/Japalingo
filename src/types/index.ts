@@ -1,6 +1,22 @@
 export type Track = "hiragana" | "katakana";
 export type Vowel = "a" | "i" | "u" | "e" | "o" | null;
-export type KanaRow = "a" | "k" | "s" | "t" | "n" | "h" | "m" | "y" | "r" | "w";
+/** Gojūon consonant rows, plus the dakuten (g/z/d/b) and han-dakuten (p) rows. */
+export type KanaRow =
+  | "a"
+  | "k"
+  | "s"
+  | "t"
+  | "n"
+  | "h"
+  | "m"
+  | "y"
+  | "r"
+  | "w"
+  | "g"
+  | "z"
+  | "d"
+  | "b"
+  | "p";
 
 export interface ExampleWord {
   kana: string;

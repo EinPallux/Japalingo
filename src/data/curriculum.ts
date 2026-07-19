@@ -13,7 +13,13 @@ export function getKanaList(ids: string[]): Kana[] {
   return ids.map((id) => KANA_BY_ID.get(id)).filter((k): k is Kana => Boolean(k));
 }
 
-/** The 10 gojūon groups, shared by both tracks (kana referenced by suffix). */
+/**
+ * The gojūon groups, shared by both tracks (kana referenced by suffix). The
+ * first ten are the basic rows; the last five are the "variation" rows the
+ * Tofugu books teach after the basics — dakuten (゛: K→G, S→Z, T→D, H→B) and
+ * han-dakuten (゜: H→P). Placing them at the end matches the books and the
+ * standard teaching order (learn all 46 basics first, then the marked variants).
+ */
 const GROUPS = [
   { id: "vowels", title: "Vowels", learnTitle: "Meet the vowels", suffixes: ["a", "i", "u", "e", "o"] },
   { id: "k", title: "K row", learnTitle: "The K row", suffixes: ["ka", "ki", "ku", "ke", "ko"] },
@@ -25,14 +31,24 @@ const GROUPS = [
   { id: "y", title: "Y row", learnTitle: "The Y row", suffixes: ["ya", "yu", "yo"] },
   { id: "r", title: "R row", learnTitle: "The R row", suffixes: ["ra", "ri", "ru", "re", "ro"] },
   { id: "w", title: "W row", learnTitle: "The W row", suffixes: ["wa", "wo", "n"] },
+  // Variation kana — dakuten (゛) and han-dakuten (゜).
+  { id: "g", title: "G row ゛", learnTitle: "Dakuten: G row (か→が)", suffixes: ["ga", "gi", "gu", "ge", "go"] },
+  { id: "z", title: "Z row ゛", learnTitle: "Dakuten: Z row (さ→ざ)", suffixes: ["za", "ji", "zu", "ze", "zo"] },
+  { id: "d", title: "D row ゛", learnTitle: "Dakuten: D row (た→だ)", suffixes: ["da", "di", "du", "de", "do"] },
+  { id: "b", title: "B row ゛", learnTitle: "Dakuten: B row (は→ば)", suffixes: ["ba", "bi", "bu", "be", "bo"] },
+  { id: "p", title: "P row ゜", learnTitle: "Han-dakuten: P row (は→ぱ)", suffixes: ["pa", "pi", "pu", "pe", "po"] },
 ] as const;
+
+const BASIC_GROUP_IDS = ["vowels", "k", "s", "t", "n", "h", "m", "y", "r", "w"];
 
 const REVIEW_AFTER: Record<string, { title: string; groups: string[] | "sample" }> = {
   k: { title: "Review: A–K", groups: ["vowels", "k"] },
   t: { title: "Review: S–T", groups: ["s", "t"] },
   h: { title: "Review: N–H", groups: ["n", "h"] },
   r: { title: "Review: M–R", groups: ["m", "y", "r"] },
-  w: { title: "Final review", groups: "sample" },
+  w: { title: "Review: all basics", groups: BASIC_GROUP_IDS },
+  d: { title: "Review: dakuten G–D", groups: ["g", "z", "d"] },
+  p: { title: "Final review", groups: "sample" },
 };
 
 function suffixesForGroups(groupIds: string[]): string[] {

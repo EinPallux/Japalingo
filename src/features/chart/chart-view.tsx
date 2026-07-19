@@ -13,7 +13,8 @@ import { useProgress } from "@/stores/progress";
 import type { Kana, KanaRow, Track, Vowel } from "@/types";
 
 const VOWELS: Exclude<Vowel, null>[] = ["a", "i", "u", "e", "o"];
-const ROWS: KanaRow[] = ["a", "k", "s", "t", "n", "h", "m", "y", "r", "w"];
+const BASIC_ROWS: KanaRow[] = ["a", "k", "s", "t", "n", "h", "m", "y", "r", "w"];
+const DAKUTEN_ROWS: KanaRow[] = ["g", "z", "d", "b", "p"];
 const ROW_LABEL: Record<KanaRow, string> = {
   a: "–",
   k: "k",
@@ -25,6 +26,11 @@ const ROW_LABEL: Record<KanaRow, string> = {
   y: "y",
   r: "r",
   w: "w",
+  g: "g",
+  z: "z",
+  d: "d",
+  b: "b",
+  p: "p",
 };
 
 const TRACKS: { id: Track; label: string; sample: string }[] = [
@@ -37,6 +43,56 @@ function tint(mastery: number): string {
   if (mastery >= 3) return "border-primary bg-primary text-white";
   if (mastery >= 1) return "border-primary/30 bg-primary-tint text-primary";
   return "border-border bg-surface text-ink";
+}
+
+/** One 5-column gojūon grid section (rows × vowels), tinted by mastery. */
+function KanaGrid({
+  rows,
+  get,
+  masteryOf,
+  onSelect,
+}: {
+  rows: KanaRow[];
+  get: (row: KanaRow, v: Exclude<Vowel, null>) => Kana | undefined;
+  masteryOf: (k: Kana) => number;
+  onSelect: (k: Kana) => void;
+}) {
+  return (
+    <div className="grid grid-cols-[1.1rem_repeat(5,1fr)] gap-1.5">
+      <span aria-hidden />
+      {VOWELS.map((v) => (
+        <span key={v} className="text-center text-xs font-bold uppercase text-muted">
+          {v}
+        </span>
+      ))}
+
+      {rows.map((row) => (
+        <Fragment key={row}>
+          <span className="grid place-items-center text-xs font-bold text-muted">{ROW_LABEL[row]}</span>
+          {VOWELS.map((v) => {
+            const k = get(row, v);
+            if (!k) return <span key={v} aria-hidden className="aspect-square rounded-blob-sm bg-surface-2/30" />;
+            return (
+              <button
+                key={v}
+                type="button"
+                onClick={() => onSelect(k)}
+                aria-label={`${k.romaji}, mastery ${masteryOf(k)} of 5`}
+                className={cn(
+                  "grid aspect-square place-items-center rounded-blob-sm border font-jp text-lg font-bold transition hover:brightness-105",
+                  tint(masteryOf(k)),
+                )}
+              >
+                <span lang="ja" aria-hidden>
+                  {k.char}
+                </span>
+              </button>
+            );
+          })}
+        </Fragment>
+      ))}
+    </div>
+  );
 }
 
 export function ChartView() {
@@ -92,40 +148,16 @@ export function ChartView() {
           ))}
         </div>
 
-        <div className="grid grid-cols-[1.1rem_repeat(5,1fr)] gap-1.5">
-          <span aria-hidden />
-          {VOWELS.map((v) => (
-            <span key={v} className="text-center text-xs font-bold uppercase text-muted">
-              {v}
-            </span>
-          ))}
+        <KanaGrid rows={BASIC_ROWS} get={(row, v) => lookup.get(`${row}-${v}`)} masteryOf={masteryOf} onSelect={setSelected} />
 
-          {ROWS.map((row) => (
-            <Fragment key={row}>
-              <span className="grid place-items-center text-xs font-bold text-muted">{ROW_LABEL[row]}</span>
-              {VOWELS.map((v) => {
-                const k = lookup.get(`${row}-${v}`);
-                if (!k) return <span key={v} aria-hidden className="aspect-square rounded-blob-sm bg-surface-2/30" />;
-                return (
-                  <button
-                    key={v}
-                    type="button"
-                    onClick={() => setSelected(k)}
-                    aria-label={`${k.romaji}, mastery ${masteryOf(k)} of 5`}
-                    className={cn(
-                      "grid aspect-square place-items-center rounded-blob-sm border font-jp text-lg font-bold transition hover:brightness-105",
-                      tint(masteryOf(k)),
-                    )}
-                  >
-                    <span lang="ja" aria-hidden>
-                      {k.char}
-                    </span>
-                  </button>
-                );
-              })}
-            </Fragment>
-          ))}
+        <div className="mt-1 flex items-center gap-2">
+          <span className="h-px flex-1 bg-border" />
+          <span className="text-xs font-bold uppercase tracking-wide text-muted">
+            Dakuten ゛ &amp; Han-dakuten ゜
+          </span>
+          <span className="h-px flex-1 bg-border" />
         </div>
+        <KanaGrid rows={DAKUTEN_ROWS} get={(row, v) => lookup.get(`${row}-${v}`)} masteryOf={masteryOf} onSelect={setSelected} />
 
         {nKana ? (
           <button

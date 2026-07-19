@@ -329,6 +329,14 @@ Mirrors hiragana, plus the two katakana-specific units the book adds.
 | 16 | `kata-long-vowel` | Long Vowel ー | ー (chōonpu) |
 | 17 | `kata-review` | Track Review | (checkpoint — no new kana) |
 
+> **As shipped (Phase 2).** Basics (units 1–10) plus **dakuten & han-dakuten** ship today.
+> The dakuten set is split into five per-consonant-row units — **`{prefix}-g` / `-z` / `-d` /
+> `-b`** (dakuten ゛) and **`-p`** (han-dakuten ゜) — rather than the two combined units above,
+> so each matches the 5-kana cadence of the basic rows. Reviews after the basics
+> (`{prefix}-w-review` "all basics"), mid-dakuten (`{prefix}-d-review`), and a comprehensive
+> `{prefix}-p-review` "Final review" over all 71 kana. Combos (yōon), small っ/ッ, extended
+> katakana, ヴ, and the long-vowel ー remain content-gated for a future pack.
+
 ---
 
 ## 6. Five Fully-Worked Example `Kana` Entries

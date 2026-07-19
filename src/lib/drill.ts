@@ -6,7 +6,7 @@
 import { trackKana } from "@/data/curriculum";
 import type { Kana, KanaProgress, KanaRow, Track } from "@/types";
 
-const ROW_ORDER: KanaRow[] = ["a", "k", "s", "t", "n", "h", "m", "y", "r", "w"];
+const ROW_ORDER: KanaRow[] = ["a", "k", "s", "t", "n", "h", "m", "y", "r", "w", "g", "z", "d", "b", "p"];
 
 const ROW_TITLE: Record<KanaRow, string> = {
   a: "Vowels",
@@ -19,6 +19,11 @@ const ROW_TITLE: Record<KanaRow, string> = {
   y: "Y row",
   r: "R row",
   w: "W row + ん",
+  g: "G row ゛",
+  z: "Z row ゛",
+  d: "D row ゛",
+  b: "B row ゛",
+  p: "P row ゜",
 };
 
 /** Cap a single drill session so a big selection stays focused. */

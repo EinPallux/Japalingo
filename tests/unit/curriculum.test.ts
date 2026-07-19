@@ -8,10 +8,10 @@ import {
 } from "@/data/curriculum";
 
 describe("curriculum data integrity", () => {
-  it("has 46 basic kana per track (92 total)", () => {
-    expect(trackKana("hiragana")).toHaveLength(46);
-    expect(trackKana("katakana")).toHaveLength(46);
-    expect(ALL_KANA).toHaveLength(92);
+  it("has 71 kana per track — 46 basic + 25 dakuten/han-dakuten (142 total)", () => {
+    expect(trackKana("hiragana")).toHaveLength(71);
+    expect(trackKana("katakana")).toHaveLength(71);
+    expect(ALL_KANA).toHaveLength(142);
   });
 
   it("has a lesson path for each track starting at the vowels", () => {
