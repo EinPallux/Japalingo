@@ -23,6 +23,7 @@ export const GRAMMAR_TABLES: GrammarTable[] = [
       ["past", "学生だった / 静かだった", "学生でした / 静かでした"],
       ["past negative", "学生じゃなかった / 静かじゃなかった", "学生じゃありませんでした / 静かじゃありませんでした"],
     ],
+    note: "では is the more formal alternative of じゃ: 学生ではない / 学生ではありません / 学生ではなかった / 学生ではありませんでした.",
     chapterIds: ["g3", "g5"],
     pointIds: ["g3-2", "g5-3"],
     reference: true,
@@ -130,6 +131,7 @@ export const GRAMMAR_TABLES: GrammarTable[] = [
       ["す", "〜して", "話す→話して"],
       ["Special forms", "して / 来て / 行って", "する→して, 来る→来て（きて）, 行く→行って"],
     ],
+    note: "Learning shortcut: learn the て-form and past form together — for Godan verbs they usually differ only in て／た or で／だ.",
     chapterIds: ["g12"],
     pointIds: ["g12-1"],
     reference: true,
@@ -420,6 +422,277 @@ export const GRAMMAR_TABLES: GrammarTable[] = [
     pointIds: ["g24-2"],
   },
   {
+    id: "qword-mo",
+    title: "Question words + も + negative predicate",
+    columns: ["Expression", "With a negative predicate", "Meaning"],
+    rows: [
+      ["だれも", "だれも来ません", "nobody comes"],
+      ["何も", "何も食べません", "eat nothing"],
+      ["どこにも", "どこにも行きません", "go nowhere"],
+    ],
+    chapterIds: ["g4"],
+    pointIds: ["g4-5"],
+  },
+  {
+    id: "aru-iru",
+    title: "ある and いる",
+    columns: ["Verb", "Used for", "Example"],
+    rows: [
+      ["ある", "inanimate objects, plants, events", "本がある / 会議がある"],
+      ["いる", "people and animals", "先生がいる / 猫がいる"],
+    ],
+    chapterIds: ["g8"],
+    pointIds: ["g8-1"],
+  },
+  {
+    id: "position-words",
+    title: "Position words",
+    columns: ["Japanese", "Reading", "Meaning"],
+    rows: [
+      ["上", "うえ", "above / on"],
+      ["下", "した", "below / under"],
+      ["中", "なか", "inside"],
+      ["前", "まえ", "in front of"],
+      ["後ろ", "うしろ", "behind"],
+      ["隣", "となり", "directly next to"],
+      ["近く", "ちかく", "near"],
+      ["間", "あいだ", "between"],
+    ],
+    chapterIds: ["g8"],
+    pointIds: ["g8-2"],
+  },
+  {
+    id: "time-ni",
+    title: "Time expressions with and without に",
+    columns: ["Usually with に", "Usually without に"],
+    rows: [
+      ["七時に", "今日"],
+      ["月曜日に", "明日"],
+      ["五月三日に", "毎朝"],
+      ["春に", "先週"],
+    ],
+    note: "Durations often take no particle either: 二時間勉強する.",
+    chapterIds: ["g8"],
+    pointIds: ["g8-3"],
+  },
+  {
+    id: "te-connect",
+    title: "Connecting states and qualities",
+    columns: ["Type", "Connecting form", "Example"],
+    rows: [
+      ["い-adjective", "〜くて", "安くて便利"],
+      ["な-adjective", "〜で", "静かで便利"],
+      ["Noun", "〜で", "学生で会社員"],
+    ],
+    chapterIds: ["g12"],
+    pointIds: ["g12-3"],
+  },
+  {
+    id: "teiru-readings",
+    title: "〜ている: three core readings",
+    columns: ["Reading", "Example", "Meaning"],
+    rows: [
+      ["action in progress", "今、食べている", "be eating now"],
+      ["habit or repetition", "毎日走っている", "run regularly"],
+      ["resulting state", "結婚している", "be married"],
+    ],
+    note: "Lexical state: 知る is closer to “come to know” — “I know” is normally 知っています, and the common standard negative is 知りません.",
+    chapterIds: ["g13"],
+    pointIds: ["g13-1"],
+  },
+  {
+    id: "trans-intrans",
+    title: "Transitive and intransitive pairs",
+    columns: ["Intransitive (が)", "Transitive (を)", "Example"],
+    rows: [
+      ["開く（あく） open", "開ける（あける） open something", "ドアが開く / ドアを開ける"],
+      ["閉まる close", "閉める close something", "窓が閉まる / 窓を閉める"],
+      ["つく turn on", "つける switch on", "電気がつく / 電気をつける"],
+      ["消える go out", "消す switch off", "電気が消える / 電気を消す"],
+    ],
+    chapterIds: ["g13"],
+    pointIds: ["g13-2"],
+  },
+  {
+    id: "obligation-ladder",
+    title: "Obligation: “must” by register",
+    columns: ["Pattern", "Literal logic", "Register"],
+    rows: [
+      ["〜なければならない", "if not, it will not do", "neutral / formal"],
+      ["〜なくてはいけない", "if not, it is not acceptable", "neutral / formal"],
+      ["〜ないと（いけない）", "if not ...", "spoken"],
+      ["〜なきゃ / 〜なくちゃ", "if not ...", "very casual"],
+    ],
+    chapterIds: ["g14"],
+    pointIds: ["g14-5"],
+  },
+  {
+    id: "potential-formation",
+    title: "Potential form",
+    columns: ["Group", "Formation", "Example"],
+    rows: [
+      ["Ichidan", "る → られる", "食べる→食べられる"],
+      ["Godan", "final kana to え-row + る", "書く→書ける, 話す→話せる"],
+      ["する", "できる", "勉強する→勉強できる"],
+      ["来る", "来られる（こられる）", "来る→来られる"],
+    ],
+    note: "The thing one is able to do is often marked with が (a safe default). 見える/聞こえる mean “be naturally visible/audible”; 見られる/聞ける more often describe an opportunity or permission.",
+    chapterIds: ["g15"],
+    pointIds: ["g15-1"],
+  },
+  {
+    id: "volitional-plans",
+    title: "Intention and suggestion",
+    columns: ["Form", "Formation", "Function"],
+    rows: [
+      ["Plain volitional", "食べよう / 書こう / しよう / 来よう", "“let's” or a personal resolve"],
+      ["Polite volitional", "〜ましょう", "polite suggestion"],
+      ["〜つもりだ", "plain form + つもり", "firm intention"],
+      ["〜予定だ", "Noun の / verb + 予定", "plan or schedule"],
+    ],
+    chapterIds: ["g15"],
+    pointIds: ["g15-4"],
+  },
+  {
+    id: "kara-node",
+    title: "Reason: から and ので",
+    columns: ["Pattern", "Nuance", "Noun / な-adjective connection"],
+    rows: [
+      ["〜から", "more direct or speaker-centered reason", "だ + から: 学生だから"],
+      ["〜ので", "softer, explanatory, more neutral", "な + ので: 学生なので"],
+    ],
+    chapterIds: ["g16"],
+    pointIds: ["g16-1"],
+  },
+  {
+    id: "conditionals",
+    title: "Four important conditional forms",
+    columns: ["Form", "Core idea", "Typical example"],
+    rows: [
+      ["〜と", "automatic or natural consequence", "春になると暖かくなる"],
+      ["〜なら", "“if that is the case”; responds to context", "日本へ行くなら、京都もおすすめ"],
+      ["〜ば", "general condition", "安ければ買います"],
+      ["〜たら", "versatile: if / when / after", "家に帰ったら、電話します"],
+    ],
+    note: "たら is built from the past form + ら (食べたら, 行ったら, 静かだったら, 安かったら) but can refer to a future condition. もし strengthens a hypothetical reading without replacing the ending: もし時間があったら…",
+    chapterIds: ["g16"],
+    pointIds: ["g16-4"],
+  },
+  {
+    id: "ba-formation",
+    title: "ば — formation",
+    columns: ["Type", "Formation", "Example"],
+    rows: [
+      ["Godan", "う-row → え-row + ば", "書く→書けば"],
+      ["Ichidan", "る → れば", "食べる→食べれば"],
+      ["い-adjective", "い → ければ", "安い→安ければ"],
+      ["Noun / な-adjective", "なら(ば)", "静かなら(ば)"],
+    ],
+    chapterIds: ["g16"],
+    pointIds: ["g16-4"],
+  },
+  {
+    id: "ndesu-formation",
+    title: "Explanatory の／ん — formation",
+    columns: ["Before の／ん", "Form", "Example"],
+    rows: [
+      ["Verb", "plain + んです", "行くんです"],
+      ["い-adjective", "plain + んです", "高いんです"],
+      ["Noun", "な + んです", "学生なんです"],
+      ["な-adjective", "な + んです", "静かなんです"],
+    ],
+    note: "In speech, のです commonly contracts to んです.",
+    chapterIds: ["g17"],
+    pointIds: ["g17-4"],
+  },
+  {
+    id: "koto-no",
+    title: "Nominalizing with こと and の",
+    columns: ["Form", "Tendency", "Example"],
+    rows: [
+      ["Verb + こと", "abstract, rule-like, fixed grammar patterns", "日本語を読むことは楽しい"],
+      ["Verb + の", "concrete, perceived, conversational", "歌うのが好き"],
+    ],
+    note: "Some expressions specifically require こと: 〜たことがある, 〜ことにする, 〜ことができる. Perception verbs commonly take の: 子どもが遊ぶのを見た.",
+    chapterIds: ["g17"],
+    pointIds: ["g17-5"],
+  },
+  {
+    id: "giving-verbs",
+    title: "Three viewpoints: あげる・くれる・もらう",
+    columns: ["Verb", "Viewpoint", "Basic pattern"],
+    rows: [
+      ["あげる", "something moves away from the speaker/reference group", "A は B に X を あげる"],
+      ["くれる", "something moves toward the speaker or in-group", "A は 私に X を くれる"],
+      ["もらう", "the recipient receives something", "B は A に／から X を もらう"],
+    ],
+    chapterIds: ["g18"],
+    pointIds: ["g18-1"],
+  },
+  {
+    id: "favor-actions",
+    title: "Actions performed as favors",
+    columns: ["Pattern", "Meaning"],
+    rows: [
+      ["〜てあげる", "do something for someone"],
+      ["〜てくれる", "someone does something for me/us"],
+      ["〜てもらう", "receive or arrange for someone to do something"],
+    ],
+    note: "Viewpoint and tone: 〜てあげる can sound as though you are emphasizing your own favor — with higher-status people, describe the action more neutrally or choose another construction.",
+    chapterIds: ["g18"],
+    pointIds: ["g18-2"],
+  },
+  {
+    id: "favor-requests",
+    title: "Requesting a favor — politeness ladder",
+    columns: ["Form", "Politeness"],
+    rows: [
+      ["〜てくれる？", "casual"],
+      ["〜てくれますか", "polite and direct"],
+      ["〜てもらえますか", "polite and more indirect"],
+      ["〜ていただけますか", "very polite and humble"],
+    ],
+    chapterIds: ["g18"],
+    pointIds: ["g18-3"],
+  },
+  {
+    id: "sou-appearance",
+    title: "〜そう (visible appearance) — formation",
+    columns: ["Base", "Formation", "Example"],
+    rows: [
+      ["Verb stem", "stem + そう", "雨が降りそう"],
+      ["い-adjective", "remove い + そう", "おいしい→おいしそう"],
+      ["な-adjective", "stem + そう", "元気→元気そう"],
+      ["いい", "よさそう", "looks good"],
+      ["ない", "なさそう", "does not seem to exist / seems unlikely"],
+    ],
+    chapterIds: ["g20"],
+    pointIds: ["g20-1"],
+  },
+  {
+    id: "you-mitai",
+    title: "ようだ and みたいだ",
+    columns: ["Form", "Register", "Typical use"],
+    rows: [
+      ["〜ようだ", "neutral to formal", "reasoned inference, similarity, illustration"],
+      ["〜みたいだ", "casual", "seems like / looks like / resembles"],
+    ],
+    chapterIds: ["g20"],
+    pointIds: ["g20-3"],
+  },
+  {
+    id: "probability",
+    title: "Probability and expectation",
+    columns: ["Pattern", "Meaning", "Strength"],
+    rows: [
+      ["〜かもしれない", "might / may", "low to moderate certainty"],
+      ["〜でしょう／だろう", "probably", "moderate prediction"],
+      ["〜はずだ", "should be / expected to be", "logical expectation based on information"],
+    ],
+    chapterIds: ["g20"],
+    pointIds: ["g20-5"],
+  },
+  {
     id: "keigo",
     title: "Respectful and humble language",
     columns: ["General", "Respectful (their action)", "Humble (your action)"],
@@ -438,10 +711,16 @@ export const GRAMMAR_TABLES: GrammarTable[] = [
   },
 ];
 
-/** Tables shown as their own lesson step for a chapter (only those not already
- *  embedded in a point's teach card). */
+/** Tables shown as their own lesson step for a chapter — those the chapter
+ *  claims but that aren't embedded in any of ITS OWN points' teach cards (e.g.
+ *  the Godan-endings grid is embedded in chapter 6 but a standalone step in
+ *  chapter 12). */
 export function tablesForChapter(chapterId: string): GrammarTable[] {
-  return GRAMMAR_TABLES.filter((t) => t.chapterIds.includes(chapterId) && !t.pointIds?.length);
+  return GRAMMAR_TABLES.filter(
+    (t) =>
+      t.chapterIds.includes(chapterId) &&
+      !t.pointIds?.some((pid) => pid.startsWith(`${chapterId}-`)),
+  );
 }
 
 /** Tables embedded in a specific point's teach card, in book order. */

@@ -124,6 +124,27 @@ describe("reference tables (Appendix A + restored in-chapter tables)", () => {
     expect(tablesForPoint("g22-2").map((t) => t.id)).toContain("counters");
     expect(tablesForPoint("g23-1").map((t) => t.id)).toContain("contractions");
     expect(tablesForPoint("g24-4").map((t) => t.id)).toContain("keigo");
+    // wave 2: the remaining in-chapter tables (ch4/8/12-18/20)
+    for (const [pid, id] of [
+      ["g4-5", "qword-mo"], ["g8-1", "aru-iru"], ["g8-2", "position-words"], ["g8-3", "time-ni"],
+      ["g12-3", "te-connect"], ["g13-1", "teiru-readings"], ["g13-2", "trans-intrans"],
+      ["g14-5", "obligation-ladder"], ["g15-1", "potential-formation"], ["g15-4", "volitional-plans"],
+      ["g16-1", "kara-node"], ["g16-4", "conditionals"], ["g17-4", "ndesu-formation"],
+      ["g17-5", "koto-no"], ["g18-1", "giving-verbs"], ["g18-2", "favor-actions"],
+      ["g18-3", "favor-requests"], ["g20-1", "sou-appearance"], ["g20-3", "you-mitai"],
+      ["g20-5", "probability"],
+    ] as const) {
+      expect(tablesForPoint(pid).map((t) => t.id), pid).toContain(id);
+    }
+    // g16-4 carries both the overview AND the ば-formation table
+    expect(tablesForPoint("g16-4").map((t) => t.id)).toContain("ba-formation");
+  });
+
+  it("shows a point-embedded table as a lesson step in OTHER chapters that claim it", async () => {
+    const { tablesForChapter } = await import("@/data/grammar-tables");
+    // godan-endings is embedded in ch6 (g6-4) but a standalone step in ch12
+    expect(tablesForChapter("g6").map((t) => t.id)).not.toContain("godan-endings");
+    expect(tablesForChapter("g12").map((t) => t.id)).toContain("godan-endings");
   });
 });
 

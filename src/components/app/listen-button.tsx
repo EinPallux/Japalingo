@@ -28,6 +28,8 @@ export function ListenButton({ text, label = "Listen" }: { text: string; label?:
     <button
       type="button"
       onClick={() => speakJa(text)}
+      // icon-only variants (label="") still need an accessible name
+      aria-label={label || "Listen"}
       className="inline-flex items-center gap-2 rounded-full bg-info/15 px-4 py-2 font-display font-bold text-info transition hover:bg-info/25"
     >
       <SpeakerIcon className="size-5" />

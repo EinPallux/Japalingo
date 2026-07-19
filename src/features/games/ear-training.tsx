@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Confetti } from "@/components/feedback/confetti";
 import { HoshiStatic } from "@/components/mascot/hoshi-static";
 import { NotEnoughKana } from "@/components/game/not-enough-kana";
@@ -127,7 +127,11 @@ function EarTrainingGame({ pool }: { pool: Kana[] }) {
     useProgress.getState().answer(rd.target.id, ok);
   };
 
+  // double-tap guard: one advance per round, even mid transition
+  const steppedRef = useRef(-1);
   const next = () => {
+    if (steppedRef.current === round) return;
+    steppedRef.current = round;
     if (round + 1 >= ROUNDS) {
       sfx.complete();
       setEarned(useProgress.getState().xp - xpBefore);
@@ -154,6 +158,7 @@ function EarTrainingGame({ pool }: { pool: Kana[] }) {
           <div className="flex w-full flex-col gap-3">
             <Button
               onClick={() => {
+                steppedRef.current = -1; // re-arm the per-round advance guard
                 setRound(0);
                 setRd(pickRound(pool));
                 setPicked(null);

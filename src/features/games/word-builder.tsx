@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ListenButton } from "@/components/app/listen-button";
 import { Confetti } from "@/components/feedback/confetti";
 import { NotEnoughKana } from "@/components/game/not-enough-kana";
@@ -45,9 +45,17 @@ function buildRounds(words: ExampleWord[]): { word: ExampleWord; options: string
   return shuffle(words)
     .slice(0, Math.min(ROUNDS, words.length))
     .map((word) => {
-      const distractors = shuffle(words.filter((w) => w.meaning !== word.meaning))
-        .slice(0, 3)
-        .map((w) => w.meaning);
+      // Dedupe distractors against the answer AND each other — the cross-track
+      // pool holds meaning twins (あ/ア "ah!", くうき/エア "air"), and two
+      // identical option buttons would collide (and double-render as wrong).
+      const seen = new Set([word.meaning]);
+      const distractors: string[] = [];
+      for (const w of shuffle(words)) {
+        if (seen.has(w.meaning)) continue;
+        seen.add(w.meaning);
+        distractors.push(w.meaning);
+        if (distractors.length === 3) break;
+      }
       return { word, options: shuffle([word.meaning, ...distractors]) };
     });
 }
@@ -107,7 +115,11 @@ function WordBuilderGame({ words }: { words: ExampleWord[] }) {
     }
   };
 
+  // double-tap guard: one advance per round, even mid transition
+  const steppedRef = useRef(-1);
   const next = () => {
+    if (steppedRef.current === index) return;
+    steppedRef.current = index;
     if (index + 1 >= rounds.length) {
       sfx.complete();
       setEarned(useProgress.getState().xp - xpBefore);

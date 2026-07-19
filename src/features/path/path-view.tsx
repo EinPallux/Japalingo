@@ -34,7 +34,7 @@ export function PathView({ track }: { track: Track }) {
           {track === "hiragana" ? "Hiragana" : "Katakana"}
         </p>
         <p className="text-sm text-muted">
-          Read all {trackKana(track).length} kana — 46 basics, then dakuten &amp; han-dakuten.
+          Read all {trackKana(track).length} kana — basics, dakuten &amp; combination kana.
         </p>
       </div>
 
